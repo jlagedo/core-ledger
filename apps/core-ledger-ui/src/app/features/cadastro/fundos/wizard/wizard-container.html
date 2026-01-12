@@ -55,6 +55,12 @@
               @case (1) {
                 <app-identificacao-step [stepConfig]="stepConfig" />
               }
+              @case (2) {
+                <app-classificacao-step [stepConfig]="stepConfig" />
+              }
+              @case (3) {
+                <app-caracteristicas-step [stepConfig]="stepConfig" />
+              }
               @default {
                 <app-placeholder-step [stepConfig]="stepConfig" />
               }

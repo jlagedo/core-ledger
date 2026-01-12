@@ -5,6 +5,8 @@ import { delay } from 'rxjs/operators';
 import { ENVIRONMENT } from '../config/environment.config';
 import { MockApiService } from './mock-api.service';
 import { mockVerificarCnpj } from './mock-data/fundo-cnpj.mock';
+import { getClassificacoesAnbimaByCvm } from './mock-data/classificacoes-anbima.mock';
+import { ClassificacaoCvm } from '../features/cadastro/fundos/wizard/models/classificacao.model';
 
 /**
  * Mock API Interceptor
@@ -145,6 +147,25 @@ function routeRequest(req: any, mockApiService: MockApiService): HttpResponse<an
             status: 200,
             statusText: 'OK',
             body: response,
+        });
+    }
+
+    // Check for ANBIMA classifications endpoint: /api/v1/parametros/classificacoes-anbima
+    if (url.includes('/parametros/classificacoes-anbima') && req.method === 'GET') {
+        const classificacaoCvm = params.get('classificacaoCvm');
+        if (!classificacaoCvm) {
+            return new HttpResponse({
+                status: 400,
+                statusText: 'Bad Request',
+                body: { error: 'classificacaoCvm query parameter is required' },
+            });
+        }
+
+        const items = getClassificacoesAnbimaByCvm(classificacaoCvm as ClassificacaoCvm);
+        return new HttpResponse({
+            status: 200,
+            statusText: 'OK',
+            body: { items, total: items.length },
         });
     }
 

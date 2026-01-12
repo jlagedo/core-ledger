@@ -6,6 +6,8 @@ import { WizardStepper } from './components/wizard-stepper/wizard-stepper';
 import { WizardNavigation } from './components/wizard-navigation/wizard-navigation';
 import { PlaceholderStep } from './steps/placeholder-step/placeholder-step';
 import { IdentificacaoStep } from './steps/identificacao-step/identificacao-step';
+import { ClassificacaoStep } from './steps/classificacao-step/classificacao-step';
+import { CaracteristicasStep } from './steps/caracteristicas-step/caracteristicas-step';
 import { PageHeader } from '../../../../layout/page-header/page-header';
 import { ToastService } from '../../../../services/toast-service';
 
@@ -17,6 +19,8 @@ import { ToastService } from '../../../../services/toast-service';
     WizardNavigation,
     PlaceholderStep,
     IdentificacaoStep,
+    ClassificacaoStep,
+    CaracteristicasStep,
   ],
   providers: [WizardStore], // Store com escopo do componente
   templateUrl: './wizard-container.html',

@@ -1,0 +1,248 @@
+// ============================================================
+// CARACTERISTICAS STEP — Fund Characteristics Form
+// Terminal-style form with Bloomberg aesthetic
+// Extends base step styles with checkboxes and alerts
+// ============================================================
+
+.caracteristicas-step {
+  animation: step-enter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes step-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================================
+// CONDITIONAL FIELDS ANIMATION
+// ============================================================
+
+.step-field--conditional {
+  animation: field-slide-down 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes field-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 500px;
+  }
+}
+
+// ============================================================
+// CHECKBOX STYLES (Terminal aesthetic)
+// ============================================================
+
+.step-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 160, 40, 0.02);
+  border: 1px solid var(--table-border-color);
+  border-radius: 2px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 160, 40, 0.04);
+    border-color: rgba(255, 160, 40, 0.3);
+  }
+
+  &:has(.step-checkbox__input:checked) {
+    background: rgba(74, 246, 195, 0.05);
+    border-color: var(--accent-teal, #4af6c3);
+  }
+
+  &:has(.step-checkbox__input:disabled) {
+    opacity: 0.6;
+    cursor: not-allowed;
+
+    &:hover {
+      background: rgba(255, 160, 40, 0.02);
+      border-color: var(--table-border-color);
+    }
+  }
+}
+
+.step-checkbox__input {
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid var(--table-border-color);
+  border-radius: 2px;
+  cursor: pointer;
+
+  &:checked {
+    background-color: var(--accent-teal, #4af6c3);
+    border-color: var(--accent-teal, #4af6c3);
+  }
+
+  &:focus {
+    border-color: var(--accent-amber, #ffa028);
+    box-shadow: 0 0 0 2px rgba(255, 160, 40, 0.15);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.step-checkbox__label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  cursor: pointer;
+  margin: 0;
+
+  &--disabled {
+    cursor: not-allowed;
+  }
+}
+
+.step-checkbox__label-text {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+}
+
+// ============================================================
+// ALERT BOXES (Warnings and Info)
+// ============================================================
+
+.step-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 2px;
+  font-size: 0.6875rem;
+  animation: alert-enter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &--warning {
+    background: rgba(255, 160, 40, 0.06);
+    border: 1px solid rgba(255, 160, 40, 0.3);
+    color: var(--accent-amber, #ffa028);
+  }
+
+  &--info {
+    background: rgba(74, 246, 195, 0.05);
+    border: 1px solid rgba(74, 246, 195, 0.2);
+    color: var(--accent-teal, #4af6c3);
+  }
+}
+
+.step-alert__icon {
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.step-alert__text {
+  flex: 1;
+}
+
+@keyframes alert-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================================
+// INPUT GROUP SUFFIX (for % and x)
+// ============================================================
+
+.step-input-suffix {
+  background: var(--bs-secondary-bg);
+  border: 1px solid var(--table-border-color);
+  border-left: none;
+  color: var(--bs-secondary-color);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--bs-font-monospace);
+  padding: 0.5rem 0.75rem;
+}
+
+.input-group:has(.step-field__input.is-valid) .step-input-suffix {
+  border-color: var(--accent-teal, #4af6c3);
+}
+
+.input-group:has(.step-field__input.is-invalid) .step-input-suffix {
+  border-color: var(--accent-coral, #ff433d);
+}
+
+// ============================================================
+// LIGHT MODE OVERRIDES
+// ============================================================
+
+[data-bs-theme='light'] {
+  .step-checkbox {
+    background: rgba(180, 83, 9, 0.02);
+
+    &:hover {
+      background: rgba(180, 83, 9, 0.04);
+      border-color: rgba(180, 83, 9, 0.3);
+    }
+
+    &:has(.step-checkbox__input:checked) {
+      background: rgba(5, 150, 105, 0.05);
+      border-color: #059669;
+    }
+
+    &:has(.step-checkbox__input:disabled):hover {
+      background: rgba(180, 83, 9, 0.02);
+      border-color: var(--table-border-color);
+    }
+  }
+
+  .step-checkbox__input {
+    &:checked {
+      background-color: #059669;
+      border-color: #059669;
+    }
+
+    &:focus {
+      border-color: var(--daylight-amber, #b45309);
+      box-shadow: 0 0 0 2px rgba(180, 83, 9, 0.1);
+    }
+  }
+
+  .step-alert--warning {
+    background: rgba(180, 83, 9, 0.05);
+    border-color: rgba(180, 83, 9, 0.3);
+    color: var(--daylight-amber, #b45309);
+  }
+
+  .step-alert--info {
+    background: rgba(5, 150, 105, 0.05);
+    border-color: rgba(5, 150, 105, 0.2);
+    color: #059669;
+  }
+}
+
+// ============================================================
+// REDUCED MOTION
+// ============================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .caracteristicas-step,
+  .step-field--conditional,
+  .step-alert {
+    animation: none;
+  }
+}

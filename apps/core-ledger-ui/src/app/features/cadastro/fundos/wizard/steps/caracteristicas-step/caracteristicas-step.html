@@ -1,0 +1,341 @@
+<div class="caracteristicas-step">
+  <form [formGroup]="form" class="step-form" novalidate>
+    <!-- Section: Estrutura do Fundo -->
+    <div class="step-form__section">
+      <h6 class="form-section-title">Estrutura do Fundo</h6>
+
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Condominio Field -->
+        <div class="step-field">
+          <label for="condominio" class="step-field__label">
+            <span class="step-field__label-text">Tipo de Condominio</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <select
+            class="form-select step-field__input"
+            [class.is-invalid]="isInvalid('condominio')"
+            [class.is-valid]="isValid('condominio')"
+            id="condominio"
+            formControlName="condominio"
+          >
+            <option [ngValue]="null">Selecione o condominio</option>
+            @for (option of condominioOptions; track option.value) {
+            <option [ngValue]="option.value">{{ option.label }}</option>
+            }
+          </select>
+          @if (isInvalid('condominio')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Tipo de condominio e obrigatorio
+          </div>
+          }
+        </div>
+
+        <!-- Prazo Field -->
+        <div class="step-field">
+          <label for="prazo" class="step-field__label">
+            <span class="step-field__label-text">Prazo do Fundo</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <select
+            class="form-select step-field__input"
+            [class.is-invalid]="isInvalid('prazo')"
+            [class.is-valid]="isValid('prazo')"
+            id="prazo"
+            formControlName="prazo"
+          >
+            <option [ngValue]="null">Selecione o prazo</option>
+            @for (option of prazoOptions; track option.value) {
+            <option [ngValue]="option.value">{{ option.label }}</option>
+            }
+          </select>
+          @if (isInvalid('prazo')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Prazo do fundo e obrigatorio
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Data Encerramento (conditional) -->
+      @if (showDataEncerramento()) {
+      <div class="step-form__grid step-form__grid--2-cols step-field--conditional">
+        <div class="step-field">
+          <label for="dataEncerramento" class="step-field__label">
+            <span class="step-field__label-text">Data de Encerramento</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <input
+            type="date"
+            class="form-control step-field__input"
+            [class.is-invalid]="isInvalid('dataEncerramento')"
+            [class.is-valid]="isValid('dataEncerramento')"
+            id="dataEncerramento"
+            formControlName="dataEncerramento"
+          />
+          @if (isInvalid('dataEncerramento')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            @if (form.get('dataEncerramento')?.hasError('required')) { Data de encerramento e
+            obrigatoria para prazo determinado } @else if
+            (form.get('dataEncerramento')?.hasError('dataPassada')) { Data de encerramento deve ser
+            futura }
+          </div>
+          }
+        </div>
+      </div>
+      }
+
+      <!-- Warning: Condominio diverges from default -->
+      @if (showCondominioWarning()) {
+      <div class="step-alert step-alert--warning">
+        <i class="bi bi-exclamation-triangle step-alert__icon" aria-hidden="true"></i>
+        <span class="step-alert__text">{{ condominioWarningMessage() }}</span>
+      </div>
+      }
+    </div>
+
+    <!-- Section: Tipo de Investidor -->
+    <div class="step-form__section">
+      <h6 class="form-section-title">Tipo de Investidor</h6>
+
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Fundo Exclusivo -->
+        <div class="step-field">
+          <div class="step-checkbox">
+            <input
+              type="checkbox"
+              class="form-check-input step-checkbox__input"
+              id="exclusivo"
+              formControlName="exclusivo"
+            />
+            <label class="step-checkbox__label" for="exclusivo">
+              <span class="step-checkbox__label-text">Fundo Exclusivo</span>
+            </label>
+          </div>
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            Fundo destinado a um unico investidor
+          </div>
+        </div>
+
+        <!-- Fundo Reservado -->
+        <div class="step-field">
+          <div class="step-checkbox">
+            <input
+              type="checkbox"
+              class="form-check-input step-checkbox__input"
+              id="reservado"
+              formControlName="reservado"
+              [attr.disabled]="reservadoDisabled() ? true : null"
+            />
+            <label
+              class="step-checkbox__label"
+              [class.step-checkbox__label--disabled]="reservadoDisabled()"
+              for="reservado"
+            >
+              <span class="step-checkbox__label-text">Fundo Reservado</span>
+            </label>
+          </div>
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            Fundo com restricao de publico
+          </div>
+        </div>
+      </div>
+
+      <!-- Info: Exclusivo implies Reservado -->
+      @if (reservadoDisabled()) {
+      <div class="step-alert step-alert--info">
+        <i class="bi bi-info-circle step-alert__icon" aria-hidden="true"></i>
+        <span class="step-alert__text"
+          >Fundos exclusivos sao automaticamente considerados reservados</span
+        >
+      </div>
+      }
+    </div>
+
+    <!-- Section: Estrategia de Investimento -->
+    <div class="step-form__section">
+      <h6 class="form-section-title">Estrategia de Investimento</h6>
+
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Permite Alavancagem -->
+        <div class="step-field">
+          <div class="step-checkbox">
+            <input
+              type="checkbox"
+              class="form-check-input step-checkbox__input"
+              id="permiteAlavancagem"
+              formControlName="permiteAlavancagem"
+              [attr.disabled]="alavancagemDisabled() ? true : null"
+            />
+            <label
+              class="step-checkbox__label"
+              [class.step-checkbox__label--disabled]="alavancagemDisabled()"
+              for="permiteAlavancagem"
+            >
+              <span class="step-checkbox__label-text">Permite Alavancagem</span>
+            </label>
+          </div>
+          @if (alavancagemDisabled()) {
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            Este tipo de fundo nao permite alavancagem
+          </div>
+          }
+        </div>
+
+        <!-- Aceita Criptoativos -->
+        <div class="step-field">
+          <div class="step-checkbox">
+            <input
+              type="checkbox"
+              class="form-check-input step-checkbox__input"
+              id="aceitaCripto"
+              formControlName="aceitaCripto"
+            />
+            <label class="step-checkbox__label" for="aceitaCripto">
+              <span class="step-checkbox__label-text">Aceita Criptoativos</span>
+            </label>
+          </div>
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            Permite investimento em criptomoedas
+          </div>
+        </div>
+      </div>
+
+      <!-- Limite Alavancagem (conditional) -->
+      @if (showLimiteAlavancagem()) {
+      <div class="step-form__grid step-form__grid--2-cols step-field--conditional">
+        <div class="step-field">
+          <label for="limiteAlavancagem" class="step-field__label">
+            <span class="step-field__label-text">Limite de Alavancagem</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <div class="input-group">
+            <input
+              type="number"
+              class="form-control step-field__input font-monospace"
+              [class.is-invalid]="isInvalid('limiteAlavancagem')"
+              [class.is-valid]="isValid('limiteAlavancagem')"
+              id="limiteAlavancagem"
+              formControlName="limiteAlavancagem"
+              placeholder="2.00"
+              step="0.01"
+              min="1.01"
+              max="10.00"
+            />
+            <span class="input-group-text step-input-suffix">x</span>
+          </div>
+          @if (isInvalid('limiteAlavancagem')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            @if (form.get('limiteAlavancagem')?.hasError('required')) { Limite de alavancagem e
+            obrigatorio } @else if (form.get('limiteAlavancagem')?.hasError('min')) { Valor minimo:
+            1.01x (101%) } @else if (form.get('limiteAlavancagem')?.hasError('max')) { Valor maximo:
+            10.00x (1000%) }
+          </div>
+          } @else {
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            Multiplicador de alavancagem (ex: 2.00 = 200%)
+          </div>
+          }
+        </div>
+      </div>
+      }
+
+      <!-- Percentual Exterior -->
+      <div class="step-form__grid step-form__grid--2-cols">
+        <div class="step-field">
+          <label for="percentualExterior" class="step-field__label">
+            <span class="step-field__label-text">% Permitido no Exterior</span>
+            <span class="step-field__optional">(opcional)</span>
+          </label>
+          <div class="input-group">
+            <input
+              type="number"
+              class="form-control step-field__input font-monospace"
+              [class.is-invalid]="isInvalid('percentualExterior')"
+              [class.is-valid]="isValid('percentualExterior')"
+              id="percentualExterior"
+              formControlName="percentualExterior"
+              placeholder="20.00"
+              step="0.01"
+              min="0"
+              max="100"
+              [attr.disabled]="exteriorDisabled() ? true : null"
+            />
+            <span class="input-group-text step-input-suffix">%</span>
+          </div>
+          @if (isInvalid('percentualExterior')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            @if (form.get('percentualExterior')?.hasError('min')) {
+              @if (cambialMinPercentual() === 80) {
+                Valor minimo para fundos cambiais: 80%
+              } @else {
+                Valor minimo: 0%
+              }
+            } @else if (form.get('percentualExterior')?.hasError('max')) {
+              Valor maximo: 100%
+            }
+          </div>
+          } @else if (exteriorDisabled()) {
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            Este tipo de fundo nao permite investimento no exterior
+          </div>
+          } @else {
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            Percentual maximo permitido em ativos no exterior
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Info: CVM 175 Cripto -->
+      @if (showCriptoInfo()) {
+      <div class="step-alert step-alert--info">
+        <i class="bi bi-info-circle step-alert__icon" aria-hidden="true"></i>
+        <span class="step-alert__text"
+          >Fundos que aceitam criptoativos devem seguir as diretrizes da CVM 175</span
+        >
+      </div>
+      }
+
+      <!-- Warning: Crypto restricted by classification -->
+      @if (showCriptoRestriction()) {
+      <div class="step-alert step-alert--warning">
+        <i class="bi bi-exclamation-triangle step-alert__icon" aria-hidden="true"></i>
+        <span class="step-alert__text">{{ criptoRestrictionMessage() }}</span>
+      </div>
+      }
+
+      <!-- Info: Cambial min 80% -->
+      @if (showCambialInfo()) {
+      <div class="step-alert step-alert--info">
+        <i class="bi bi-info-circle step-alert__icon" aria-hidden="true"></i>
+        <span class="step-alert__text"
+          >Fundos cambiais exigem no minimo 80% de exposicao em ativos no exterior (obrigatorio)</span
+        >
+      </div>
+      }
+    </div>
+
+    <!-- Form Footer -->
+    <div class="step-form__footer">
+      <div class="step-hint">
+        <i class="bi bi-lightbulb step-hint__icon" aria-hidden="true"></i>
+        <span class="step-hint__text">
+          Preencha todos os campos obrigatorios (<span class="text-danger">*</span>) para habilitar
+          o botao "Proximo"
+        </span>
+      </div>
+    </div>
+  </form>
+</div>

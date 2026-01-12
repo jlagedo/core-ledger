@@ -1,0 +1,177 @@
+<div class="classificacao-step">
+  <form [formGroup]="form" class="step-form" novalidate>
+    <!-- Section: Classificacao Regulatoria -->
+    <div class="step-form__section">
+      <h6 class="form-section-title">Classificacao Regulatoria</h6>
+
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Classificacao CVM Field -->
+        <div class="step-field">
+          <label for="classificacaoCvm" class="step-field__label">
+            <span class="step-field__label-text">Classificacao CVM</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <select
+            class="form-select step-field__input"
+            [class.is-invalid]="isInvalid('classificacaoCvm')"
+            [class.is-valid]="isValid('classificacaoCvm')"
+            id="classificacaoCvm"
+            formControlName="classificacaoCvm"
+          >
+            <option [ngValue]="null">Selecione a classificacao</option>
+            @for (option of classificacaoCvmOptions; track option.value) {
+            <option [ngValue]="option.value">{{ option.label }} - {{ option.description }}</option>
+            }
+          </select>
+          @if (isInvalid('classificacaoCvm')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Classificacao CVM e obrigatoria
+          </div>
+          }
+        </div>
+
+        <!-- Classificacao ANBIMA Field (Conditional) -->
+        <div class="step-field">
+          <label for="classificacaoAnbima" class="step-field__label">
+            <span class="step-field__label-text">Classificacao ANBIMA</span>
+            @if (cvmHasAnbimaOptions()) {
+            <span class="step-field__optional">(opcional)</span>
+            }
+          </label>
+          <div class="step-field__input-wrapper">
+            <select
+              class="form-select step-field__input"
+              [class.is-disabled]="anbimaDisabled()"
+              id="classificacaoAnbima"
+              formControlName="classificacaoAnbima"
+              [attr.disabled]="anbimaDisabled() ? true : null"
+            >
+              <option [ngValue]="null">
+                @if (loadingAnbima()) { Carregando... } @else if (!cvmHasAnbimaOptions()) { Nao
+                aplicavel para esta classificacao } @else { Selecione a classificacao ANBIMA }
+              </option>
+              @for (option of classificacoesAnbimaOptions(); track option.codigo) {
+              <option [ngValue]="option.codigo">
+                {{ option.nivel2 }}
+                @if (option.nivel3) { - {{ option.nivel3 }} }
+              </option>
+              }
+            </select>
+            @if (loadingAnbima()) {
+            <div class="step-field__spinner">
+              <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+              <span class="visually-hidden">Carregando classificacoes ANBIMA...</span>
+            </div>
+            }
+          </div>
+          @if (anbimaMessage()) {
+          <div class="step-field__info">
+            <i class="bi bi-info-circle" aria-hidden="true"></i>
+            {{ anbimaMessage() }}
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Codigo ANBIMA (optional, single column) -->
+      <div class="step-form__grid step-form__grid--2-cols">
+        <div class="step-field">
+          <label for="codigoAnbima" class="step-field__label">
+            <span class="step-field__label-text">Codigo ANBIMA</span>
+            <span class="step-field__optional">(opcional)</span>
+          </label>
+          <input
+            type="text"
+            class="form-control step-field__input font-monospace"
+            id="codigoAnbima"
+            formControlName="codigoAnbima"
+            placeholder="Ex: 123456"
+            maxlength="20"
+          />
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            Codigo de identificacao ANBIMA do fundo
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Caracteristicas do Publico -->
+    <div class="step-form__section">
+      <h6 class="form-section-title">Caracteristicas do Publico</h6>
+
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Publico Alvo -->
+        <div class="step-field">
+          <label for="publicoAlvo" class="step-field__label">
+            <span class="step-field__label-text">Publico Alvo</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <select
+            class="form-select step-field__input"
+            [class.is-invalid]="isInvalid('publicoAlvo')"
+            [class.is-valid]="isValid('publicoAlvo')"
+            id="publicoAlvo"
+            formControlName="publicoAlvo"
+          >
+            <option [ngValue]="null">Selecione o publico</option>
+            @for (option of publicoAlvoOptions; track option.value) {
+            <option [ngValue]="option.value" [disabled]="isPublicoAlvoDisabled(option.value)">
+              {{ option.label }}
+            </option>
+            }
+          </select>
+          @if (isInvalid('publicoAlvo')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Publico alvo e obrigatorio
+          </div>
+          } @if (restrictedPublicoAlvo()) {
+          <div class="step-field__info">
+            <i class="bi bi-info-circle" aria-hidden="true"></i>
+            {{ getPublicoAlvoRestrictionMessage() }}
+          </div>
+          }
+        </div>
+
+        <!-- Tributacao -->
+        <div class="step-field">
+          <label for="tributacao" class="step-field__label">
+            <span class="step-field__label-text">Regime de Tributacao</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <select
+            class="form-select step-field__input"
+            [class.is-invalid]="isInvalid('tributacao')"
+            [class.is-valid]="isValid('tributacao')"
+            id="tributacao"
+            formControlName="tributacao"
+          >
+            <option [ngValue]="null">Selecione o regime</option>
+            @for (option of tributacaoOptions; track option.value) {
+            <option [ngValue]="option.value">{{ option.label }}</option>
+            }
+          </select>
+          @if (isInvalid('tributacao')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Regime de tributacao e obrigatorio
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Footer -->
+    <div class="step-form__footer">
+      <div class="step-hint">
+        <i class="bi bi-lightbulb step-hint__icon" aria-hidden="true"></i>
+        <span class="step-hint__text">
+          Preencha todos os campos obrigatorios (<span class="text-danger">*</span>) para habilitar
+          o botao "Proximo"
+        </span>
+      </div>
+    </div>
+  </form>
+</div>
