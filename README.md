@@ -1,96 +1,206 @@
-# CoreLedger
+# Core Ledger
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+A comprehensive **fund accounting ABOR (Accounting Book of Records)** system for the Brazilian investment fund market. Implements Brazilian regulatory requirements (CVM 175, ANBIMA, etc.).
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+## Overview
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+Core Ledger is an enterprise-grade monorepo containing:
 
-## Run tasks
+- **Web Application** - Angular 21 frontend with modern signals-based architecture
+- **REST API** - .NET 10 backend with Clean Architecture
+- **Background Worker** - .NET 10 service for async processing via RabbitMQ
+- **ETL Pipeline** - Meltano-based data integration for B3 financial instruments
+- **E2E Tests** - Playwright test suite with Brazilian financial test data
 
-To run tasks with Nx use:
+## Project Structure
 
-```sh
-npx nx <target> <project-name>
+```
+core-ledger/
+├── apps/
+│   ├── core-ledger-ui/        # Angular 21 frontend
+│   ├── core-ledger-api/       # .NET 10 Web API
+│   ├── core-ledger-worker/    # .NET 10 Background Worker
+│   └── core-ledger-e2e/       # Playwright E2E tests
+├── libs/
+│   └── core-ledger-dotnet/    # Shared .NET libraries
+│       ├── CoreLedger.Domain/
+│       ├── CoreLedger.Application/
+│       ├── CoreLedger.Infrastructure/
+│       ├── CoreLedger.UnitTests/
+│       └── CoreLedger.IntegrationTests/
+├── tools/
+│   └── etl/                   # Meltano ETL pipeline
+├── docs/                      # Documentation
+│   ├── specs/                 # Feature specifications
+│   ├── testing/               # Testing documentation
+│   ├── etl/                   # ETL documentation
+│   └── compliance/            # Compliance documentation
+├── CoreLedger.sln             # Root .NET solution
+├── nx.json                    # Nx workspace configuration
+└── package.json               # Root package.json
 ```
 
-For example:
+## Quick Start
 
-```sh
-npx nx build myproject
+### Prerequisites
+
+- **Node.js** >= 20.9.0
+- **npm** >= 11.6.2
+- **.NET SDK** 10.0
+- **Docker** (for infrastructure services)
+
+### 1. Install Dependencies
+
+```bash
+npm install
+dotnet restore CoreLedger.sln
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+### 2. Start Infrastructure
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Add new projects
-
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-To install a new plugin you can use the `nx add` command. Here's an example of adding the React plugin:
-```sh
-npx nx add @nx/react
+```bash
+npm run docker:up
+# Starts: PostgreSQL (5432), Redis (6379), RabbitMQ (5672/15672)
 ```
 
-Use the plugin's generator to create new projects. For example, to create a new React app or library:
+### 3. Run the Applications
 
-```sh
-# Generate an app
-npx nx g @nx/react:app demo
+```bash
+# Terminal 1: Start the API
+nx serve core-ledger-api
 
-# Generate a library
-npx nx g @nx/react:lib some-lib
+# Terminal 2: Start the UI
+nx serve core-ledger-ui
+
+# Open http://localhost:4200 (login: admin / any password)
 ```
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+## Development Commands
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Nx Commands (Recommended)
 
-## Set up CI!
+```bash
+# Serve applications
+nx serve core-ledger-ui              # Angular dev server (http://localhost:4200)
+nx serve core-ledger-ui -c local-auth # With Auth0 authentication
+nx serve core-ledger-api             # .NET API (https://localhost:7109)
+nx serve core-ledger-worker          # .NET Worker
 
-### Step 1
+# Build
+nx build core-ledger-ui              # Build Angular
+nx build core-ledger-api             # Build .NET API
+nx run-many -t build                 # Build all projects
 
-To connect to Nx Cloud, run the following command:
+# Test
+nx test core-ledger-ui               # Angular unit tests (Vitest)
+nx test core-ledger-dotnet           # .NET unit tests
+nx e2e core-ledger-e2e               # Playwright E2E tests
 
-```sh
-npx nx connect
+# Utilities
+nx graph                             # Visualize dependency graph
+nx affected -t test                  # Test only affected projects
 ```
 
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
+### npm Scripts
 
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Step 2
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
+```bash
+npm start                    # Start Angular UI (mock auth)
+npm run start:auth           # Start Angular UI (Auth0)
+npm run start:api            # Start .NET API
+npm run build                # Build all projects
+npm run test                 # Test all projects
+npm run e2e                  # Run E2E tests
+npm run docker:up            # Start infrastructure
+npm run docker:down          # Stop infrastructure
 ```
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### .NET Commands
 
-## Install Nx Console
+```bash
+dotnet build CoreLedger.sln
+dotnet test CoreLedger.sln
+nx run core-ledger-api:migrate       # Run EF Core migrations
+```
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+## Technology Stack
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+| Component | Technology |
+|-----------|------------|
+| Frontend | Angular 21, Bootstrap 5, NgRx Signals |
+| Backend | .NET 10, Entity Framework Core, MediatR |
+| Database | PostgreSQL 18 |
+| Cache | Redis |
+| Queue | RabbitMQ |
+| ETL | Meltano, DBT, Python |
+| Testing | Vitest (UI), xUnit (.NET), Playwright (E2E) |
+| Build | Nx, Angular CLI, .NET CLI |
 
-## Useful links
+## Architecture
 
-Learn more:
+### Dependency Graph
 
-- [Learn more about this workspace setup](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```
+core-ledger-e2e → core-ledger-ui
+                → core-ledger-api → core-ledger-dotnet
 
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+core-ledger-worker → core-ledger-dotnet
+```
+
+### .NET Clean Architecture
+
+- **Domain** - Pure business logic, no external dependencies
+- **Application** - Use cases with MediatR (CQRS), validators, DTOs
+- **Infrastructure** - EF Core, PostgreSQL, RabbitMQ integrations
+- **API/Worker** - Entry points consuming shared libraries
+
+### Database Schemas
+
+```
+cadastros  → Funds, assets, investors
+carteira   → Operations, positions
+passivo    → Investor movements
+cota       → NAV, shares, closing
+pricing    → Prices and indexes
+audit      → Logs and history
+```
+
+## Documentation
+
+Detailed documentation is available in the `/docs` directory:
+
+- **[Specifications](docs/specs/)** - Feature specifications for API and UI
+- **[Testing](docs/testing/)** - E2E test coverage and Brazilian test data
+- **[ETL](docs/etl/)** - B3 instruments pipeline documentation
+- **[Compliance](docs/compliance/)** - Angular compliance review guides
+
+### Claude Code Instructions
+
+Each project has a `CLAUDE.md` file with AI-assisted development guidance:
+
+- [`/CLAUDE.md`](CLAUDE.md) - Monorepo overview
+- [`/apps/core-ledger-ui/CLAUDE.md`](apps/core-ledger-ui/CLAUDE.md) - Angular UI patterns
+- [`/tools/etl/CLAUDE.md`](tools/etl/CLAUDE.md) - Meltano ETL guidance
+
+## ETL Pipeline
+
+Process B3 financial instruments data:
+
+```bash
+cd tools/etl
+meltano install
+export TARGET_POSTGRES_PASSWORD=postgres
+bash extract/preprocess_b3_instruments.sh && meltano run b3_instruments_pipeline
+```
+
+See [ETL Documentation](docs/etl/README.md) for details.
+
+## Contributing
+
+1. Create a feature branch from `main`
+2. Make changes following project code standards
+3. Run tests: `npm run test && dotnet test CoreLedger.sln`
+4. Submit a pull request
+
+## License
+
+Proprietary - All rights reserved

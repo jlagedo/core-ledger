@@ -201,7 +201,7 @@ export const MOCK_ENTITIES: Entity[] = [
 ];
 ```
 
-**See `documentation/mock-api.md` for complete documentation.**
+**Note:** The mock API documentation is embedded above in the "Mock API System" section.
 
 ### Mock Authentication System (REQUIRED)
 

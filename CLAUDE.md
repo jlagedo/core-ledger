@@ -26,6 +26,12 @@ core-ledger/
 │       └── CoreLedger.IntegrationTests/
 ├── tools/
 │   └── etl/                   # Meltano ETL (standalone)
+├── docs/                      # Centralized documentation
+│   ├── specs/api/             # API specifications
+│   ├── specs/ui/              # UI specifications
+│   ├── testing/               # E2E test documentation
+│   ├── etl/                   # ETL pipeline documentation
+│   └── compliance/            # Compliance documentation
 ├── CoreLedger.sln             # Root solution for IDE support
 ├── nx.json                    # Nx workspace configuration
 └── package.json               # Root package.json
@@ -149,5 +155,13 @@ Nx caches build outputs. Use `nx reset` to clear cache if needed.
 
 ### Project-Specific Instructions
 Each project has its own `CLAUDE.md` with detailed architecture and commands:
-- `apps/core-ledger-ui/CLAUDE.md`
-- `libs/core-ledger-dotnet/docs/` (API specifications)
+- `apps/core-ledger-ui/CLAUDE.md` - Angular UI patterns and conventions
+- `tools/etl/CLAUDE.md` - Meltano ETL guidance
+
+### Documentation
+All documentation is centralized in `/docs/`:
+- `docs/specs/api/` - API specifications (.NET)
+- `docs/specs/ui/` - UI specifications (Angular)
+- `docs/testing/` - E2E test coverage and Brazilian test data
+- `docs/etl/` - B3 instruments ETL pipeline
+- `docs/compliance/` - Angular compliance review guides
