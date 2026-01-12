@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(meltano --version:*)",
+      "Bash(meltano config:*)",
+      "Bash(meltano schedule list:*)",
+      "Bash(meltano:*)",
+      "Bash(cat:*)",
+      "Bash(sqlite3:*)",
+      "Bash(PGPASSWORD=postgres psql:*)",
+      "Bash(file:*)",
+      "Bash(chmod:*)",
+      "Bash(./extract/preprocess_b3_instruments.sh:*)",
+      "Bash(cut:*)",
+      "Bash(tr:*)",
+      "Bash(psql:*)",
+      "Bash(TARGET_POSTGRES_PASSWORD=postgres .meltano/transformers/dbt-postgres/venv/bin/dbt run:*)",
+      "Bash(python3:*)",
+      "Bash(pip3 install:*)",
+      "Bash(TARGET_POSTGRES_PASSWORD=postgres .meltano/transformers/dbt-postgres/venv/bin/dbt test:*)"
+    ]
+  }
+}

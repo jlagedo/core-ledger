@@ -1,0 +1,48 @@
+<div class="modal-header">
+  <h5 id="modal-title" class="modal-title">Excluir Calendário</h5>
+  <button
+    type="button"
+    class="btn-close"
+    aria-label="Fechar"
+    (click)="activeModal.dismiss()"
+  ></button>
+</div>
+<div class="modal-body">
+  @if (calendario(); as cal) {
+    <p>Tem certeza que deseja excluir este registro de calendário?</p>
+    <div class="alert alert-warning" role="alert">
+      <div class="d-flex align-items-start">
+        <i class="bi bi-exclamation-triangle-fill fs-4 me-2" aria-hidden="true"></i>
+        <div>
+          <strong>Atenção:</strong> Esta ação não pode ser desfeita.
+        </div>
+      </div>
+    </div>
+    <div class="card bg-body-tertiary border-0">
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-4">Data:</dt>
+          <dd class="col-sm-8">{{ cal.data | date: 'dd/MM/yyyy' }}</dd>
+
+          <dt class="col-sm-4">Tipo de Dia:</dt>
+          <dd class="col-sm-8">{{ cal.tipoDiaDescricao }}</dd>
+
+          <dt class="col-sm-4">Praça:</dt>
+          <dd class="col-sm-8">{{ cal.pracaDescricao }}</dd>
+
+          @if (cal.descricao) {
+            <dt class="col-sm-4">Descrição:</dt>
+            <dd class="col-sm-8">{{ cal.descricao }}</dd>
+          }
+        </dl>
+      </div>
+    </div>
+  }
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">Cancelar</button>
+  <button type="button" class="btn btn-danger" (click)="activeModal.close('confirm')">
+    <i class="bi bi-trash me-1" aria-hidden="true"></i>
+    Excluir
+  </button>
+</div>

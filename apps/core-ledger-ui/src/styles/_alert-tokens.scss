@@ -1,0 +1,81 @@
+// ============================================================
+// ALERT & BADGE TOKENS
+//
+// Semantic color tokens for alerts and badges in both
+// light and dark modes.
+// ============================================================
+
+@use "sass:color";
+@use "variables" as *;
+
+$alert-tokens: (
+  success: (
+    light-bg: rgba(#0A8754, 0.08),
+    light-border: rgba(#0A8754, 0.18),
+    light-color: #065F3E,
+    light-accent: #0A8754,
+    dark-bg: rgba($accent-teal, 0.1),
+    dark-border: rgba($accent-teal, 0.3),
+    dark-color: color.scale($accent-teal, $lightness: -15%),
+    dark-accent: $accent-teal,
+    dark-shadow: 0 0 10px rgba($accent-teal, 0.3)
+  ),
+  info: (
+    light-bg: rgba($brand-blue-500, 0.08),
+    light-border: rgba($brand-blue-500, 0.18),
+    light-color: $brand-blue-600,
+    light-accent: $brand-blue-500,
+    dark-bg: rgba($brand-blue-400, 0.1),
+    dark-border: rgba($brand-blue-400, 0.3),
+    dark-color: $brand-blue-400,
+    dark-accent: $brand-blue-400
+  ),
+  warning: (
+    light-bg: rgba($daylight-amber, 0.1),
+    light-border: rgba($daylight-amber, 0.22),
+    light-color: #92400E,
+    light-accent: $daylight-amber,
+    dark-bg: rgba($accent-yellow, 0.1),
+    dark-border: rgba($accent-yellow, 0.3),
+    dark-color: color.scale($accent-yellow, $lightness: -10%),
+    dark-accent: $accent-yellow,
+    dark-shadow: 0 0 10px rgba($accent-yellow, 0.3)
+  ),
+  danger: (
+    light-bg: rgba(#DC2626, 0.08),
+    light-border: rgba(#DC2626, 0.18),
+    light-color: #991B1B,
+    light-accent: #DC2626,
+    dark-bg: rgba($accent-red, 0.1),
+    dark-border: rgba($accent-red, 0.3),
+    dark-color: $accent-red-light,
+    dark-accent: $accent-red
+  ),
+  primary: (
+    light-bg: rgba($brand-blue-500, 0.08),
+    light-border: rgba($brand-blue-500, 0.18),
+    light-color: $brand-blue-600,
+    light-accent: $brand-blue-500,
+    dark-bg: rgba($brand-blue-500, 0.15),
+    dark-border: rgba($brand-blue-500, 0.3),
+    dark-color: $brand-blue-400,
+    dark-accent: $brand-blue-500
+  ),
+  secondary: (
+    light-bg: rgba($daylight-muted, 0.1),
+    light-border: rgba($daylight-muted, 0.2),
+    light-color: $daylight-text,
+    light-accent: $daylight-muted,
+    dark-bg: rgba($neutral-500, 0.15),
+    dark-border: rgba($neutral-500, 0.3),
+    dark-color: $neutral-100,
+    dark-accent: $neutral-500
+  )
+);
+
+$badge-tokens: (
+  success: (light: #0A8754 $neutral-white, dark: $accent-teal $brand-blue-800),
+  info:    (light: $brand-blue-500 $neutral-white, dark: $brand-blue-400 $brand-blue-800),
+  warning: (light: $daylight-amber $neutral-white, dark: $accent-yellow $brand-blue-800),
+  danger:  (light: #DC2626 $neutral-white, dark: $accent-red-light $brand-blue-800)
+);

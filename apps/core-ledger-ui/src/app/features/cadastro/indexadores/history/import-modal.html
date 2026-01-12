@@ -1,0 +1,266 @@
+@if (indexador(); as idx) {
+  <div class="modal-header">
+    <h5 class="modal-title" id="modal-title">
+      <i class="bi bi-upload me-2"></i>
+      Importar Valores
+    </h5>
+    <button
+      type="button"
+      class="btn-close"
+      (click)="cancel()"
+      [disabled]="isImporting()"
+      aria-label="Fechar"
+    ></button>
+  </div>
+
+  <div class="modal-body">
+    <!-- Indexador Info -->
+    <div class="indexador-info mb-4">
+      <span class="indexador-codigo font-monospace">{{ idx.codigo }}</span>
+      <span class="indexador-nome text-muted ms-2">{{ idx.nome }}</span>
+    </div>
+
+    <!-- Import Mode Tabs -->
+    @if (showApiTab()) {
+      <ul class="nav nav-pills mb-4">
+        <li class="nav-item">
+          <button
+            class="nav-link"
+            [class.active]="importMode() === 'csv'"
+            (click)="setImportMode('csv')"
+            [disabled]="isImporting()"
+          >
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i>
+            Arquivo CSV
+          </button>
+        </li>
+        <li class="nav-item">
+          <button
+            class="nav-link"
+            [class.active]="importMode() === 'api'"
+            (click)="setImportMode('api')"
+            [disabled]="isImporting()"
+          >
+            <i class="bi bi-cloud-download me-1"></i>
+            Fonte Externa
+          </button>
+        </li>
+      </ul>
+    }
+
+    @if (errorMessage(); as error) {
+      <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ error }}
+      </div>
+    }
+
+    @if (importResult(); as result) {
+      <div class="alert alert-success d-flex flex-column" role="alert">
+        <div class="d-flex align-items-center mb-2">
+          <i class="bi bi-check-circle-fill me-2"></i>
+          <strong>Importacao concluida</strong>
+        </div>
+        <div class="small">
+          <span class="me-3">Total: {{ result.totalRows }}</span>
+          <span class="me-3 text-success">Importados: {{ result.importedRows }}</span>
+          @if (result.skippedRows > 0) {
+            <span class="me-3 text-warning">Ignorados: {{ result.skippedRows }}</span>
+          }
+          @if (result.overwrittenRows > 0) {
+            <span class="me-3 text-info">Sobrescritos: {{ result.overwrittenRows }}</span>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- CSV Import Mode -->
+    @if (importMode() === 'csv') {
+      @if (!selectedFile()) {
+        <!-- File Drop Zone -->
+        <div
+          class="drop-zone"
+          [class.drag-over]="isDragOver()"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+        >
+          <i class="bi bi-file-earmark-arrow-up display-4 text-muted mb-3"></i>
+          <p class="mb-2">Arraste um arquivo CSV aqui ou</p>
+          <label class="btn btn-outline-primary">
+            Selecione um arquivo
+            <input
+              type="file"
+              accept=".csv"
+              class="d-none"
+              (change)="onFileInputChange($event)"
+            />
+          </label>
+        </div>
+
+        <!-- CSV Format Specification -->
+        <div class="format-spec mt-4">
+          <h6 class="text-muted mb-2"><i class="bi bi-info-circle me-1"></i>Formato esperado</h6>
+          <code class="d-block p-2 bg-dark rounded small">
+            data_referencia;valor;fator_diario;variacao_percentual;fonte<br/>
+            2026-01-10;13.65;1.000512374;0.00;BACEN
+          </code>
+          <p class="small text-muted mt-2 mb-0">
+            Separador: ponto e virgula (;) | Encoding: UTF-8
+          </p>
+        </div>
+      } @else {
+        <!-- Selected File Info -->
+        <div class="selected-file d-flex align-items-center justify-content-between mb-3">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-file-earmark-spreadsheet fs-4 text-primary me-2"></i>
+            <div>
+              <div class="fw-medium">{{ selectedFile()!.name }}</div>
+              <div class="small text-muted">
+                {{ (selectedFile()!.size / 1024).toFixed(1) }} KB
+              </div>
+            </div>
+          </div>
+          <button
+            class="btn btn-sm btn-outline-secondary"
+            (click)="clearFile()"
+            [disabled]="isImporting()"
+          >
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <!-- Preview Table -->
+        @if (csvPreview().length > 0) {
+          <div class="preview-section">
+            <h6 class="text-muted mb-2">Pre-visualizacao (primeiras 5 linhas)</h6>
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered font-monospace small mb-0">
+                <thead class="table-secondary">
+                  <tr>
+                    <th>Data</th>
+                    <th>Valor</th>
+                    <th>Fator</th>
+                    <th>Var %</th>
+                    <th>Fonte</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of csvPreview(); track row.dataReferencia) {
+                    <tr>
+                      <td>{{ row.dataReferencia }}</td>
+                      <td class="text-end">{{ row.valor }}</td>
+                      <td class="text-end">{{ row.fatorDiario || '—' }}</td>
+                      <td class="text-end">{{ row.variacaoPercentual || '—' }}</td>
+                      <td>{{ row.fonte || '—' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+        <!-- Options -->
+        <div class="form-check mt-3">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="sobrescrever"
+            [checked]="sobrescrever()"
+            (change)="sobrescrever.set(!sobrescrever())"
+            [disabled]="isImporting()"
+          />
+          <label class="form-check-label" for="sobrescrever">
+            Sobrescrever valores existentes
+          </label>
+          <div class="form-text">
+            Se desmarcado, datas que ja existem serao ignoradas
+          </div>
+        </div>
+      }
+    }
+
+    <!-- API Import Mode -->
+    @if (importMode() === 'api') {
+      <div class="api-import">
+        @if (idx.importacaoAutomatica && idx.urlFonte) {
+          <div class="mb-3">
+            <label class="form-label text-muted small">URL da Fonte</label>
+            <div class="font-monospace small text-break bg-dark p-2 rounded">
+              {{ idx.urlFonte }}
+            </div>
+          </div>
+
+          @if (apiImportStatus() === 'idle') {
+            <p class="text-muted">
+              Clique em "Importar" para buscar os valores mais recentes da fonte externa.
+            </p>
+          }
+
+          @if (apiImportStatus() === 'pending') {
+            <div class="d-flex align-items-center text-primary">
+              <span class="spinner-border spinner-border-sm me-2"></span>
+              Conectando a fonte externa...
+            </div>
+          }
+
+          @if (apiImportStatus() === 'success') {
+            <div class="alert alert-success d-flex align-items-center">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              Importacao iniciada com sucesso. Os valores serao atualizados em breve.
+            </div>
+          }
+
+          @if (apiImportStatus() === 'error') {
+            <div class="alert alert-danger d-flex align-items-center">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              Falha ao conectar com a fonte externa. Tente novamente mais tarde.
+            </div>
+          }
+        } @else {
+          <div class="alert alert-warning d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Este indexador nao possui importacao automatica configurada.
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="modal-footer">
+    @if (importResult()) {
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="closeWithResult()"
+      >
+        <i class="bi bi-check-lg me-1"></i>
+        Fechar
+      </button>
+    } @else {
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="cancel()"
+        [disabled]="isImporting()"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="import()"
+        [disabled]="!canImport() || isImporting()"
+      >
+        @if (isImporting()) {
+          <span class="spinner-border spinner-border-sm me-1"></span>
+          Importando...
+        } @else {
+          <i class="bi bi-upload me-1"></i>
+          Importar
+        }
+      </button>
+    }
+  </div>
+}

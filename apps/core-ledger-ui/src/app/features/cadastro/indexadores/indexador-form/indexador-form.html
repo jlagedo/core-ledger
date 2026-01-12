@@ -1,0 +1,340 @@
+<app-page-header [title]="indexadorId() ? 'Editar Indexador' : 'Novo Indexador'">
+  <button class="btn btn-sm btn-secondary" aria-label="Obter ajuda para esta pagina">
+    <i class="bi bi-question-circle"></i> Ajuda
+  </button>
+</app-page-header>
+
+<main class="container-form-wide">
+  <div class="card-form">
+    <div class="card-header">
+      <h5 class="card-title">{{ indexadorId() ? 'Editar Indexador' : 'Novo Indexador' }}</h5>
+    </div>
+    <div class="card-body">
+
+      <form (ngSubmit)="onSubmit()" [formGroup]="indexadorForm" class="row g-3" novalidate>
+
+        <!-- Section: Dados Basicos -->
+        <div class="col-12">
+          <h6 class="form-section-title">Dados Basicos</h6>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="codigo">Codigo <span class="text-danger">*</span></label>
+          <input
+            [class.is-invalid]="isInvalid('codigo')"
+            class="form-control font-monospace"
+            formControlName="codigo"
+            id="codigo"
+            maxlength="20"
+            placeholder="Ex: CDI"
+            type="text"
+            autofocus
+          >
+          @if (isInvalid('codigo')) {
+            <div class="invalid-feedback">
+              @if (hasError('codigo', 'required')) {
+                Codigo e obrigatorio
+              }
+              @if (hasError('codigo', 'maxlength')) {
+                Codigo deve ter no maximo 20 caracteres
+              }
+            </div>
+          }
+          @if (indexadorId()) {
+            <div class="form-text">O codigo nao pode ser alterado em edicoes</div>
+          }
+        </div>
+
+        <div class="col-md-8">
+          <label class="form-label" for="nome">Nome <span class="text-danger">*</span></label>
+          <input
+            [class.is-invalid]="isInvalid('nome')"
+            class="form-control"
+            formControlName="nome"
+            id="nome"
+            maxlength="200"
+            placeholder="Ex: Certificado de Deposito Interbancario"
+            type="text"
+          >
+          @if (isInvalid('nome')) {
+            <div class="invalid-feedback">
+              @if (hasError('nome', 'required')) {
+                Nome e obrigatorio
+              }
+              @if (hasError('nome', 'maxlength')) {
+                Nome deve ter no maximo 200 caracteres
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Section: Classificacao -->
+        <div class="col-12 mt-4">
+          <h6 class="form-section-title">Classificacao</h6>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="tipo">Tipo <span class="text-danger">*</span></label>
+          <select
+            [class.is-invalid]="isInvalid('tipo')"
+            class="form-select"
+            formControlName="tipo"
+            id="tipo"
+          >
+            <option [ngValue]="null">Selecione o tipo</option>
+            @for (option of indexadorService.tipoIndexadorOptions; track option.value) {
+              <option [ngValue]="option.value">
+                {{ option.name }} - {{ option.description }}
+              </option>
+            }
+          </select>
+          @if (isInvalid('tipo')) {
+            <div class="invalid-feedback">
+              @if (hasError('tipo', 'required')) {
+                Tipo e obrigatorio
+              }
+            </div>
+          }
+          @if (indexadorId()) {
+            <div class="form-text">O tipo nao pode ser alterado em edicoes</div>
+          }
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="periodicidade">Periodicidade <span class="text-danger">*</span></label>
+          <select
+            [class.is-invalid]="isInvalid('periodicidade') || hasTipoPeriodicidadeError"
+            class="form-select"
+            formControlName="periodicidade"
+            id="periodicidade"
+          >
+            <option [ngValue]="null">Selecione a periodicidade</option>
+            @for (option of allowedPeriodicidades(); track option.value) {
+              <option [ngValue]="option.value">{{ option.name }}</option>
+            }
+          </select>
+          @if (isInvalid('periodicidade')) {
+            <div class="invalid-feedback">
+              @if (hasError('periodicidade', 'required')) {
+                Periodicidade e obrigatoria
+              }
+            </div>
+          }
+          @if (hasTipoPeriodicidadeError) {
+            <div class="invalid-feedback d-block">
+              Periodicidade incompativel com o tipo selecionado
+            </div>
+          }
+          @if (indexadorId()) {
+            <div class="form-text">A periodicidade nao pode ser alterada em edicoes</div>
+          } @else if (hasFixedPeriodicidade()) {
+            <div class="form-text text-info">
+              <i class="bi bi-info-circle me-1"></i>
+              Periodicidade definida automaticamente pelo tipo selecionado
+            </div>
+          }
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="fonte">Fonte</label>
+          <select
+            [class.is-invalid]="isInvalid('fonte')"
+            class="form-select"
+            formControlName="fonte"
+            id="fonte"
+          >
+            <option [ngValue]="null">Selecione a fonte</option>
+            @for (option of indexadorService.fonteOptions; track option.value) {
+              <option [ngValue]="option.value">{{ option.name }}</option>
+            }
+          </select>
+          <div class="form-text">Provedor de dados para importacao</div>
+        </div>
+
+        <!-- Section: Fator Acumulado -->
+        <div class="col-12 mt-4">
+          <h6 class="form-section-title">Fator Acumulado (Opcional)</h6>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="dataBase">Data Base</label>
+          <div class="input-group">
+            <input
+              #dataBasePicker="ngbDatepicker"
+              [class.is-invalid]="isInvalid('dataBase')"
+              class="form-control font-monospace text-nowrap"
+              formControlName="dataBase"
+              id="dataBase"
+              ngbDatepicker
+              placeholder="dd/mm/aaaa"
+              type="text"
+            >
+            <button
+              (click)="dataBasePicker.toggle()"
+              [attr.aria-label]="'Abrir calendario'"
+              class="btn btn-outline-secondary"
+              type="button"
+            >
+              <i aria-hidden="true" class="bi bi-calendar3"></i>
+            </button>
+          </div>
+          <div class="form-text">Data de referencia do fator acumulado</div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="fatorAcumulado">Fator Acumulado</label>
+          <input
+            [class.is-invalid]="isInvalid('fatorAcumulado')"
+            class="form-control font-monospace"
+            formControlName="fatorAcumulado"
+            id="fatorAcumulado"
+            placeholder="Ex: 1.000512374"
+            type="number"
+            step="0.000000001"
+          >
+          <div class="form-text">Fator acumulado ate a data base</div>
+        </div>
+
+        <!-- Section: Importacao -->
+        <div class="col-12 mt-4">
+          <h6 class="form-section-title">Importacao de Dados</h6>
+        </div>
+
+        <div class="col-12">
+          <div class="form-check form-switch">
+            <input
+              class="form-check-input"
+              formControlName="importacaoAutomatica"
+              id="importacaoAutomatica"
+              type="checkbox"
+            >
+            <label class="form-check-label" for="importacaoAutomatica">
+              Habilitar importacao automatica
+            </label>
+          </div>
+          <div class="form-text">Quando habilitado, os valores serao importados automaticamente da fonte configurada</div>
+        </div>
+
+        @if (showUrlFonte) {
+          <div class="col-md-8">
+            <label class="form-label" for="urlFonte">URL da Fonte <span class="text-danger">*</span></label>
+            <input
+              [class.is-invalid]="isInvalid('urlFonte')"
+              class="form-control font-monospace"
+              formControlName="urlFonte"
+              id="urlFonte"
+              maxlength="500"
+              placeholder="https://..."
+              type="url"
+            >
+            @if (isInvalid('urlFonte')) {
+              <div class="invalid-feedback">
+                @if (hasError('urlFonte', 'required')) {
+                  URL da fonte e obrigatoria quando importacao automatica esta habilitada
+                }
+                @if (hasError('urlFonte', 'maxlength')) {
+                  URL deve ter no maximo 500 caracteres
+                }
+              </div>
+            }
+            <div class="form-text">URL para consulta/importacao dos valores</div>
+          </div>
+        }
+
+        <!-- Section: Status (only in edit mode) -->
+        @if (indexadorId()) {
+          <div class="col-12 mt-4">
+            <h6 class="form-section-title">Status</h6>
+          </div>
+
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input
+                class="form-check-input"
+                formControlName="ativo"
+                id="ativo"
+                type="checkbox"
+              >
+              <label class="form-check-label" for="ativo">
+                Indexador ativo
+              </label>
+            </div>
+            <div class="form-text">Indexadores inativos nao aparecem nas selecoes e nao recebem atualizacoes automaticas</div>
+          </div>
+        }
+
+        <!-- Loading Status Message -->
+        <div class="col-12 mt-4">
+          @if (submitStatus() === 'loading') {
+            <div class="alert alert-info d-flex align-items-center" role="status">
+              <div aria-hidden="true" class="spinner-border spinner-border-sm me-2 text-primary"></div>
+              <div>
+                {{ indexadorId() ? 'Atualizando' : 'Criando' }} indexador...
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="col-12">
+          <div class="d-flex gap-2 align-items-center">
+            <button [disabled]="isSubmitting()" class="btn btn-primary position-relative" type="submit">
+              @if (isSubmitting()) {
+                <span aria-hidden="true" class="spinner-border spinner-border-sm me-1"></span>
+              }
+              Salvar
+            </button>
+            <button (click)="onCancel()" class="btn btn-secondary" type="button">
+              Cancelar
+            </button>
+            @if (!indexadorId()) {
+              <button (click)="clearForm()" [disabled]="isSubmitting()" class="btn btn-outline-secondary" type="button">
+                Limpar
+              </button>
+            }
+          </div>
+        </div>
+      </form>
+
+      <!-- ARIA Live Region for Screen Reader Announcements -->
+      <div aria-atomic="true" aria-live="polite" class="visually-hidden" role="status">
+        @if (submitStatus() === 'loading') {
+          {{ indexadorId() ? 'Atualizando' : 'Criando' }} indexador, por favor aguarde...
+        }
+        @if (submitStatus() === 'success') {
+          Indexador {{ indexadorId() ? 'atualizado' : 'criado' }} com sucesso. Redirecionando para lista...
+        }
+        @if (submitStatus() === 'error') {
+          Erro: {{ errorMessage() }}
+        }
+      </div>
+
+      <!-- Success Message -->
+      @if (submitStatus() === 'success') {
+        <div class="alert alert-success d-flex align-items-center mb-3 mt-3" role="alert">
+          <i aria-hidden="true" class="bi bi-check-circle-fill fs-4 me-2"></i>
+          <div>
+            <strong>Sucesso!</strong> Indexador {{ indexadorId() ? 'atualizado' : 'criado' }} com sucesso.
+            Redirecionando para lista...
+          </div>
+        </div>
+      }
+
+      <!-- Error Message -->
+      @if (submitStatus() === 'error') {
+        <div class="alert alert-danger d-flex align-items-start mb-3 mt-3" role="alert">
+          <i aria-hidden="true" class="bi bi-exclamation-triangle-fill fs-4 me-2 flex-shrink-0"></i>
+          <div class="flex-grow-1">
+            <strong>Erro!</strong> {{ errorMessage() }}
+            <div class="mt-2">
+              <button (click)="retrySubmit()" class="btn btn-sm btn-outline-danger" type="button">
+                <i aria-hidden="true" class="bi bi-arrow-clockwise me-1"></i>
+                Tentar Novamente
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+</main>

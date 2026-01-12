@@ -1,0 +1,273 @@
+@if (indexador(); as idx) {
+  <app-page-header [title]="idx.codigo + ' - ' + idx.nome">
+    <a
+      class="btn btn-primary"
+      [routerLink]="['/cadastro/indexadores', idx.id, 'edit']"
+    >
+      <i class="bi bi-pencil me-1"></i>
+      Editar
+    </a>
+  </app-page-header>
+
+  <main class="container-data">
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-2">
+        <div class="summary-card">
+          <span class="summary-card__label">Tipo</span>
+          <span class="summary-card__value" [style.color]="getTipoColor(idx)">
+            <i class="bi {{ getTipoIcon(idx) }} me-1"></i>
+            {{ idx.tipoDescricao }}
+          </span>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="summary-card">
+          <span class="summary-card__label">Periodicidade</span>
+          <span class="summary-card__value">{{ idx.periodicidadeDescricao }}</span>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="summary-card">
+          <span class="summary-card__label">Fonte</span>
+          <span class="summary-card__value">{{ idx.fonte || '—' }}</span>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="summary-card">
+          <span class="summary-card__label">Fator Acumulado</span>
+          <span class="summary-card__value font-monospace">
+            {{ idx.fatorAcumulado !== null ? (idx.fatorAcumulado | number: '1.9-9') : '—' }}
+          </span>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="summary-card">
+          <span class="summary-card__label">Data Base</span>
+          <span class="summary-card__value font-monospace">
+            {{ idx.dataBase ? (idx.dataBase | date: 'dd/MM/yyyy') : '—' }}
+          </span>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="summary-card">
+          <span class="summary-card__label">Status</span>
+          <span class="summary-card__value">
+            @if (idx.ativo) {
+              <span class="badge bg-success">Ativo</span>
+            } @else {
+              <span class="badge bg-secondary">Inativo</span>
+            }
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="card bg-body-tertiary border-0 shadow-sm rounded-4">
+      <div class="card-header bg-transparent border-bottom p-0">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav nav-tabs card-header-tabs px-3">
+          <li ngbNavItem="historico">
+            <a ngbNavLink>
+              <i class="bi bi-clock-history me-1"></i>
+              Historico de Valores
+            </a>
+            <ng-template ngbNavContent>
+              <!-- History Tab Content -->
+              <div class="p-3">
+                <!-- Action Bar -->
+                <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+                  <button class="btn btn-primary btn-sm" (click)="openAddValueModal()">
+                    <i class="bi bi-plus-lg me-1"></i>
+                    Adicionar Valor
+                  </button>
+                  <button class="btn btn-outline-secondary btn-sm" (click)="openImportModal()">
+                    <i class="bi bi-upload me-1"></i>
+                    Importar
+                  </button>
+                  <button class="btn btn-outline-secondary btn-sm" (click)="exportCsv()">
+                    <i class="bi bi-download me-1"></i>
+                    Exportar CSV
+                  </button>
+                  <button class="btn btn-outline-secondary btn-sm" (click)="refreshHistory()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>
+                    Atualizar
+                  </button>
+
+                  <div class="ms-auto d-flex gap-2 align-items-center">
+                    <!-- Date Range Filters -->
+                    <div class="input-group input-group-sm" style="width: auto;">
+                      <span class="input-group-text">De</span>
+                      <input
+                        class="form-control"
+                        placeholder="dd/mm/aaaa"
+                        name="dataInicio"
+                        ngbDatepicker
+                        #dpInicio="ngbDatepicker"
+                        [ngModel]="dataInicioFilter()"
+                        (ngModelChange)="dataInicioFilter.set($event); onDateFilterChange()"
+                        (click)="dpInicio.toggle()"
+                        style="width: 7rem;"
+                      />
+                    </div>
+                    <div class="input-group input-group-sm" style="width: auto;">
+                      <span class="input-group-text">Ate</span>
+                      <input
+                        class="form-control"
+                        placeholder="dd/mm/aaaa"
+                        name="dataFim"
+                        ngbDatepicker
+                        #dpFim="ngbDatepicker"
+                        [ngModel]="dataFimFilter()"
+                        (ngModelChange)="dataFimFilter.set($event); onDateFilterChange()"
+                        (click)="dpFim.toggle()"
+                        style="width: 7rem;"
+                      />
+                    </div>
+                    @if (dataInicioFilter() || dataFimFilter()) {
+                      <button
+                        class="btn btn-sm btn-outline-secondary"
+                        (click)="clearDateFilters()"
+                        title="Limpar filtros de data"
+                      >
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    }
+                  </div>
+                </div>
+
+                <!-- History Grid -->
+                <ag-grid-angular
+                  class="ag-theme-alpine-dark history-grid"
+                  [columnDefs]="columnDefs"
+                  [gridOptions]="gridOptions"
+                  (gridReady)="onGridReady($event)"
+                />
+
+                <!-- Status Bar -->
+                <div class="status-bar d-flex justify-content-between align-items-center mt-2 px-2 py-1">
+                  <span class="text-muted small">{{ statsDisplay() }}</span>
+                  @if (paginationStats().isLoading) {
+                    <span class="spinner-border spinner-border-sm text-primary"></span>
+                  }
+                </div>
+              </div>
+            </ng-template>
+          </li>
+
+          <li ngbNavItem="grafico">
+            <a ngbNavLink>
+              <i class="bi bi-graph-up me-1"></i>
+              Grafico
+            </a>
+            <ng-template ngbNavContent>
+              <app-chart-tab [indexador]="idx" />
+            </ng-template>
+          </li>
+
+          <li ngbNavItem="configuracao">
+            <a ngbNavLink>
+              <i class="bi bi-gear me-1"></i>
+              Configuracao
+            </a>
+            <ng-template ngbNavContent>
+              <!-- Configuration Tab Content -->
+              <div class="p-4">
+                <dl class="row mb-0">
+                  <dt class="col-sm-3">Codigo:</dt>
+                  <dd class="col-sm-9 font-monospace">{{ idx.codigo }}</dd>
+
+                  <dt class="col-sm-3">Nome:</dt>
+                  <dd class="col-sm-9">{{ idx.nome }}</dd>
+
+                  <dt class="col-sm-3">Tipo:</dt>
+                  <dd class="col-sm-9">
+                    <span [style.color]="getTipoColor(idx)">
+                      <i class="bi {{ getTipoIcon(idx) }} me-1"></i>
+                      {{ idx.tipoDescricao }}
+                    </span>
+                  </dd>
+
+                  <dt class="col-sm-3">Periodicidade:</dt>
+                  <dd class="col-sm-9">{{ idx.periodicidadeDescricao }}</dd>
+
+                  <dt class="col-sm-3">Fonte:</dt>
+                  <dd class="col-sm-9">{{ idx.fonte || '—' }}</dd>
+
+                  <dt class="col-sm-3">Data Base:</dt>
+                  <dd class="col-sm-9 font-monospace">
+                    {{ idx.dataBase ? (idx.dataBase | date: 'dd/MM/yyyy') : '—' }}
+                  </dd>
+
+                  <dt class="col-sm-3">Fator Acumulado:</dt>
+                  <dd class="col-sm-9 font-monospace">
+                    {{ idx.fatorAcumulado !== null ? (idx.fatorAcumulado | number: '1.9-12') : '—' }}
+                  </dd>
+
+                  <dt class="col-sm-3">Importacao Automatica:</dt>
+                  <dd class="col-sm-9">
+                    @if (idx.importacaoAutomatica) {
+                      <span class="text-success"><i class="bi bi-check-circle me-1"></i>Habilitada</span>
+                    } @else {
+                      <span class="text-muted"><i class="bi bi-x-circle me-1"></i>Desabilitada</span>
+                    }
+                  </dd>
+
+                  @if (idx.urlFonte) {
+                    <dt class="col-sm-3">URL Fonte:</dt>
+                    <dd class="col-sm-9">
+                      <a [href]="idx.urlFonte" target="_blank" rel="noopener" class="text-break font-monospace small">
+                        {{ idx.urlFonte }}
+                        <i class="bi bi-box-arrow-up-right ms-1"></i>
+                      </a>
+                    </dd>
+                  }
+
+                  <dt class="col-sm-3">Status:</dt>
+                  <dd class="col-sm-9">
+                    @if (idx.ativo) {
+                      <span class="badge bg-success">Ativo</span>
+                    } @else {
+                      <span class="badge bg-secondary">Inativo</span>
+                    }
+                  </dd>
+
+                  <dt class="col-sm-3 border-top pt-3 mt-3">Criado em:</dt>
+                  <dd class="col-sm-9 border-top pt-3 mt-3">{{ idx.createdAt | date: 'dd/MM/yyyy HH:mm' }}</dd>
+
+                  @if (idx.updatedAt) {
+                    <dt class="col-sm-3">Atualizado em:</dt>
+                    <dd class="col-sm-9">{{ idx.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</dd>
+                  }
+                </dl>
+              </div>
+            </ng-template>
+          </li>
+        </ul>
+      </div>
+      <div class="card-body p-0">
+        <div [ngbNavOutlet]="nav"></div>
+      </div>
+    </div>
+  </main>
+} @else if (isLoading()) {
+  <app-page-header title="Carregando..."></app-page-header>
+  <main class="container-data">
+    <div class="d-flex justify-content-center align-items-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+    </div>
+  </main>
+} @else {
+  <app-page-header title="Indexador nao encontrado"></app-page-header>
+  <main class="container-data">
+    <div class="alert alert-warning d-flex align-items-center" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <div>
+        Indexador nao encontrado ou ocorreu um erro ao carregar.
+        <a routerLink="/cadastro/indexadores" class="alert-link ms-2">Voltar para lista</a>
+      </div>
+    </div>
+  </main>
+}

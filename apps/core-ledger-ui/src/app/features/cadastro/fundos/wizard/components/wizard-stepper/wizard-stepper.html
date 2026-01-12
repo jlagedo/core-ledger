@@ -1,0 +1,51 @@
+<div class="wizard-stepper">
+  <!-- Header: System Status Bar -->
+  <div class="wizard-stepper__header">
+    <div class="wizard-stepper__title font-monospace">CADASTRO DE FUNDO</div>
+    <div class="wizard-stepper__progress font-monospace">
+      <span class="wizard-stepper__progress-bar">{{ progressBar() }}</span>
+      <span class="wizard-stepper__progress-percent">{{ progressPercentage() }}%</span>
+    </div>
+  </div>
+
+  <!-- Step Matrix Grid -->
+  <div class="wizard-stepper__grid">
+    @for (step of steps(); track step.id) {
+      <div
+        [class]="getStepClass(step.id)"
+        [attr.data-step]="step.id.toString().padStart(2, '0')"
+        [attr.aria-current]="step.id === currentStep() ? 'step' : null"
+        [attr.aria-label]="step.label + ': ' + step.descricao"
+        (click)="onStepClick(step.id)"
+        (keydown.enter)="onStepClick(step.id)"
+        (keydown.space)="onStepClick(step.id)"
+        role="button"
+        [attr.tabindex]="isStepClickable(step.id) ? 0 : -1"
+      >
+        <!-- Directional Arrow (current step only) -->
+        <div class="wizard-step__arrow" aria-hidden="true">▸</div>
+
+        <!-- Short Label -->
+        <div class="wizard-step__label font-monospace">{{ step.shortLabel }}</div>
+
+        <!-- Status Indicator -->
+        <div class="wizard-step__status font-monospace" aria-hidden="true">
+          {{ getStatusIndicator(step.id) }}
+        </div>
+
+        <!-- Tooltip: Full Step Name -->
+        <div class="wizard-step__tooltip" role="tooltip">
+          <span class="wizard-step__tooltip-number font-monospace">{{ step.id.toString().padStart(2, '0') }}</span>
+          <span class="wizard-step__tooltip-name">{{ step.label }}</span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Mobile: Current Step Info -->
+  <div class="wizard-stepper__current-step" aria-live="polite">
+    <span class="font-monospace">{{ currentStep().toString().padStart(2, '0') }}/{{ steps().length.toString().padStart(2, '0') }}</span>
+    &nbsp;·&nbsp;
+    {{ steps()[currentStep() - 1]?.label }}
+  </div>
+</div>

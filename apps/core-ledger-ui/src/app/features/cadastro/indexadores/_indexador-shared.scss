@@ -1,0 +1,19 @@
+// Shared Indexador Modal Styles
+// Used by: add-value-modal, import-modal, delete-value-modal
+
+.indexador-info {
+  padding: 0.75rem 1rem;
+  background: var(--amber-8);
+  border-left: 3px solid var(--bs-primary);
+  border-radius: 0.25rem;
+}
+
+.indexador-codigo {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--bs-primary);
+}
+
+.indexador-nome {
+  font-size: 0.875rem;
+}

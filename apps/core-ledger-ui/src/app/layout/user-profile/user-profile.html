@@ -1,0 +1,54 @@
+<div [class.justify-content-center]="isCollapsed()"
+     [class.justify-content-between]="!isCollapsed()"
+     [class.user-profile--collapsed]="isCollapsed()"
+     class="d-flex align-items-center user-profile">
+
+  <!-- Avatar do Usuário com Menu Suspenso -->
+  <div ngbDropdown container="body" placement="top-start">
+    <button ngbDropdownToggle
+            [attr.aria-label]="'Perfil do usuário'"
+            class="user-profile__avatar-btn">
+      @if (userProfile()?.picture) {
+        <img [src]="userProfile()!.picture"
+             [alt]="userProfile()!.name"
+             class="user-profile__avatar"
+             referrerpolicy="no-referrer" />
+      } @else {
+        <i class="bi bi-person-circle user-profile__icon"></i>
+      }
+    </button>
+
+    <div ngbDropdownMenu class="user-profile__dropdown">
+      @if (userProfile()) {
+        <div class="user-profile__info">
+          <div class="user-profile__name">{{ displayName() }}</div>
+          <small class="user-profile__email d-block">{{ userProfile()!.email }}</small>
+          @if (currentUser()) {
+            <div class="user-profile__meta">
+              <small class="user-profile__id">ID: {{ currentUser()!.id }}</small>
+              <div class="user-profile__login">
+                Último acesso: <span class="font-monospace text-nowrap">{{ currentUser()!.lastLoginAt | date: 'MM/dd/yyyy, hh:mm a' }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+      <button ngbDropdownItem routerLink="/profile">
+        <i class="bi bi-person me-2"></i>Ver Perfil
+      </button>
+      <button ngbDropdownItem (click)="logout()">
+        <i class="bi bi-box-arrow-right me-2"></i>Sair
+      </button>
+    </div>
+  </div>
+
+  <!-- Alternador de Tema (oculto quando recolhido) -->
+  @if (!isCollapsed()) {
+    <button (click)="toggleTheme()"
+            [attr.aria-label]="isDarkMode() ? 'Mudar para modo claro' : 'Mudar para modo escuro'"
+            class="user-profile__theme-toggle"
+            type="button">
+      <i [class]="isDarkMode() ? 'bi bi-sun-fill' : 'bi bi-moon-fill'"></i>
+    </button>
+  }
+</div>

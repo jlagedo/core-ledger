@@ -1,0 +1,546 @@
+// ============================================================
+// PAGE HEADER — Bloomberg Terminal Command Bar
+//
+// Top-level navigation and action bar for all pages.
+// Matches the terminal-panel aesthetic from dashboard.
+// ============================================================
+
+@keyframes header-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-ready {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+// ============================================================
+// HOST CONTAINER
+// ============================================================
+
+:host {
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+  margin-bottom: 1rem;
+}
+
+// ============================================================
+// HEADER WRAPPER
+// Uses shared --header-height for alignment with sidenav
+// ============================================================
+
+.terminal-header {
+  --grid-line: var(--bs-border-color);
+  --terminal-glow: var(--accent-amber, #FFA028);
+
+  background: var(--bs-body-bg);
+  border-bottom: 1px solid var(--grid-line);
+  animation: header-slide-in 0.3s ease-out;
+  position: relative;
+  // Ensure total height matches sidenav header for visual alignment
+  min-height: var(--header-height, 67px);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+
+  // Left accent line (connects with sidenav header border)
+  border-left: 2px solid transparent;
+  border-image: linear-gradient(
+    180deg,
+    var(--terminal-glow) 0%,
+    var(--amber-30) 50%,
+    transparent 100%
+  ) 1;
+
+  // Subtle top accent line
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      var(--terminal-glow) 0%,
+      transparent 30%,
+      transparent 70%,
+      var(--terminal-glow) 100%
+    );
+    opacity: 0.4;
+  }
+
+  // Grid pattern overlay (subtle)
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.03;
+    pointer-events: none;
+  }
+}
+
+// ============================================================
+// BREADCRUMB ROW
+// ============================================================
+
+.terminal-header__breadcrumb {
+  padding: 0.375rem 1rem;
+  border-bottom: 1px solid var(--grid-line);
+  background: var(--bs-tertiary-bg);
+  position: relative;
+  z-index: 1;
+
+  // Terminal path style
+  :host ::ng-deep {
+    .breadcrumb {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      font-size: 0.625rem;
+      letter-spacing: 0.02em;
+    }
+
+    .breadcrumb-item {
+      color: var(--bs-tertiary-color);
+      font-weight: 500;
+
+      &::before {
+        content: '/' !important;
+        color: var(--bs-tertiary-color);
+        padding-right: 0.375rem;
+        font-weight: 400;
+      }
+
+      &:first-child::before {
+        content: '>' !important;
+        color: var(--terminal-glow);
+        font-weight: 700;
+      }
+
+      a {
+        color: var(--bs-secondary-color);
+        text-decoration: none;
+        transition: color 0.2s ease;
+
+        &:hover {
+          color: var(--terminal-glow);
+        }
+      }
+
+      &.active {
+        color: var(--bs-body-color);
+      }
+    }
+  }
+}
+
+// ============================================================
+// MAIN HEADER ROW
+// ============================================================
+
+.terminal-header__main {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  gap: 1rem;
+  position: relative;
+  z-index: 1;
+  flex: 1; // Fill remaining height after breadcrumb
+}
+
+// ============================================================
+// TITLE SECTION
+// ============================================================
+
+.terminal-header__title-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.terminal-header__indicator {
+  width: 8px;
+  height: 8px;
+  background: var(--terminal-glow);
+  border-radius: 2px;
+  animation: pulse-ready 2s ease-in-out infinite;
+  box-shadow: 0 0 8px var(--terminal-glow);
+  flex-shrink: 0;
+}
+
+.terminal-header__title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--bs-emphasis-color);
+  margin: 0;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ============================================================
+// ACTIONS SECTION
+// ============================================================
+
+.terminal-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+
+  // Style projected content buttons
+  :host ::ng-deep {
+    // All buttons get terminal styling
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.375rem 0.75rem;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-radius: 2px;
+      transition: all 0.2s ease;
+      position: relative;
+
+      i {
+        font-size: 0.8125rem;
+        line-height: 1;
+
+        // Ensure spacing when followed by text
+        &:first-child:not(:last-child) {
+          margin-right: 0.375rem;
+        }
+      }
+
+      span {
+        // Ensure spacing when preceded by icon
+        &:not(:first-child) {
+          margin-left: 0.125rem;
+        }
+      }
+
+      // Remove Bootstrap's default focus ring
+      &:focus {
+        box-shadow: none;
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--terminal-glow);
+        outline-offset: 1px;
+      }
+    }
+
+    // Secondary buttons (Filters, Export, etc.)
+    .btn-secondary {
+      background: var(--bs-tertiary-bg);
+      border: 1px solid var(--grid-line);
+      color: var(--bs-secondary-color);
+
+      &:hover {
+        background: var(--bs-secondary-bg);
+        border-color: var(--terminal-glow);
+        color: var(--bs-emphasis-color);
+        transform: translateY(-1px);
+      }
+
+      &:active {
+        transform: translateY(0);
+        background: var(--bs-tertiary-bg);
+      }
+    }
+
+    // Primary button (New Fund, New Account, etc.)
+    .btn-primary {
+      background: var(--terminal-glow);
+      border: 1px solid var(--terminal-glow);
+      color: #000;
+      font-weight: 700;
+
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.15) 0%,
+          transparent 50%
+        );
+        border-radius: 1px;
+        pointer-events: none;
+      }
+
+      &:hover {
+        background: var(--accent-yellow, #fb8b1e);
+        border-color: var(--accent-yellow, #fb8b1e);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px var(--amber-30);
+      }
+
+      &:active {
+        transform: translateY(0);
+        box-shadow: none;
+      }
+
+      i {
+        color: #000;
+      }
+    }
+
+    // Outline variants
+    .btn-outline-secondary {
+      background: transparent;
+      border: 1px solid var(--grid-line);
+      color: var(--bs-secondary-color);
+
+      &:hover {
+        background: var(--bs-tertiary-bg);
+        border-color: var(--terminal-glow);
+        color: var(--bs-emphasis-color);
+      }
+    }
+
+    .btn-outline-primary {
+      background: transparent;
+      border: 1px solid var(--terminal-glow);
+      color: var(--terminal-glow);
+
+      &:hover {
+        background: var(--amber-10);
+        color: var(--terminal-glow);
+      }
+    }
+
+    // Danger variant
+    .btn-danger {
+      background: var(--accent-coral, #ff433d);
+      border-color: var(--accent-coral, #ff433d);
+      color: #fff;
+
+      &:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+      }
+    }
+
+    // Info variant
+    .btn-info {
+      background: var(--accent-blue, #0068ff);
+      border-color: var(--accent-blue, #0068ff);
+      color: #fff;
+
+      &:hover {
+        filter: brightness(1.15);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 104, 255, 0.3);
+      }
+
+      &:active {
+        transform: translateY(0);
+        box-shadow: none;
+      }
+    }
+
+    // Success variant
+    .btn-success {
+      background: var(--accent-teal, #4af6c3);
+      border-color: var(--accent-teal, #4af6c3);
+      color: #000;
+
+      &:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(74, 246, 195, 0.3);
+      }
+    }
+
+    // Warning variant
+    .btn-warning {
+      background: var(--accent-yellow, #fb8b1e);
+      border-color: var(--accent-yellow, #fb8b1e);
+      color: #000;
+
+      &:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+      }
+    }
+
+    // Small button variant
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.625rem;
+    }
+
+    // Icon-only buttons
+    .btn:not(:has(span)):not(:has(.btn-text)) {
+      padding: 0.375rem 0.5rem;
+    }
+
+    // Button groups
+    .btn-group {
+      gap: 0;
+
+      .btn {
+        border-radius: 0;
+
+        &:first-child {
+          border-radius: 2px 0 0 2px;
+        }
+
+        &:last-child {
+          border-radius: 0 2px 2px 0;
+        }
+      }
+    }
+  }
+}
+
+// ============================================================
+// DARK MODE ENHANCEMENTS
+// ============================================================
+
+[data-bs-theme="dark"] {
+  .terminal-header {
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(8px);
+
+    &::before {
+      opacity: 0.6;
+    }
+
+    &::after {
+      opacity: 0.05;
+    }
+  }
+
+  .terminal-header__breadcrumb {
+    background: rgba(26, 26, 26, 0.8);
+  }
+
+  :host ::ng-deep {
+    .btn-primary:hover {
+      box-shadow: 0 4px 16px var(--amber-40);
+    }
+
+    .btn-secondary:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+  }
+}
+
+// ============================================================
+// LIGHT MODE ADJUSTMENTS
+// ============================================================
+
+[data-bs-theme="light"] {
+  .terminal-header {
+    --terminal-glow: #B45309;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+
+    &::before {
+      opacity: 0.5;
+    }
+  }
+
+  .terminal-header__indicator {
+    background: var(--terminal-glow);
+    box-shadow: 0 0 6px var(--terminal-glow);
+  }
+
+  :host ::ng-deep {
+    .btn-primary {
+      background: var(--terminal-glow);
+      border-color: var(--terminal-glow);
+
+      &:hover {
+        background: #A44207;
+        border-color: #A44207;
+        box-shadow: 0 4px 12px rgba(180, 83, 9, 0.25);
+      }
+    }
+  }
+}
+
+// ============================================================
+// RESPONSIVE ADJUSTMENTS
+// ============================================================
+
+@media (max-width: 768px) {
+  .terminal-header__main {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .terminal-header__title-section {
+    flex: 1 1 100%;
+    order: 1;
+  }
+
+  .terminal-header__actions {
+    flex: 1 1 100%;
+    order: 2;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+
+    :host ::ng-deep {
+      .btn {
+        flex: 0 1 auto;
+      }
+
+      // Hide button text on mobile, show only icon
+      .btn-secondary span,
+      .btn-secondary:not(:has(i)) {
+        display: none;
+      }
+
+      .btn-secondary:has(i) {
+        padding: 0.375rem 0.5rem;
+      }
+
+      // Keep primary button text visible
+      .btn-primary span {
+        display: inline;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .terminal-header__breadcrumb {
+    padding: 0.25rem 0.75rem;
+  }
+
+  .terminal-header__main {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .terminal-header__title {
+    font-size: 0.875rem;
+  }
+
+  :host ::ng-deep {
+    .btn {
+      font-size: 0.625rem;
+      padding: 0.3125rem 0.5rem;
+    }
+  }
+}

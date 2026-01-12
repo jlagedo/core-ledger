@@ -1,0 +1,83 @@
+// Import Modal — File upload and preview styling
+@use '../indexador-shared';
+
+// Nav pills styling
+.nav-pills {
+  gap: 0.5rem;
+
+  .nav-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border-radius: 0.375rem;
+
+    &:not(.active) {
+      color: var(--bs-body-color);
+      background: rgba(255, 255, 255, 0.05);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+    }
+  }
+}
+
+// Drop zone styling
+.drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  border: 2px dashed var(--bs-border-color);
+  border-radius: 0.5rem;
+  text-align: center;
+  transition: all 0.2s ease;
+
+  &.drag-over {
+    border-color: var(--bs-primary);
+    background: var(--amber-8);
+  }
+
+  &:hover {
+    border-color: var(--bs-secondary);
+  }
+}
+
+// Format specification
+.format-spec {
+  code {
+    font-size: 0.75rem;
+    line-height: 1.5;
+    background: var(--bs-dark) !important;
+  }
+}
+
+// Selected file display
+.selected-file {
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.5rem;
+}
+
+// Preview table
+.preview-section {
+  .table {
+    font-size: 0.75rem;
+    margin-bottom: 0;
+
+    th {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    td {
+      white-space: nowrap;
+    }
+  }
+}
+
+// API import section
+.api-import {
+  min-height: 10rem;
+}

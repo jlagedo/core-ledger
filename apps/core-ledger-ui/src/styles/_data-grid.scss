@@ -1,0 +1,1460 @@
+// ============================================================
+// DATA GRID STYLES — Bloomberg Terminal List Components
+//
+// Shared styles for AG Grid lists with filter bars, preset bars,
+// status badges, and action buttons. Used by cadastro/calendario,
+// cadastro/indexadores, and other data-dense list views.
+//
+// Structure:
+// 1. AG Grid Refinements (host, cells, headers)
+// 2. Preset Bar (quick filter presets)
+// 3. Filter Bar (search, dropdowns)
+// 4. Filter Pills (active filter display)
+// 5. Status Badges (cell renderer)
+// 6. Grid Status Bar (pagination info)
+// 7. Row Action Buttons
+// 8. Date Picker (NgbDatepicker integration)
+// 9. Type Badges (colored type indicators)
+// ============================================================
+
+@use "variables" as *;
+
+// ============================================================
+// 1. AG GRID REFINEMENTS — Component-level overrides
+// ============================================================
+
+// Note: These styles must be applied via ::ng-deep in component SCSS
+// as they target AG Grid's internal DOM structure.
+
+// Base component host
+@mixin ag-grid-host {
+  display: block;
+}
+
+// Grid container styling
+@mixin ag-grid-container {
+  display: block;
+  border-radius: 0;
+  transition: background-color 0.2s ease-in-out;
+}
+
+// AG Grid cell and header refinements
+@mixin ag-grid-refinements {
+  // Header cell refinements
+  .ag-header-cell-label {
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    font-size: 0.6875rem;
+  }
+
+  // Cell typography
+  .ag-cell {
+    display: flex;
+    align-items: center;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+  }
+
+  // Text alignment classes
+  .ag-cell.text-center,
+  .ag-header-cell.text-center .ag-header-cell-label {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .ag-cell.text-end,
+  .ag-header-cell.text-end .ag-header-cell-label {
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  // Numeric columns - right-aligned with monospace
+  .ag-cell.ag-right-aligned-cell {
+    font-feature-settings: 'tnum' 1;
+    justify-content: flex-end;
+  }
+
+  // Row hover enhancement
+  .ag-row-hover {
+    transition: background-color 0.1s ease-in-out;
+  }
+
+  // Loading overlay styling
+  .ag-overlay-loading-wrapper {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+  }
+
+  // No rows overlay
+  .ag-overlay-no-rows-wrapper {
+    color: var(--bs-secondary-color);
+  }
+
+  // Scrollbar refinements for webkit browsers
+  .ag-body-viewport::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .ag-body-viewport::-webkit-scrollbar-track {
+    background: var(--bs-tertiary-bg);
+    border-radius: 4px;
+  }
+
+  .ag-body-viewport::-webkit-scrollbar-thumb {
+    background: var(--bs-secondary-color);
+    border-radius: 4px;
+
+    &:hover {
+      background: var(--bs-body-color);
+    }
+  }
+
+  // Sort indicator refinement
+  .ag-sort-indicator-icon {
+    opacity: 0.8;
+  }
+
+  // Column resize handle
+  .ag-header-cell-resize {
+    opacity: 0;
+    transition: opacity 0.15s ease-in-out;
+  }
+
+  .ag-header-cell:hover .ag-header-cell-resize {
+    opacity: 1;
+  }
+}
+
+// Dark mode AG Grid enhancements
+@mixin ag-grid-dark-mode {
+  // Subtle amber glow on header
+  .ag-header {
+    border-bottom: 1px solid var(--terminal-glow-muted);
+  }
+
+  // Selected row amber accent
+  .ag-row-selected {
+    border-left: 2px solid var(--terminal-glow);
+  }
+
+  // Loading spinner color
+  .ag-overlay-loading-center {
+    color: var(--terminal-glow);
+  }
+}
+
+// Light mode AG Grid enhancements
+@mixin ag-grid-light-mode {
+  // Warm border on header
+  .ag-header {
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+
+  // Selected row amber accent
+  .ag-row-selected {
+    border-left: 2px solid var(--terminal-glow);
+  }
+}
+
+// ============================================================
+// 2. PRESET BAR — Bloomberg Function Keys Style
+// ============================================================
+
+.preset-bar {
+  --preset-bg: var(--bs-tertiary-bg);
+  --preset-border: var(--bs-border-color);
+  --preset-text: var(--bs-secondary-color);
+  --preset-text-muted: var(--bs-tertiary-color);
+  --preset-accent: var(--terminal-glow);
+  --preset-hover: var(--terminal-glow-bg);
+  --preset-active-bg: var(--terminal-glow-subtle);
+  --preset-active-border: var(--terminal-glow-muted);
+
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--preset-bg);
+  border-bottom: 1px solid var(--preset-border);
+  font-family: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+}
+
+.preset-bar__label {
+  color: var(--preset-text-muted);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+  padding: 0.25rem 0.5rem;
+  background: rgba(128, 128, 128, 0.1);
+  border-radius: 2px;
+}
+
+.preset-bar__chips {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.preset-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.625rem;
+  background: transparent;
+  border: 1px solid var(--preset-border);
+  border-radius: 3px;
+  color: var(--preset-text);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--preset-hover);
+    border-color: var(--preset-accent);
+    color: var(--preset-accent);
+  }
+
+  &--active {
+    background: var(--preset-active-bg);
+    border-color: var(--preset-active-border);
+    color: var(--preset-accent);
+    font-weight: 600;
+    box-shadow: 0 0 8px var(--terminal-glow-subtle);
+
+    .preset-chip__icon {
+      color: var(--preset-accent);
+    }
+  }
+}
+
+.preset-chip__icon {
+  font-size: 0.75rem;
+  color: var(--preset-text-muted);
+  transition: color 0.15s ease-out;
+}
+
+.preset-chip__label {
+  line-height: 1;
+}
+
+.preset-bar__clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--preset-text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba(220, 53, 69, 0.15);
+    border-color: rgba(220, 53, 69, 0.3);
+    color: var(--bs-danger);
+  }
+}
+
+// Dark mode preset bar
+[data-bs-theme="dark"] {
+  .preset-bar {
+    --preset-bg: var(--surface-muted);
+    --preset-border: var(--terminal-glow-subtle);
+    --preset-hover: var(--terminal-glow-bg);
+    --preset-active-bg: var(--terminal-glow-subtle);
+    --preset-active-border: var(--terminal-glow-muted);
+    backdrop-filter: blur(4px);
+  }
+
+  .preset-bar__label {
+    background: var(--terminal-glow-bg);
+    color: var(--preset-accent);
+  }
+
+  .preset-chip {
+    border-color: var(--terminal-glow-subtle);
+
+    &--active {
+      box-shadow: 0 0 12px var(--terminal-glow-subtle);
+    }
+  }
+}
+
+// Light mode preset bar
+[data-bs-theme="light"] {
+  .preset-bar {
+    --preset-bg: var(--surface-muted);
+    --preset-border: var(--bs-border-color);
+    --preset-accent: var(--terminal-glow);
+    --preset-hover: var(--terminal-glow-bg);
+    --preset-active-bg: var(--terminal-glow-subtle);
+    --preset-active-border: var(--terminal-glow-muted);
+  }
+
+  .preset-bar__label {
+    background: var(--terminal-glow-bg);
+    color: var(--terminal-glow);
+  }
+
+  .preset-chip {
+    border-color: var(--bs-border-color);
+
+    &:hover {
+      border-color: var(--terminal-glow);
+      color: var(--terminal-glow);
+    }
+
+    &--active {
+      box-shadow: 0 0 8px var(--terminal-glow-subtle);
+    }
+  }
+
+  .preset-chip__icon {
+    color: var(--bs-secondary-color);
+  }
+}
+
+// Responsive preset bar
+@media (max-width: 768px) {
+  .preset-bar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .preset-bar__label {
+    flex-basis: auto;
+  }
+
+  .preset-bar__chips {
+    flex: 1 1 100%;
+    order: 1;
+  }
+
+  .preset-chip__label {
+    display: none;
+  }
+
+  .preset-chip {
+    padding: 0.375rem;
+  }
+
+  .preset-chip__icon {
+    font-size: 0.875rem;
+  }
+}
+
+// ============================================================
+// 3. FILTER BAR — Bloomberg Terminal Quick Filters
+// ============================================================
+
+.filter-bar {
+  --filter-bg: var(--bs-body-bg);
+  --filter-border: var(--bs-border-color);
+  --filter-text: var(--bs-body-color);
+  --filter-text-muted: var(--bs-secondary-color);
+  --filter-accent: var(--terminal-glow);
+  --filter-hover: var(--bs-tertiary-bg);
+  --filter-active-bg: var(--terminal-glow-subtle);
+  --filter-active-border: var(--terminal-glow-muted);
+
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  background: var(--filter-bg);
+  border-bottom: 1px solid var(--filter-border);
+  font-family: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+  font-size: 0.75rem;
+  min-height: 48px;
+}
+
+// Search Input
+.filter-bar__search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+  min-width: 180px;
+  max-width: 240px;
+  padding: 0.375rem 0.625rem;
+  background: var(--bs-tertiary-bg);
+  border: 1px solid transparent;
+  border-radius: 3px;
+  transition: all 0.15s ease-out;
+
+  &:focus-within {
+    border-color: var(--filter-accent);
+    box-shadow: 0 0 0 2px var(--terminal-glow-subtle);
+  }
+}
+
+.filter-bar__search-icon {
+  color: var(--filter-text-muted);
+  font-size: 0.8125rem;
+  flex-shrink: 0;
+}
+
+.filter-bar__search-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--filter-text);
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+
+  &::placeholder {
+    color: var(--filter-text-muted);
+    opacity: 0.7;
+  }
+}
+
+.filter-bar__search-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 2px;
+  color: var(--filter-text-muted);
+  cursor: pointer;
+  transition: all 0.1s ease-out;
+  flex-shrink: 0;
+
+  &:hover {
+    background: var(--filter-hover);
+    color: var(--filter-text);
+  }
+}
+
+// Divider
+.filter-bar__divider {
+  width: 1px;
+  height: 1.25rem;
+  background: var(--filter-border);
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+// Filter Dropdowns Container
+.filter-bar__filters {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+// Individual Filter Dropdown
+.filter-dropdown {
+  position: relative;
+}
+
+.filter-dropdown__trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.5rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--filter-text);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--filter-hover);
+  }
+
+  &--active {
+    background: var(--filter-active-bg);
+    border-color: var(--filter-active-border);
+
+    .filter-dropdown__label {
+      color: var(--filter-text-muted);
+    }
+  }
+}
+
+.filter-dropdown__label {
+  color: var(--filter-text-muted);
+}
+
+.filter-dropdown__value {
+  color: var(--filter-accent);
+  font-weight: 600;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.filter-dropdown__chevron {
+  font-size: 0.625rem;
+  color: var(--filter-text-muted);
+  transition: transform 0.15s ease-out;
+  margin-left: 0.125rem;
+
+  .show & {
+    transform: rotate(180deg);
+  }
+}
+
+.filter-dropdown__menu {
+  min-width: 160px;
+  padding: 0.375rem 0;
+  background: var(--bs-body-bg);
+  border: 1px solid var(--filter-border);
+  border-radius: 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  font-family: inherit;
+  font-size: 0.75rem;
+
+  .dropdown-item {
+    padding: 0.5rem 0.75rem;
+    color: var(--filter-text);
+    font-size: 0.75rem;
+    transition: all 0.1s ease-out;
+
+    &:hover {
+      background: var(--filter-hover);
+    }
+
+    &.active {
+      background: var(--filter-active-bg);
+      color: var(--filter-accent);
+      font-weight: 600;
+    }
+  }
+
+  .dropdown-divider {
+    margin: 0.25rem 0;
+    border-color: var(--filter-border);
+    opacity: 0.5;
+  }
+
+  // Date picker menu variant
+  &--datepicker {
+    min-width: auto;
+    padding: 0;
+  }
+}
+
+// Clear All Button
+.filter-bar__clear-all {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.5rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--filter-text-muted);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(220, 53, 69, 0.1);
+    border-color: rgba(220, 53, 69, 0.3);
+    color: var(--bs-danger);
+  }
+
+  i {
+    font-size: 0.75rem;
+  }
+}
+
+// Filter Count Badge
+.filter-bar__count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 0.375rem;
+  background: var(--filter-accent);
+  border-radius: 9px;
+  color: #000;
+  font-size: 0.625rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+// Dark mode filter bar
+[data-bs-theme="dark"] {
+  .filter-bar {
+    --filter-bg: var(--surface-subtle);
+    --filter-border: var(--terminal-glow-subtle);
+    --filter-hover: var(--terminal-glow-bg);
+    --filter-active-bg: var(--terminal-glow-subtle);
+    --filter-active-border: var(--terminal-glow-muted);
+    backdrop-filter: blur(4px);
+  }
+
+  .filter-dropdown__menu {
+    background: var(--surface-elevated);
+    border-color: var(--terminal-glow-subtle);
+  }
+}
+
+// Light mode filter bar
+[data-bs-theme="light"] {
+  .filter-bar {
+    --filter-bg: var(--surface-elevated);
+    --filter-border: var(--bs-border-color);
+    --filter-accent: var(--terminal-glow);
+    --filter-hover: var(--terminal-glow-bg);
+    --filter-active-bg: var(--terminal-glow-subtle);
+    --filter-active-border: var(--terminal-glow-muted);
+  }
+
+  .filter-bar__count {
+    background: var(--terminal-glow);
+    color: var(--surface-base);
+  }
+
+  .filter-dropdown__menu {
+    background: var(--surface-base);
+    border-color: var(--bs-border-color);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .filter-bar {
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  .filter-bar__search {
+    flex: 1 1 100%;
+    max-width: none;
+    order: -1;
+  }
+
+  .filter-bar__divider:first-of-type {
+    display: none;
+  }
+
+  .filter-bar__filters {
+    flex: 1;
+  }
+}
+
+// ============================================================
+// 4. FILTER PILLS — Active Filter Display
+// ============================================================
+
+@keyframes pill-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bs-tertiary-bg);
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.375rem 0.25rem 0.5rem;
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 3px;
+  font-family: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+  font-size: 0.6875rem;
+  line-height: 1;
+  animation: pill-appear 0.2s ease-out;
+}
+
+.filter-pill__label {
+  color: var(--bs-secondary-color);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.filter-pill__value {
+  color: var(--terminal-glow);
+  font-weight: 600;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.filter-pill__remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 2px;
+  color: var(--bs-secondary-color);
+  cursor: pointer;
+  transition: all 0.1s ease-out;
+  margin-left: 0.125rem;
+
+  &:hover {
+    background: rgba(220, 53, 69, 0.15);
+    color: var(--bs-danger);
+  }
+
+  i {
+    font-size: 0.75rem;
+  }
+}
+
+// Dark mode pills
+[data-bs-theme="dark"] {
+  .filter-pills {
+    background: var(--surface-elevated);
+    border-color: var(--terminal-glow-subtle);
+  }
+
+  .filter-pill {
+    background: var(--surface-base);
+    border-color: var(--terminal-glow-subtle);
+  }
+}
+
+// Light mode pills
+[data-bs-theme="light"] {
+  .filter-pills {
+    background: var(--surface-subtle);
+  }
+
+  .filter-pill {
+    background: var(--surface-base);
+    border-color: var(--bs-border-color);
+  }
+
+  .filter-pill__value {
+    color: var(--terminal-glow);
+  }
+}
+
+// ============================================================
+// 5. STATUS BADGES — Cell Renderer Styles
+// ============================================================
+
+// Note: Applied via ::ng-deep in component styles
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 2px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.4;
+
+  &--active {
+    background: var(--status-positive-bg);
+    color: var(--status-positive);
+    border: 1px solid var(--status-positive-border);
+  }
+
+  &--inactive {
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-secondary-color);
+    border: 1px solid var(--bs-border-color);
+  }
+}
+
+// ============================================================
+// 6. GRID STATUS BAR — Bloomberg Terminal Ticker
+// ============================================================
+
+@keyframes pulse-fetch {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 4px var(--status-loading-color, #0068ff);
+  }
+  50% {
+    opacity: 0.5;
+    box-shadow: 0 0 8px var(--status-loading-color, #0068ff);
+  }
+}
+
+@keyframes slide-in-status {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.grid-status-bar {
+  --status-bg: var(--bs-tertiary-bg);
+  --status-border: var(--bs-border-color);
+  --status-text: var(--bs-secondary-color);
+  --status-text-muted: var(--bs-tertiary-color);
+  --status-accent: var(--terminal-glow);
+  --status-ready-color: var(--status-positive);
+  --status-loading-color: var(--status-info);
+
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0.5rem 0.75rem;
+  background: var(--status-bg);
+  border-top: 1px solid var(--status-border);
+  border-radius: 0 0 0.5rem 0.5rem;
+  font-family: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.03em;
+  animation: slide-in-status 0.25s ease-out;
+  position: relative;
+
+  // Subtle grid pattern
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(90deg, var(--status-border) 1px, transparent 1px);
+    background-size: 60px 100%;
+    opacity: 0.03;
+    pointer-events: none;
+  }
+}
+
+.status-bar__section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.75rem;
+  position: relative;
+  z-index: 1;
+}
+
+.status-bar__label {
+  color: var(--status-text-muted);
+  font-weight: 500;
+  font-size: 0.625rem;
+  text-transform: uppercase;
+}
+
+.status-bar__value {
+  color: var(--status-text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  min-width: 3ch;
+
+  &--primary {
+    color: var(--status-accent);
+    font-weight: 700;
+    font-size: 0.75rem;
+  }
+}
+
+.status-bar__percentage {
+  color: var(--status-text-muted);
+  font-size: 0.5625rem;
+  padding: 0.125rem 0.25rem;
+  background: rgba(128, 128, 128, 0.15);
+  border-radius: 2px;
+  margin-left: 0.25rem;
+}
+
+.status-bar__divider {
+  width: 1px;
+  height: 1rem;
+  background: var(--status-border);
+  opacity: 0.5;
+}
+
+.status-bar__spacer {
+  flex: 1;
+}
+
+.status-bar__indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  flex-shrink: 0;
+
+  &--ready {
+    background: var(--status-ready-color);
+    box-shadow: 0 0 6px var(--status-ready-color);
+  }
+
+  &--loading {
+    background: var(--status-loading-color);
+    animation: pulse-fetch 1s ease-in-out infinite;
+  }
+}
+
+// Dark mode enhancements
+[data-bs-theme="dark"] {
+  .grid-status-bar {
+    --status-bg: var(--surface-subtle);
+    --status-border: var(--terminal-glow-subtle);
+    background: var(--status-bg);
+    backdrop-filter: blur(4px);
+
+    // Amber accent line at top
+    border-top: 1px solid var(--status-border);
+    box-shadow: inset 0 1px 0 var(--terminal-glow-bg);
+  }
+
+  .status-bar__percentage {
+    background: var(--terminal-glow-bg);
+    color: var(--status-accent);
+  }
+}
+
+// Light mode adjustments
+[data-bs-theme="light"] {
+  .grid-status-bar {
+    --status-bg: var(--surface-muted);
+    --status-border: var(--bs-border-color);
+    --status-accent: var(--terminal-glow);
+    --status-ready-color: var(--status-positive-muted);
+    --status-loading-color: var(--status-info);
+    box-shadow: inset 0 1px 0 var(--terminal-glow-bg);
+  }
+
+  .status-bar__percentage {
+    background: var(--terminal-glow-bg);
+    color: var(--status-accent);
+  }
+
+  .status-bar__indicator--ready {
+    box-shadow: 0 0 4px var(--status-ready-color);
+  }
+}
+
+// Responsive status bar
+@media (max-width: 640px) {
+  .grid-status-bar {
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    padding: 0.375rem 0.5rem;
+  }
+
+  .status-bar__section {
+    padding: 0 0.375rem;
+  }
+
+  .status-bar__divider {
+    display: none;
+  }
+
+  .status-bar__spacer {
+    flex-basis: 100%;
+    height: 0;
+  }
+
+  .status-bar__loaded .status-bar__progress {
+    display: none;
+  }
+}
+
+// ============================================================
+// 7. ROW ACTION BUTTONS — Compact Icon Toolbar
+// ============================================================
+
+// Note: Applied via ::ng-deep in component styles
+.row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  width: 100%;
+  height: 100%;
+}
+
+.row-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+  opacity: 0.7;
+
+  &:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  // View - Info action
+  &--view {
+    color: var(--status-positive);
+
+    &:hover {
+      background: var(--status-positive-bg);
+      border-color: var(--status-positive-border);
+      color: var(--status-positive);
+    }
+  }
+
+  // Edit - Primary action
+  &--edit {
+    color: var(--status-info);
+
+    &:hover {
+      background: var(--status-info-bg);
+      border-color: var(--status-info-border);
+      color: var(--status-info);
+    }
+  }
+
+  // Cancel/Delete - Destructive action
+  &--cancel {
+    color: var(--status-negative);
+
+    &:hover {
+      background: var(--status-negative-bg);
+      border-color: var(--status-negative-border);
+      color: var(--status-negative);
+    }
+  }
+}
+
+// ============================================================
+// 8. DATE PICKER — NgbDatepicker Integration
+// ============================================================
+
+.date-range-picker {
+  padding: 0.75rem;
+}
+
+// NgbDatepicker Custom Styling
+ngb-datepicker {
+  background: transparent;
+  border: none;
+
+  .ngb-dp-header {
+    background: transparent;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--filter-border, var(--bs-border-color));
+    margin-bottom: 0.25rem;
+  }
+
+  .ngb-dp-arrow {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    button {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 3px;
+      color: var(--filter-text-muted, var(--bs-secondary-color));
+      transition: all 0.15s ease-out;
+      width: 1.75rem;
+      height: 1.75rem;
+      padding: 0;
+
+      &:hover {
+        background: var(--filter-hover, rgba(128, 128, 128, 0.1));
+        color: var(--filter-accent, #FFA028);
+        border-color: var(--filter-active-border, var(--amber-40));
+      }
+
+      .ngb-dp-navigation-chevron {
+        border-width: 0.125rem 0.125rem 0 0;
+        width: 0.5rem;
+        height: 0.5rem;
+      }
+    }
+  }
+
+  .ngb-dp-navigation-select {
+    display: flex;
+    gap: 0.375rem;
+
+    select {
+      background: var(--bs-tertiary-bg);
+      border: 1px solid transparent;
+      border-radius: 3px;
+      color: var(--filter-text, var(--bs-body-color));
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+      transition: all 0.15s ease-out;
+
+      &:focus {
+        outline: none;
+        border-color: var(--filter-accent, #FFA028);
+      }
+
+      &:hover {
+        background: var(--filter-hover, rgba(128, 128, 128, 0.1));
+      }
+    }
+  }
+
+  .ngb-dp-months {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.25rem;
+  }
+
+  .ngb-dp-month {
+    background: transparent;
+  }
+
+  .ngb-dp-month-name {
+    color: var(--filter-text, var(--bs-body-color));
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+    padding: 0.375rem 0;
+    background: transparent;
+  }
+
+  .ngb-dp-weekdays {
+    border-bottom: 1px solid var(--filter-border, var(--bs-border-color));
+    background: transparent;
+    margin-bottom: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .ngb-dp-weekday {
+    color: var(--filter-text-muted, var(--bs-secondary-color));
+    font-size: 0.5625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-style: normal;
+    width: 2rem;
+    height: 1.5rem;
+  }
+
+  .ngb-dp-week {
+    background: transparent;
+  }
+
+  .ngb-dp-day {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+  }
+}
+
+// Custom day template styling
+.dp-custom-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--filter-text, var(--bs-body-color));
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.1s ease-out;
+
+  &:hover:not(.range) {
+    background: var(--filter-hover, rgba(128, 128, 128, 0.1));
+  }
+
+  &.focused {
+    box-shadow: 0 0 0 2px var(--terminal-glow-muted);
+  }
+
+  &.range {
+    background: var(--filter-active-bg, var(--terminal-glow-subtle));
+    color: var(--filter-accent, var(--terminal-glow));
+  }
+
+  &.faded {
+    background: var(--terminal-glow-bg);
+  }
+
+  &.from,
+  &.to {
+    background: var(--filter-accent, var(--terminal-glow));
+    color: var(--surface-base);
+    font-weight: 700;
+  }
+
+  &.from {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  &.to {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  &.from.to {
+    border-radius: 3px;
+  }
+}
+
+// Selected range display
+.date-range-picker__selection {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  margin-top: 0.5rem;
+  background: var(--bs-tertiary-bg);
+  border-radius: 3px;
+}
+
+.date-range-picker__selection-label {
+  color: var(--filter-text-muted, var(--bs-secondary-color));
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.date-range-picker__selection-value {
+  color: var(--filter-accent, #FFA028);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.date-range-picker__selection-separator {
+  color: var(--filter-text-muted, var(--bs-secondary-color));
+  margin: 0 0.25rem;
+}
+
+.date-range-picker__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.625rem;
+  border-top: 1px solid var(--filter-border, var(--bs-border-color));
+}
+
+.date-range-picker__btn {
+  flex: 1;
+  padding: 0.375rem 0.5rem;
+  border: none;
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+
+  &--clear {
+    background: transparent;
+    color: var(--filter-text-muted, var(--bs-secondary-color));
+
+    &:hover {
+      background: var(--filter-hover, rgba(128, 128, 128, 0.1));
+      color: var(--filter-text, var(--bs-body-color));
+    }
+  }
+
+  &--apply {
+    background: var(--filter-accent, var(--terminal-glow));
+    color: var(--surface-base);
+
+    &:hover {
+      filter: brightness(1.1);
+    }
+  }
+}
+
+// Dark mode date picker
+[data-bs-theme="dark"] {
+  .date-range-picker__input::-webkit-calendar-picker-indicator {
+    filter: invert(0.7) sepia(1) saturate(5) hue-rotate(10deg);
+  }
+
+  ngb-datepicker {
+    .ngb-dp-navigation-select select {
+      background: var(--bs-tertiary-bg);
+
+      option {
+        background: var(--surface-elevated);
+        color: var(--filter-text);
+      }
+    }
+  }
+
+  .dp-custom-day {
+    &.from,
+    &.to {
+      background: var(--terminal-glow);
+      color: var(--surface-base);
+    }
+  }
+
+  .date-range-picker__selection {
+    background: var(--terminal-glow-bg);
+    border: 1px solid var(--terminal-glow-subtle);
+  }
+}
+
+// Light mode date picker
+[data-bs-theme="light"] {
+  .date-range-picker__btn--apply {
+    background: var(--terminal-glow);
+    color: var(--surface-base);
+  }
+
+  .date-range-picker__input::-webkit-calendar-picker-indicator {
+    filter: none;
+  }
+
+  ngb-datepicker {
+    .ngb-dp-header {
+      border-color: var(--bs-border-color);
+    }
+
+    .ngb-dp-weekdays {
+      border-color: var(--bs-border-color);
+    }
+
+    .ngb-dp-navigation-select select {
+      background: var(--surface-subtle);
+
+      &:hover {
+        background: var(--bs-tertiary-bg);
+      }
+    }
+  }
+
+  .dp-custom-day {
+    color: var(--bs-body-color);
+
+    &:hover:not(.range) {
+      background: var(--terminal-glow-bg);
+    }
+
+    &.focused {
+      box-shadow: 0 0 0 2px var(--terminal-glow-muted);
+    }
+
+    &.range {
+      background: var(--terminal-glow-subtle);
+      color: var(--terminal-glow);
+    }
+
+    &.faded {
+      background: var(--terminal-glow-bg);
+    }
+
+    &.from,
+    &.to {
+      background: var(--terminal-glow);
+      color: var(--surface-base);
+    }
+  }
+
+  .date-range-picker__selection {
+    background: var(--surface-subtle);
+    border: 1px solid var(--bs-border-color);
+  }
+
+  .date-range-picker__selection-value {
+    color: var(--terminal-glow);
+  }
+}
+
+// ============================================================
+// 9. TYPE BADGES — Colored Type Indicators
+// ============================================================
+
+// Note: Applied via ::ng-deep in component styles
+.tipo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.125rem 0.5rem;
+  background: color-mix(in srgb, var(--tipo-color) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tipo-color) 30%, transparent);
+  border-radius: 3px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--tipo-color);
+  line-height: 1.4;
+
+  i {
+    font-size: 0.75rem;
+  }
+}
+
+// Light mode tipo badge adjustments
+[data-bs-theme="light"] {
+  .tipo-badge {
+    background: color-mix(in srgb, var(--tipo-color) 10%, transparent);
+    border-color: color-mix(in srgb, var(--tipo-color) 25%, transparent);
+  }
+}

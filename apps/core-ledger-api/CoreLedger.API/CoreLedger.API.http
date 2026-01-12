@@ -1,0 +1,1017 @@
+@CoreLedger.API_HostAddress = http://localhost:5071
+
+# ==================== ToDos API Tests ====================
+
+### GET All ToDos - Retrieve all ToDo items
+GET {{CoreLedger.API_HostAddress}}/api/ToDos
+Accept: application/json
+
+###
+
+### GET ToDo by ID - Retrieve a specific ToDo item (valid ID)
+GET {{CoreLedger.API_HostAddress}}/api/ToDos/1
+Accept: application/json
+
+###
+
+### GET ToDo by ID - Retrieve a specific ToDo item (non-existent ID)
+GET {{CoreLedger.API_HostAddress}}/api/ToDos/999
+Accept: application/json
+
+###
+
+### POST Create ToDo - Create a new ToDo item (valid data)
+POST {{CoreLedger.API_HostAddress}}/api/ToDos
+Content-Type: application/json
+
+{
+  "description": "Complete project documentation"
+}
+
+###
+
+### POST Create ToDo - Create a new ToDo item (empty description - should fail validation)
+POST {{CoreLedger.API_HostAddress}}/api/ToDos
+Content-Type: application/json
+
+{
+  "description": ""
+}
+
+###
+
+### POST Create ToDo - Create a new ToDo item (null description - should fail validation)
+POST {{CoreLedger.API_HostAddress}}/api/ToDos
+Content-Type: application/json
+
+{
+  "description": null
+}
+
+###
+
+### POST Create ToDo - Create a new ToDo item (missing description - should fail validation)
+POST {{CoreLedger.API_HostAddress}}/api/ToDos
+Content-Type: application/json
+
+{
+}
+
+###
+
+### PUT Update ToDo - Update an existing ToDo item (mark as completed)
+PUT {{CoreLedger.API_HostAddress}}/api/ToDos/1
+Content-Type: application/json
+
+{
+  "description": "Complete project documentation - Updated",
+  "isCompleted": true
+}
+
+###
+
+### PUT Update ToDo - Update an existing ToDo item (change description only)
+PUT {{CoreLedger.API_HostAddress}}/api/ToDos/1
+Content-Type: application/json
+
+{
+  "description": "Updated task description",
+  "isCompleted": false
+}
+
+###
+
+### PUT Update ToDo - Update an existing ToDo item (mark as incomplete)
+PUT {{CoreLedger.API_HostAddress}}/api/ToDos/1
+Content-Type: application/json
+
+{
+  "description": "Task to be completed later",
+  "isCompleted": false
+}
+
+###
+
+### PUT Update ToDo - Update non-existent ToDo item
+PUT {{CoreLedger.API_HostAddress}}/api/ToDos/999
+Content-Type: application/json
+
+{
+  "description": "This should fail",
+  "isCompleted": true
+}
+
+###
+
+### PUT Update ToDo - Update with empty description (should fail validation)
+PUT {{CoreLedger.API_HostAddress}}/api/ToDos/1
+Content-Type: application/json
+
+{
+  "description": "",
+  "isCompleted": false
+}
+
+###
+
+### PUT Update ToDo - Update with null description (should fail validation)
+PUT {{CoreLedger.API_HostAddress}}/api/ToDos/1
+Content-Type: application/json
+
+{
+  "description": null,
+  "isCompleted": false
+}
+
+###
+
+### PUT Update ToDo - Update with missing properties (should fail validation)
+PUT {{CoreLedger.API_HostAddress}}/api/ToDos/1
+Content-Type: application/json
+
+{
+}
+
+###
+
+### DELETE ToDo - Delete an existing ToDo item
+DELETE {{CoreLedger.API_HostAddress}}/api/ToDos/1
+
+###
+
+### DELETE ToDo - Delete non-existent ToDo item
+DELETE {{CoreLedger.API_HostAddress}}/api/ToDos/999
+
+###
+
+# ==================== Account Types API Tests ====================
+
+### GET All Account Types - Retrieve all account type items
+GET {{CoreLedger.API_HostAddress}}/api/account/types
+Accept: application/json
+
+###
+
+### GET Account Type by ID - Retrieve a specific account type item (valid ID)
+GET {{CoreLedger.API_HostAddress}}/api/account/types/1
+Accept: application/json
+
+###
+
+### GET Account Type by ID - Retrieve a specific account type item (non-existent ID)
+GET {{CoreLedger.API_HostAddress}}/api/account/types/999
+Accept: application/json
+
+###
+
+### POST Create Account Type - Create a new account type item (valid data)
+POST {{CoreLedger.API_HostAddress}}/api/account/types
+Content-Type: application/json
+
+{
+  "description": "Asset Account"
+}
+
+###
+
+### POST Create Account Type - Create a new account type item (valid data - different type)
+POST {{CoreLedger.API_HostAddress}}/api/account/types
+Content-Type: application/json
+
+{
+  "description": "Liability Account"
+}
+
+###
+
+### POST Create Account Type - Create a new account type item (empty description - should fail validation)
+POST {{CoreLedger.API_HostAddress}}/api/account/types
+Content-Type: application/json
+
+{
+  "description": ""
+}
+
+###
+
+### POST Create Account Type - Create a new account type item (null description - should fail validation)
+POST {{CoreLedger.API_HostAddress}}/api/account/types
+Content-Type: application/json
+
+{
+  "description": null
+}
+
+###
+
+### POST Create Account Type - Create a new account type item (missing description - should fail validation)
+POST {{CoreLedger.API_HostAddress}}/api/account/types
+Content-Type: application/json
+
+{
+}
+
+###
+
+### POST Create Account Type - Create a new account type item (description too long - should fail validation)
+POST {{CoreLedger.API_HostAddress}}/api/account/types
+Content-Type: application/json
+
+{
+  "description": "This account type description is way too long and exceeds the maximum allowed length of 100 characters which should trigger a validation error"
+}
+
+###
+
+### POST Create Account Type - Create duplicate account type (should fail uniqueness validation)
+POST {{CoreLedger.API_HostAddress}}/api/account/types
+Content-Type: application/json
+
+{
+  "description": "Asset Account"
+}
+
+###
+
+### PUT Update Account Type - Update an existing account type item
+PUT {{CoreLedger.API_HostAddress}}/api/account/types/1
+Content-Type: application/json
+
+{
+  "description": "Updated Asset Account Type"
+}
+
+###
+
+### PUT Update Account Type - Update an existing account type item (different description)
+PUT {{CoreLedger.API_HostAddress}}/api/account/types/2
+Content-Type: application/json
+
+{
+  "description": "Updated Liability Account Type"
+}
+
+###
+
+### PUT Update Account Type - Update non-existent account type item
+PUT {{CoreLedger.API_HostAddress}}/api/account/types/999
+Content-Type: application/json
+
+{
+  "description": "This should fail"
+}
+
+###
+
+### PUT Update Account Type - Update with empty description (should fail validation)
+PUT {{CoreLedger.API_HostAddress}}/api/account/types/1
+Content-Type: application/json
+
+{
+  "description": ""
+}
+
+###
+
+### PUT Update Account Type - Update with null description (should fail validation)
+PUT {{CoreLedger.API_HostAddress}}/api/account/types/1
+Content-Type: application/json
+
+{
+  "description": null
+}
+
+###
+
+### PUT Update Account Type - Update with missing description (should fail validation)
+PUT {{CoreLedger.API_HostAddress}}/api/account/types/1
+Content-Type: application/json
+
+{
+}
+
+###
+
+### PUT Update Account Type - Update with description too long (should fail validation)
+PUT {{CoreLedger.API_HostAddress}}/api/account/types/1
+Content-Type: application/json
+
+{
+  "description": "This updated account type description is way too long and exceeds the maximum allowed length of 100 characters which should trigger a validation error"
+}
+
+###
+
+### PUT Update Account Type - Update to duplicate description (should fail uniqueness validation)
+PUT {{CoreLedger.API_HostAddress}}/api/account/types/1
+Content-Type: application/json
+
+{
+  "description": "Liability Account"
+}
+
+###
+
+### DELETE Account Type - Delete an existing account type item
+DELETE {{CoreLedger.API_HostAddress}}/api/account/types/1
+
+###
+
+### DELETE Account Type - Delete non-existent account type item
+DELETE {{CoreLedger.API_HostAddress}}/api/account/types/999
+
+###
+
+# ==================== Account Types Workflow Test Sequence ====================
+
+### Account Types Workflow Step 1: Create a new account type
+POST {{CoreLedger.API_HostAddress}}/api/account/types
+Content-Type: application/json
+
+{
+  "description": "Equity Account"
+}
+
+###
+
+### Account Types Workflow Step 2: Get all account types to verify creation
+GET {{CoreLedger.API_HostAddress}}/api/account/types
+Accept: application/json
+
+###
+
+### Account Types Workflow Step 3: Get the newly created account type by ID (assuming ID 3)
+GET {{CoreLedger.API_HostAddress}}/api/account/types/3
+Accept: application/json
+
+###
+
+### Account Types Workflow Step 4: Update the account type
+PUT {{CoreLedger.API_HostAddress}}/api/account/types/3
+Content-Type: application/json
+
+{
+  "description": "Updated Equity Account Type"
+}
+
+###
+
+### Account Types Workflow Step 5: Verify the update
+GET {{CoreLedger.API_HostAddress}}/api/account/types/3
+Accept: application/json
+
+###
+
+### Account Types Workflow Step 6: Delete the test account type
+DELETE {{CoreLedger.API_HostAddress}}/api/account/types/3
+
+###
+
+### Account Types Workflow Step 7: Verify deletion
+GET {{CoreLedger.API_HostAddress}}/api/account/types/3
+Accept: application/json
+
+###
+
+# ==================== Workflow Test Sequence ====================
+
+### Workflow Step 1: Create a new ToDo
+POST {{CoreLedger.API_HostAddress}}/api/ToDos
+Content-Type: application/json
+
+{
+  "description": "Test workflow task"
+}
+
+###
+
+### Workflow Step 2: Get all ToDos to verify creation
+GET {{CoreLedger.API_HostAddress}}/api/ToDos
+Accept: application/json
+
+###
+
+### Workflow Step 3: Get the newly created ToDo by ID (assuming ID 2)
+GET {{CoreLedger.API_HostAddress}}/api/ToDos/2
+Accept: application/json
+
+###
+
+### Workflow Step 4: Update the ToDo to mark as completed
+PUT {{CoreLedger.API_HostAddress}}/api/ToDos/2
+Content-Type: application/json
+
+{
+  "description": "Test workflow task - Completed",
+  "isCompleted": true
+}
+
+###
+
+### Workflow Step 5: Verify the update
+GET {{CoreLedger.API_HostAddress}}/api/ToDos/2
+Accept: application/json
+
+###
+
+### Workflow Step 6: Delete the test ToDo
+DELETE {{CoreLedger.API_HostAddress}}/api/ToDos/2
+
+###
+
+### Workflow Step 7: Verify deletion
+GET {{CoreLedger.API_HostAddress}}/api/ToDos/2
+Accept: application/json
+
+###
+
+# ==================== Accounts API Tests ====================
+
+### GET All Accounts - Retrieve all account items
+GET {{CoreLedger.API_HostAddress}}/api/accounts
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Default values
+GET {{CoreLedger.API_HostAddress}}/api/accounts?limit=100&offset=0
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Pagination (limit 10, offset 0)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?limit=10&offset=0
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Pagination (limit 10, offset 10)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?limit=10&offset=10
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Pagination (limit 5, offset 20)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?limit=5&offset=20
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Limit exceeds 100 (should be capped at 100)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?limit=200&offset=0
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Sort by code (ascending)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?sortBy=code&sortDirection=asc
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Sort by code (descending)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?sortBy=code&sortDirection=desc
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Sort by name (ascending)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?sortBy=name&sortDirection=asc
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Sort by name (descending)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?sortBy=name&sortDirection=desc
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Sort by typeId (ascending)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?sortBy=typeId&sortDirection=asc
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Sort by status (ascending)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?sortBy=status&sortDirection=asc
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Sort by normalBalance (ascending)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?sortBy=normalBalance&sortDirection=asc
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Sort by createdAt (ascending)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?sortBy=createdAt&sortDirection=asc
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Sort by createdAt (descending)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?sortBy=createdAt&sortDirection=desc
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Filter by code
+GET {{CoreLedger.API_HostAddress}}/api/accounts?filter=code=1001
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Filter by name (exact match)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?filter=name=Cash on Hand
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Filter by name (partial match with LIKE)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?filter=name=Cash
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Filter by typeId
+GET {{CoreLedger.API_HostAddress}}/api/accounts?filter=typeId=1
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Filter by status (Active)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?filter=status=1
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Filter by status (Inactive)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?filter=status=2
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Filter by normalBalance (Debit)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?filter=normalBalance=1
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Filter by normalBalance (Credit)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?filter=normalBalance=2
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Combined filter and sort
+GET {{CoreLedger.API_HostAddress}}/api/accounts?filter=typeId=1&sortBy=code&sortDirection=asc
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Combined filter, sort, and pagination
+GET {{CoreLedger.API_HostAddress}}/api/accounts?filter=status=1&sortBy=name&sortDirection=asc&limit=5&offset=0
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Complex query with all parameters
+GET {{CoreLedger.API_HostAddress}}/api/accounts?filter=name=Cash&sortBy=code&sortDirection=desc&limit=10&offset=0&
+    fields=id,code,name,typeId
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Invalid filter format (should be ignored)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?filter=invalidformat
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Invalid sort field (should default to Id)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?sortBy=invalidfield&sortDirection=asc
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Negative offset (should work)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?limit=10&offset=-5
+Accept: application/json
+
+###
+
+### GET All Accounts with RFC-8040 Query Parameters - Zero limit (should default to 100)
+GET {{CoreLedger.API_HostAddress}}/api/accounts?limit=0&offset=0
+Accept: application/json
+
+###
+
+### GET Account by ID - Retrieve a specific account item (valid ID)
+GET {{CoreLedger.API_HostAddress}}/api/accounts/1
+Accept: application/json
+
+###
+
+### GET Account by ID - Retrieve a specific account item (non-existent ID)
+GET {{CoreLedger.API_HostAddress}}/api/accounts/999
+Accept: application/json
+
+###
+
+### POST Create Account - Create a new account item (valid data - Asset account)
+POST {{CoreLedger.API_HostAddress}}/api/accounts
+Content-Type: application/json
+
+{
+  "code": 1001,
+  "name": "Cash on Hand",
+  "typeId": 1,
+  "status": 1,
+  "normalBalance": 1
+}
+
+###
+
+### POST Create Account - Create a new account item (valid data - Liability account)
+POST {{CoreLedger.API_HostAddress}}/api/accounts
+Content-Type: application/json
+
+{
+  "code": 2001,
+  "name": "Accounts Payable",
+  "typeId": 2,
+  "status": 1,
+  "normalBalance": 2
+}
+
+###
+
+### POST Create Account - Create a new account item (empty name - should fail validation)
+POST {{CoreLedger.API_HostAddress}}/api/accounts
+Content-Type: application/json
+
+{
+  "code": 1002,
+  "name": "",
+  "typeId": 1,
+  "status": 1,
+  "normalBalance": 1
+}
+
+###
+
+### POST Create Account - Create a new account item (code exceeds 10 digits - should fail validation)
+POST {{CoreLedger.API_HostAddress}}/api/accounts
+Content-Type: application/json
+
+{
+  "code": 99999999999,
+  "name": "Invalid Code Account",
+  "typeId": 1,
+  "status": 1,
+  "normalBalance": 1
+}
+
+###
+
+### POST Create Account - Create a new account item (invalid typeId - should fail)
+POST {{CoreLedger.API_HostAddress}}/api/accounts
+Content-Type: application/json
+
+{
+  "code": 1003,
+  "name": "Invalid Type Account",
+  "typeId": 999,
+  "status": 1,
+  "normalBalance": 1
+}
+
+###
+
+### POST Create Account - Create a new account item (duplicate code - should fail)
+POST {{CoreLedger.API_HostAddress}}/api/accounts
+Content-Type: application/json
+
+{
+  "code": 1001,
+  "name": "Duplicate Code Account",
+  "typeId": 1,
+  "status": 1,
+  "normalBalance": 1
+}
+
+###
+
+### PUT Update Account - Update an existing account item
+PUT {{CoreLedger.API_HostAddress}}/api/accounts/1
+Content-Type: application/json
+
+{
+  "code": 1001,
+  "name": "Updated Cash on Hand",
+  "typeId": 1,
+  "status": 1,
+  "normalBalance": 1
+}
+
+###
+
+### PUT Update Account - Update account status to inactive
+PUT {{CoreLedger.API_HostAddress}}/api/accounts/1
+Content-Type: application/json
+
+{
+  "code": 1001,
+  "name": "Cash on Hand",
+  "typeId": 1,
+  "status": 2,
+  "normalBalance": 1
+}
+
+###
+
+### PUT Update Account - Update non-existent account item
+PUT {{CoreLedger.API_HostAddress}}/api/accounts/999
+Content-Type: application/json
+
+{
+  "code": 9999,
+  "name": "This should fail",
+  "typeId": 1,
+  "status": 1,
+  "normalBalance": 1
+}
+
+###
+
+### PUT Update Account - Update with empty name (should fail validation)
+PUT {{CoreLedger.API_HostAddress}}/api/accounts/1
+Content-Type: application/json
+
+{
+  "code": 1001,
+  "name": "",
+  "typeId": 1,
+  "status": 1,
+  "normalBalance": 1
+}
+
+###
+
+### PUT Update Account - Update with invalid typeId (should fail)
+PUT {{CoreLedger.API_HostAddress}}/api/accounts/1
+Content-Type: application/json
+
+{
+  "code": 1001,
+  "name": "Cash on Hand",
+  "typeId": 999,
+  "status": 1,
+  "normalBalance": 1
+}
+
+###
+
+### DELETE Account - Delete an existing account item
+DELETE {{CoreLedger.API_HostAddress}}/api/accounts/1
+
+###
+
+### DELETE Account - Delete non-existent account item
+DELETE {{CoreLedger.API_HostAddress}}/api/accounts/999
+
+###
+
+# ==================== Accounts Workflow Test Sequence ====================
+
+### Accounts Workflow Step 1: Create a new account
+POST {{CoreLedger.API_HostAddress}}/api/accounts
+Content-Type: application/json
+
+{
+  "code": 3001,
+  "name": "Revenue Account",
+  "typeId": 1,
+  "status": 1,
+  "normalBalance": 2
+}
+
+###
+
+### Accounts Workflow Step 2: Get all accounts to verify creation
+GET {{CoreLedger.API_HostAddress}}/api/accounts
+Accept: application/json
+
+###
+
+### Accounts Workflow Step 3: Get the newly created account by ID (assuming ID 3)
+GET {{CoreLedger.API_HostAddress}}/api/accounts/3
+Accept: application/json
+
+###
+
+### Accounts Workflow Step 4: Update the account
+PUT {{CoreLedger.API_HostAddress}}/api/accounts/3
+Content-Type: application/json
+
+{
+  "code": 3001,
+  "name": "Updated Revenue Account",
+  "typeId": 1,
+  "status": 1,
+  "normalBalance": 2
+}
+
+###
+
+### Accounts Workflow Step 5: Verify the update
+GET {{CoreLedger.API_HostAddress}}/api/accounts/3
+Accept: application/json
+
+###
+
+### Accounts Workflow Step 6: Delete the test account
+DELETE {{CoreLedger.API_HostAddress}}/api/accounts/3
+
+###
+
+### Accounts Workflow Step 7: Verify deletion
+GET {{CoreLedger.API_HostAddress}}/api/accounts/3
+Accept: application/json
+
+###
+
+# ==================== CoreJobs API Tests ====================
+
+### GET All CoreJobs - Retrieve all core job items
+GET {{CoreLedger.API_HostAddress}}/api/corejobs
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Default values
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?limit=100&offset=0
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Pagination (limit 10, offset 0)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?limit=10&offset=0
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Pagination (limit 10, offset 10)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?limit=10&offset=10
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Pagination (limit 20, offset 50)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?limit=20&offset=50
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Limit exceeds 100 (should be capped at 100)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?limit=200&offset=0
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Sort by referenceId (ascending)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?sortBy=referenceId&sortDirection=asc
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Sort by referenceId (descending)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?sortBy=referenceId&sortDirection=desc
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Sort by status (ascending)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?sortBy=status&sortDirection=asc
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Sort by creationDate (ascending)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?sortBy=creationDate&sortDirection=asc
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Sort by creationDate (descending)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?sortBy=creationDate&sortDirection=desc
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Sort by finishedDate (ascending)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?sortBy=finishedDate&sortDirection=asc
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Sort by finishedDate (descending)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?sortBy=finishedDate&sortDirection=desc
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Filter by referenceId (partial match)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?filter=referenceId=REF-00001
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Filter by referenceId (pattern match)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?filter=referenceId=REF-0001
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Filter by status (Complete)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?filter=status=Complete
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Filter by status (Failed)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?filter=status=Failed
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Filter by jobDescription (NAV)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?filter=jobDescription=NAV
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Filter by jobDescription (reconciliation)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?filter=jobDescription=reconciliation
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Filter by jobDescription (processing)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?filter=jobDescription=processing
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Combined filter (Complete) and sort
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?filter=status=Complete&sortBy=creationDate&sortDirection=desc
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Combined filter (Failed) and sort
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?filter=status=Failed&sortBy=creationDate&sortDirection=desc
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Combined filter, sort, and pagination (Recent Complete Jobs)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?filter=status=Complete&sortBy=finishedDate&sortDirection=desc&limit=10&
+    offset=0
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Combined filter, sort, and pagination (Recent Failed Jobs)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?filter=status=Failed&sortBy=finishedDate&sortDirection=desc&limit=10&
+    offset=0
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Complex query with all parameters
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?filter=jobDescription=calculation&sortBy=creationDate&
+    sortDirection=desc&limit=15&offset=0
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Jobs from last 3 days sorted by date
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?sortBy=creationDate&sortDirection=desc&limit=50
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Invalid filter format (should be ignored)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?filter=invalidformat
+Accept: application/json
+
+###
+
+### GET All CoreJobs with RFC-8040 Query Parameters - Invalid sort field (should default to Id)
+GET {{CoreLedger.API_HostAddress}}/api/corejobs?sortBy=invalidfield&sortDirection=asc
+Accept: application/json
+
+###

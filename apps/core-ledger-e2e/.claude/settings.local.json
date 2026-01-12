@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:localhost)",
+      "Bash(curl:*)"
+    ]
+  },
+  "disabledMcpjsonServers": [
+    "angular-cli",
+    "nuget",
+    "postgres",
+    "microsoft-docs"
+  ]
+}

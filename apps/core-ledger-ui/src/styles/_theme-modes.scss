@@ -1,0 +1,126 @@
+// ============================================================
+// THEME MODES — Light/Dark Mode CSS Variable Definitions
+//
+// Applies CSS custom properties and gradient backgrounds
+// for each theme mode.
+// ============================================================
+
+@use "sass:color";
+@use "variables" as *;
+@use "mixins" as *;
+
+// --- Body Base Styles ---
+body {
+  position: relative;
+  min-height: 100vh;
+  background: var(--theme-body-gradient, var(--bs-body-bg));
+  background-attachment: fixed;
+  background-size: 100% 100vh;
+  color: var(--bs-body-color);
+}
+
+// ============================================================
+// LIGHT MODE
+// ============================================================
+
+:root,
+[data-bs-theme="light"] {
+  color-scheme: light;
+
+  // Layout dimensions (shared across components)
+  --header-height: #{$header-height};
+
+  // Bloomberg Daylight — Warm professional gradient (high contrast)
+  // Warm cream base lets white cards float with visible elevation
+  --theme-body-gradient:
+    radial-gradient(ellipse 100% 50% at 50% -20%, #{rgba($daylight-gold, 0.06)}, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 80%, #{rgba($daylight-amber, 0.08)}, transparent 60%),
+    linear-gradient(180deg,
+      #{$surface-light-subtle} 0%,
+      #{color.scale($surface-light-subtle, $lightness: -3%)} 100%
+    );
+
+  // Expose brand colors as CSS variables
+  --brand-blue-400: #{$brand-blue-400};
+  --brand-blue-500: #{$brand-blue-500};
+  --brand-blue-600: #{$brand-blue-600};
+  --brand-blue-700: #{$brand-blue-700};
+
+  // Expose accent colors (Bloomberg Daylight palette)
+  --accent-teal: #{$accent-teal};
+  --accent-amber: #{$daylight-amber};
+  --accent-gold: #{$daylight-gold};
+  --accent-purple: #{$accent-purple};
+  --accent-pink: #{$accent-pink};
+  --accent-yellow: #{$accent-yellow};
+
+  // Semantic surface colors (warm professional)
+  --surface-primary: #{$daylight-cream};
+  --surface-secondary: #{$daylight-sand};
+  --surface-elevated: #{$neutral-white};
+  --surface-accent: #{rgba($daylight-amber, 0.1)};
+
+  // Legacy surface names (compatibility)
+  --surface-lagoon: #{$daylight-sand};
+  --surface-shallow: #{$daylight-cream};
+  --surface-sand: #{$warm-cream};
+  --surface-coral: #{$accent-coral};
+  --surface-seagrass: #{$daylight-text};
+  --surface-starfish: #{$daylight-amber};
+
+  @include generate-theme-vars(light);
+}
+
+// ============================================================
+// DARK MODE - Bloomberg Terminal Style
+// ============================================================
+
+[data-bs-theme="dark"] {
+  color-scheme: dark;
+
+  // Bloomberg Terminal - solid black background
+  --theme-body-gradient: #{$neutral-black};
+
+  // Dark mode surface overrides - Bloomberg style
+  --surface-shallow: #{rgba($accent-amber, 0.1)};
+  --surface-sand: #{rgba($accent-amber, 0.08)};
+  --surface-coral: #{$accent-red};
+  --surface-seagrass: #{$accent-teal};
+  --surface-starfish: #{$accent-amber};
+
+  // Bootstrap dark mode overrides - Terminal Hierarchy System
+  // Uses distinct colors instead of opacity variations for better contrast
+  --bs-body-bg-rgb: 0, 0, 0;
+  --bs-body-color-rgb: 255, 160, 40;
+  --bs-emphasis-color: #{$terminal-text-emphasis};
+  --bs-emphasis-color-rgb: 255, 255, 255;
+  --bs-secondary-color: #{$terminal-text-secondary};
+  --bs-secondary-bg: #1e1e1e;
+  --bs-tertiary-color: #{$terminal-text-muted};
+  --bs-tertiary-bg: #2a2a2a;
+
+  // Theme colors - Bloomberg semantic colors
+  --bs-primary: #{$accent-blue};
+  --bs-success: #{$accent-teal};
+  --bs-warning: #{$accent-yellow};
+  --bs-danger: #{$accent-red};
+  --bs-info: #{$accent-blue};
+  --bs-secondary: #{$terminal-text-secondary};
+
+  // Bloomberg accent colors exposed
+  --accent-teal: #{$accent-teal};
+  --accent-amber: #{$accent-amber};
+  --accent-blue: #{$accent-blue};
+
+  // Terminal text hierarchy exposed as CSS variables
+  --terminal-text-emphasis: #{$terminal-text-emphasis};
+  --terminal-text-primary: #{$terminal-text-primary};
+  --terminal-text-secondary: #{$terminal-text-secondary};
+  --terminal-text-muted: #{$terminal-text-muted};
+
+  // Dark mode specific effects - Bloomberg amber glow
+  --nav-link-active-text-shadow: 0 0 8px #{rgba($accent-amber, 0.4)};
+  --card-hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+
+  @include generate-theme-vars(dark);
+}

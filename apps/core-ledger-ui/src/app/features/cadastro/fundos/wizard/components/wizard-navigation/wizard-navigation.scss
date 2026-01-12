@@ -1,0 +1,294 @@
+// ============================================================
+// WIZARD NAVIGATION — Terminal Command Interface
+// Precision buttons with CRT phosphor aesthetics
+// ============================================================
+
+// --- Design Tokens ---
+$btn-height: 2.25rem;
+$btn-radius: 2px;
+$transition-duration: 0.2s;
+$glow-amber: rgba(255, 160, 40, 0.5);
+$glow-teal: rgba(74, 246, 195, 0.5);
+
+.wizard-navigation {
+  padding: 1rem 1.25rem;
+
+  @media (min-width: 768px) {
+    padding: 1.25rem 1.5rem;
+  }
+}
+
+.wizard-navigation__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 575.98px) {
+    flex-direction: column;
+    align-items: stretch;
+
+    .wizard-navigation__spacer {
+      display: none;
+    }
+  }
+}
+
+.wizard-navigation__spacer {
+  flex: 1;
+}
+
+// ============================================================
+// WIZARD BUTTON — Base Styles
+// ============================================================
+
+.wizard-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: $btn-height;
+  padding: 0 1rem;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid transparent;
+  border-radius: $btn-radius;
+  cursor: pointer;
+  transition: all $transition-duration cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+
+  // Remove default browser styles
+  appearance: none;
+  outline: none;
+  background: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-amber, #FFA028);
+    outline-offset: 2px;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  @media (max-width: 575.98px) {
+    width: 100%;
+    height: 2.5rem;
+  }
+}
+
+.wizard-btn__icon {
+  font-size: 0.625rem;
+  line-height: 1;
+  transition: transform $transition-duration ease;
+}
+
+.wizard-btn__text {
+  line-height: 1;
+}
+
+// ============================================================
+// BUTTON VARIANTS
+// ============================================================
+
+// --- Primary: Amber Accent ---
+.wizard-btn--primary {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 160, 40, 0.2) 0%,
+    rgba(255, 160, 40, 0.12) 100%
+  );
+  border-color: var(--accent-amber, #FFA028);
+  color: var(--accent-amber, #FFA028);
+  text-shadow: 0 0 8px $glow-amber;
+  box-shadow: 0 0 12px rgba(255, 160, 40, 0.1);
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 160, 40, 0.3) 0%,
+      rgba(255, 160, 40, 0.2) 100%
+    );
+    box-shadow: 0 0 20px rgba(255, 160, 40, 0.2);
+
+    .wizard-btn__icon:last-child {
+      transform: translateX(2px);
+    }
+  }
+}
+
+// --- Secondary: Subtle ---
+.wizard-btn--secondary {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--table-border-color);
+  color: var(--bs-secondary-color);
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 160, 40, 0.08);
+    border-color: rgba(255, 160, 40, 0.3);
+    color: var(--bs-emphasis-color);
+
+    .wizard-btn__icon:first-child {
+      transform: translateX(-2px);
+    }
+  }
+}
+
+// --- Ghost: Minimal ---
+.wizard-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--terminal-text-muted);
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 67, 61, 0.08);
+    border-color: rgba(255, 67, 61, 0.2);
+    color: var(--accent-coral, #ff433d);
+  }
+}
+
+// --- Submit: Success/Teal ---
+.wizard-btn--submit {
+  background: linear-gradient(
+    180deg,
+    rgba(74, 246, 195, 0.2) 0%,
+    rgba(74, 246, 195, 0.12) 100%
+  );
+  border-color: var(--accent-teal, #4af6c3);
+  color: var(--accent-teal, #4af6c3);
+  text-shadow: 0 0 8px $glow-teal;
+  box-shadow: 0 0 12px rgba(74, 246, 195, 0.1);
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(
+      180deg,
+      rgba(74, 246, 195, 0.3) 0%,
+      rgba(74, 246, 195, 0.2) 100%
+    );
+    box-shadow: 0 0 20px rgba(74, 246, 195, 0.2);
+  }
+}
+
+// ============================================================
+// BUTTON STATES
+// ============================================================
+
+// --- Disabled ---
+.wizard-btn--disabled,
+.wizard-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+// --- Loading ---
+.wizard-btn--loading {
+  pointer-events: none;
+}
+
+.wizard-btn__spinner {
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-right-color: currentColor;
+  border-radius: 50%;
+  animation: btn-spin 0.8s linear infinite;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ============================================================
+// LIGHT MODE OVERRIDES
+// ============================================================
+
+[data-bs-theme="light"] {
+  .wizard-btn--primary {
+    background: linear-gradient(
+      180deg,
+      rgba(180, 83, 9, 0.12) 0%,
+      rgba(180, 83, 9, 0.06) 100%
+    );
+    border-color: var(--daylight-amber, #B45309);
+    color: var(--daylight-amber, #B45309);
+    text-shadow: none;
+    box-shadow: 0 2px 8px rgba(180, 83, 9, 0.1);
+
+    &:hover:not(:disabled) {
+      background: linear-gradient(
+        180deg,
+        rgba(180, 83, 9, 0.18) 0%,
+        rgba(180, 83, 9, 0.1) 100%
+      );
+      box-shadow: 0 4px 12px rgba(180, 83, 9, 0.15);
+    }
+  }
+
+  .wizard-btn--secondary {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(180, 83, 9, 0.15);
+    color: var(--bs-secondary-color);
+
+    &:hover:not(:disabled) {
+      background: rgba(180, 83, 9, 0.06);
+      border-color: rgba(180, 83, 9, 0.25);
+      color: var(--daylight-text);
+    }
+  }
+
+  .wizard-btn--ghost {
+    &:hover:not(:disabled) {
+      background: rgba(220, 38, 38, 0.06);
+      border-color: rgba(220, 38, 38, 0.15);
+      color: #DC2626;
+    }
+  }
+
+  .wizard-btn--submit {
+    background: linear-gradient(
+      180deg,
+      rgba(5, 150, 105, 0.12) 0%,
+      rgba(5, 150, 105, 0.06) 100%
+    );
+    border-color: #059669;
+    color: #059669;
+    text-shadow: none;
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.1);
+
+    &:hover:not(:disabled) {
+      background: linear-gradient(
+        180deg,
+        rgba(5, 150, 105, 0.18) 0%,
+        rgba(5, 150, 105, 0.1) 100%
+      );
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15);
+    }
+  }
+}
+
+// ============================================================
+// REDUCED MOTION
+// ============================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .wizard-btn {
+    transition: none;
+  }
+
+  .wizard-btn__icon {
+    transition: none;
+  }
+
+  .wizard-btn__spinner {
+    animation: none;
+    border-style: dotted;
+  }
+}

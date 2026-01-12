@@ -1,0 +1,166 @@
+<app-page-header title="Cadastro de Fundo">
+  <div class="d-flex align-items-center gap-2">
+    <!-- Progress Badge -->
+    <span class="wizard-progress-badge font-monospace">
+      <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
+      {{ store.progressPercentage() }}%
+    </span>
+    <button
+      type="button"
+      class="btn btn-sm btn-secondary"
+      aria-label="Obter ajuda para esta página"
+    >
+      <i class="bi bi-question-circle"></i>
+      <span class="d-none d-sm-inline">Ajuda</span>
+    </button>
+  </div>
+</app-page-header>
+
+<main class="wizard-main">
+  <div class="wizard-layout">
+    <!-- Main Content Area -->
+    <div class="wizard-content">
+      <!-- Stepper: Progress Matrix -->
+      <app-wizard-stepper
+        [steps]="steps"
+        [currentStep]="currentStep()"
+        [completedSteps]="store.completedSteps()"
+        [stepValidation]="store.stepValidation()"
+        (stepClick)="onStepClick($event)"
+      />
+
+      <!-- Step Content Card -->
+      <div class="wizard-card">
+        <!-- Card Header -->
+        <div class="wizard-card__header">
+          <div class="wizard-card__header-content">
+            <div class="wizard-card__step-indicator font-monospace">
+              {{ currentStep().toString().padStart(2, '0') }}
+            </div>
+            <div class="wizard-card__header-text">
+              <h2 class="wizard-card__title">{{ currentStepConfig()?.label }}</h2>
+              <p class="wizard-card__subtitle">{{ currentStepConfig()?.descricao }}</p>
+            </div>
+          </div>
+          <!-- Step Icon -->
+          <div class="wizard-card__icon" aria-hidden="true">
+            <i [class]="'bi ' + currentStepConfig()?.icon"></i>
+          </div>
+        </div>
+
+        <!-- Card Body: Step Form -->
+        <div class="wizard-card__body">
+          @if (currentStepConfig(); as stepConfig) {
+            @switch (stepConfig.id) {
+              @case (1) {
+                <app-identificacao-step [stepConfig]="stepConfig" />
+              }
+              @default {
+                <app-placeholder-step [stepConfig]="stepConfig" />
+              }
+            }
+          }
+        </div>
+
+        <!-- Card Footer: Navigation -->
+        <div class="wizard-card__footer">
+          <app-wizard-navigation
+            [canGoNext]="canGoNext()"
+            [canGoPrevious]="canGoPrevious()"
+            [canSubmit]="canSubmit()"
+            [isSubmitting]="isSubmitting()"
+            [isFirstStep]="isFirstStep()"
+            [isLastStep]="isLastStep()"
+            (previous)="onPrevious()"
+            (next)="onNext()"
+            (submit)="onSubmit()"
+            (cancel)="onCancel()"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar: Quick Stats (Desktop only) -->
+    <aside class="wizard-sidebar d-none d-xl-block">
+      <div class="wizard-stats">
+        <div class="wizard-stats__header font-monospace">
+          <i class="bi bi-bar-chart-fill" aria-hidden="true"></i>
+          STATUS
+        </div>
+
+        <div class="wizard-stats__grid">
+          <!-- Completed Steps -->
+          <div class="wizard-stat">
+            <div class="wizard-stat__value font-monospace wizard-stat__value--success">
+              {{ store.completedStepsCount() }}
+            </div>
+            <div class="wizard-stat__label">Concluídos</div>
+          </div>
+
+          <!-- Pending Steps -->
+          <div class="wizard-stat">
+            <div class="wizard-stat__value font-monospace wizard-stat__value--pending">
+              {{ steps.length - store.completedStepsCount() }}
+            </div>
+            <div class="wizard-stat__label">Pendentes</div>
+          </div>
+
+          <!-- Current Step -->
+          <div class="wizard-stat">
+            <div class="wizard-stat__value font-monospace wizard-stat__value--current">
+              {{ currentStep() }}
+            </div>
+            <div class="wizard-stat__label">Atual</div>
+          </div>
+
+          <!-- Total Steps -->
+          <div class="wizard-stat">
+            <div class="wizard-stat__value font-monospace">
+              {{ steps.length }}
+            </div>
+            <div class="wizard-stat__label">Total</div>
+          </div>
+        </div>
+
+        <!-- Quick Navigation -->
+        <div class="wizard-stats__nav">
+          <div class="wizard-stats__nav-header font-monospace">
+            <i class="bi bi-list-ol" aria-hidden="true"></i>
+            NAVEGAÇÃO
+          </div>
+          <ul class="wizard-nav-list">
+            @for (step of steps; track step.id) {
+              <li
+                class="wizard-nav-item"
+                [class.wizard-nav-item--completed]="store.completedSteps().has(step.id)"
+                [class.wizard-nav-item--current]="step.id === currentStep()"
+                [class.wizard-nav-item--clickable]="store.completedSteps().has(step.id) || step.id === currentStep()"
+                (click)="onStepClick(step.id)"
+                (keydown.enter)="onStepClick(step.id)"
+                [attr.tabindex]="store.completedSteps().has(step.id) || step.id === currentStep() ? 0 : -1"
+                role="button"
+              >
+                <span class="wizard-nav-item__number font-monospace">{{ step.id.toString().padStart(2, '0') }}</span>
+                <span class="wizard-nav-item__label">{{ step.label }}</span>
+                <span class="wizard-nav-item__status font-monospace">
+                  @if (store.completedSteps().has(step.id)) {
+                    ✓
+                  } @else if (step.id === currentStep()) {
+                    ▸
+                  }
+                </span>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ARIA Live Region -->
+  <div aria-atomic="true" aria-live="polite" class="visually-hidden" role="status">
+    @if (isSubmitting()) {
+      Salvando fundo, por favor aguarde...
+    }
+  </div>
+</main>

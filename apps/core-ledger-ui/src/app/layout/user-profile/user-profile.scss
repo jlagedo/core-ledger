@@ -1,0 +1,372 @@
+// ============================================================
+// USER PROFILE — Bloomberg Terminal Footer Panel
+//
+// Compact user profile section with avatar, theme toggle,
+// and dropdown menu styled for the terminal aesthetic.
+// ============================================================
+
+// ============================================================
+// ANIMATIONS
+// ============================================================
+
+@keyframes avatar-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 2px var(--terminal-glow);
+  }
+  50% {
+    box-shadow: 0 0 8px 2px var(--terminal-glow);
+  }
+}
+
+// ============================================================
+// CSS VARIABLES
+// ============================================================
+
+:host {
+  --terminal-glow: var(--accent-amber, #FFA028);
+  display: block;
+}
+
+// ============================================================
+// PROFILE CONTAINER
+// ============================================================
+
+.user-profile {
+  padding: 0.75rem;
+  position: relative;
+
+  // Subtle top highlight
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20%;
+    right: 20%;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--amber-20),
+      transparent
+    );
+  }
+}
+
+// ============================================================
+// AVATAR & DROPDOWN TOGGLE
+// ============================================================
+
+.user-profile__avatar-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 0.25rem;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &:hover {
+    border-color: var(--amber-30);
+    background: var(--sidenav-link-hover-bg);
+
+    .user-profile__avatar {
+      border-color: var(--terminal-glow);
+      box-shadow: 0 0 8px var(--amber-40);
+    }
+
+    .user-profile__icon {
+      color: var(--terminal-glow);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--terminal-glow);
+    outline-offset: 2px;
+  }
+
+  // Hide dropdown caret
+  &::after {
+    display: none !important;
+  }
+}
+
+// Avatar image
+.user-profile__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 2px;
+  border: 1px solid var(--amber-30);
+  transition: all 0.2s ease;
+  object-fit: cover;
+}
+
+// Fallback icon
+.user-profile__icon {
+  font-size: 1.5rem;
+  color: var(--sidenav-color);
+  transition: color 0.2s ease;
+}
+
+// User initials badge (alternative to avatar)
+.user-profile__initials {
+  width: 32px;
+  height: 32px;
+  border-radius: 2px;
+  background: linear-gradient(
+    135deg,
+    var(--amber-20) 0%,
+    var(--amber-10) 100%
+  );
+  border: 1px solid var(--amber-30);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--terminal-glow);
+  transition: all 0.2s ease;
+}
+
+// ============================================================
+// THEME TOGGLE BUTTON
+// ============================================================
+
+.user-profile__theme-toggle {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 0.375rem;
+  border-radius: 2px;
+  color: inherit;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  i {
+    font-size: 1.125rem;
+    transition: all 0.2s ease;
+  }
+
+  &:hover {
+    border-color: var(--amber-30);
+    background: var(--sidenav-link-hover-bg);
+
+    i {
+      color: var(--terminal-glow);
+      text-shadow: 0 0 8px var(--terminal-glow);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--terminal-glow);
+    outline-offset: 2px;
+  }
+
+  // Sun icon (dark mode active)
+  .bi-sun-fill {
+    color: var(--terminal-glow);
+  }
+
+  // Moon icon (light mode active)
+  .bi-moon-fill {
+    color: var(--sidenav-color);
+  }
+}
+
+// ============================================================
+// DROPDOWN MENU STYLING
+// ============================================================
+
+.user-profile__dropdown {
+  background: var(--dropdown-bg, rgba(26, 26, 26, 0.98));
+  border: 1px solid var(--dropdown-border, var(--amber-20));
+  border-radius: 2px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  min-width: 220px;
+  overflow: hidden;
+
+  // User info header
+  .user-profile__info {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--sidenav-divider, var(--amber-15));
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .user-profile__name {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--bs-emphasis-color, #fff);
+    margin-bottom: 0.125rem;
+  }
+
+  .user-profile__email {
+    font-size: 0.6875rem;
+    color: var(--bs-secondary-color, #C4A35A);
+  }
+
+  .user-profile__meta {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--sidenav-divider, var(--amber-10));
+  }
+
+  .user-profile__id {
+    font-size: 0.625rem;
+    font-weight: 600;
+    padding: 0.125rem 0.375rem;
+    background: var(--amber-15);
+    border: 1px solid var(--amber-30);
+    border-radius: 2px;
+    color: var(--terminal-glow);
+  }
+
+  .user-profile__login {
+    font-size: 0.625rem;
+    color: var(--bs-tertiary-color, #8B7355);
+    margin-top: 0.375rem;
+
+    .font-monospace {
+      color: var(--bs-secondary-color, #C4A35A);
+    }
+  }
+
+  // Dropdown items
+  .dropdown-item {
+    font-size: 0.75rem;
+    padding: 0.5rem 1rem;
+    color: var(--sidenav-color, #FFA028);
+    transition: all 0.15s ease;
+
+    i {
+      opacity: 0.7;
+      transition: opacity 0.15s ease;
+    }
+
+    &:hover {
+      background: var(--sidenav-link-hover-bg, var(--amber-8));
+      color: var(--bs-emphasis-color, #fff);
+
+      i {
+        opacity: 1;
+        color: var(--terminal-glow);
+      }
+    }
+
+    &:focus {
+      background: var(--sidenav-link-hover-bg, var(--amber-8));
+      outline: none;
+    }
+  }
+
+  .dropdown-divider {
+    border-color: var(--sidenav-divider, var(--amber-15));
+    margin: 0.25rem 0;
+  }
+}
+
+// ============================================================
+// COLLAPSED STATE
+// ============================================================
+
+.user-profile--collapsed {
+  .user-profile__avatar-btn {
+    padding: 0.375rem;
+
+    &:hover {
+      .user-profile__avatar,
+      .user-profile__initials {
+        animation: avatar-glow 1.5s ease-in-out infinite;
+      }
+    }
+  }
+}
+
+// ============================================================
+// DARK MODE ENHANCEMENTS
+// ============================================================
+
+[data-bs-theme="dark"] {
+  .user-profile__avatar-btn:hover .user-profile__avatar {
+    box-shadow: 0 0 12px var(--amber-50);
+  }
+
+  .user-profile__theme-toggle:hover i {
+    text-shadow: 0 0 12px var(--terminal-glow);
+  }
+
+  .user-profile__dropdown {
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+  }
+}
+
+// ============================================================
+// LIGHT MODE ADJUSTMENTS
+// ============================================================
+
+[data-bs-theme="light"] {
+  :host {
+    --terminal-glow: #B45309;
+  }
+
+  .user-profile__avatar {
+    border-color: rgba(180, 83, 9, 0.3);
+  }
+
+  .user-profile__initials {
+    background: linear-gradient(
+      135deg,
+      rgba(180, 83, 9, 0.15) 0%,
+      rgba(180, 83, 9, 0.08) 100%
+    );
+    border-color: rgba(180, 83, 9, 0.3);
+    color: #B45309;
+  }
+
+  .user-profile__theme-toggle .bi-moon-fill {
+    color: var(--sidenav-color);
+  }
+
+  .user-profile__dropdown {
+    background: rgba(255, 255, 255, 0.98);
+    border-color: var(--bs-border-color);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+
+    .user-profile__info {
+      background: var(--bs-tertiary-bg);
+      border-bottom-color: var(--bs-border-color);
+    }
+
+    .user-profile__name {
+      color: var(--bs-emphasis-color);
+    }
+
+    .user-profile__email {
+      color: var(--bs-secondary-color);
+    }
+
+    .user-profile__id {
+      background: rgba(180, 83, 9, 0.1);
+      border-color: rgba(180, 83, 9, 0.2);
+      color: #B45309;
+    }
+
+    .dropdown-item {
+      color: var(--bs-body-color);
+
+      &:hover {
+        background: rgba(180, 83, 9, 0.08);
+        color: var(--bs-emphasis-color);
+
+        i {
+          color: #B45309;
+        }
+      }
+    }
+
+    .dropdown-divider {
+      border-color: var(--bs-border-color);
+    }
+  }
+}
+

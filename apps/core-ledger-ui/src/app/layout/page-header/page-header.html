@@ -1,0 +1,22 @@
+<nav
+  class="terminal-header"
+  [class]="additionalClasses()"
+  role="banner"
+>
+  <!-- Linha de Breadcrumb -->
+  <div class="terminal-header__breadcrumb">
+    <app-breadcrumb />
+  </div>
+
+  <!-- Linha Principal de Cabeçalho -->
+  <div class="terminal-header__main">
+    <div class="terminal-header__title-section">
+      <span class="terminal-header__indicator" aria-hidden="true"></span>
+      <h1 class="terminal-header__title">{{ title() }}</h1>
+    </div>
+
+    <div class="terminal-header__actions">
+      <ng-content />
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,91 @@
+@if (historico(); as hist) {
+  <div class="modal-header border-danger">
+    <h5 class="modal-title text-danger" id="modal-title">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      Excluir Valor
+    </h5>
+    <button
+      type="button"
+      class="btn-close"
+      (click)="cancel()"
+      [disabled]="isDeleting()"
+      aria-label="Fechar"
+    ></button>
+  </div>
+
+  <div class="modal-body">
+    @if (errorMessage(); as error) {
+      <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ error }}
+      </div>
+    }
+
+    <p class="mb-4">
+      Tem certeza que deseja excluir este valor historico? Esta acao nao pode ser desfeita.
+    </p>
+
+    <!-- Value Details -->
+    <div class="value-details">
+      <div class="detail-row">
+        <span class="detail-label">Indexador:</span>
+        <span class="detail-value font-monospace">{{ hist.indexadorCodigo }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Data Referencia:</span>
+        <span class="detail-value font-monospace">{{ hist.dataReferencia | date: 'dd/MM/yyyy' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Valor:</span>
+        <span class="detail-value font-monospace">{{ hist.valor | number: '1.2-8' }}</span>
+      </div>
+      @if (hist.fatorDiario !== null) {
+        <div class="detail-row">
+          <span class="detail-label">Fator Diario:</span>
+          <span class="detail-value font-monospace">{{ hist.fatorDiario | number: '1.9-12' }}</span>
+        </div>
+      }
+      @if (hist.variacaoPercentual !== null) {
+        <div class="detail-row">
+          <span class="detail-label">Variacao %:</span>
+          <span class="detail-value font-monospace">{{ hist.variacaoPercentual | number: '1.2-4' }}%</span>
+        </div>
+      }
+      @if (hist.fonte) {
+        <div class="detail-row">
+          <span class="detail-label">Fonte:</span>
+          <span class="detail-value">{{ hist.fonte }}</span>
+        </div>
+      }
+      <div class="detail-row">
+        <span class="detail-label">Criado em:</span>
+        <span class="detail-value text-muted small">{{ hist.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button
+      type="button"
+      class="btn btn-secondary"
+      (click)="cancel()"
+      [disabled]="isDeleting()"
+    >
+      Cancelar
+    </button>
+    <button
+      type="button"
+      class="btn btn-danger"
+      (click)="confirm()"
+      [disabled]="isDeleting()"
+    >
+      @if (isDeleting()) {
+        <span class="spinner-border spinner-border-sm me-1"></span>
+        Excluindo...
+      } @else {
+        <i class="bi bi-trash me-1"></i>
+        Excluir
+      }
+    </button>
+  </div>
+}

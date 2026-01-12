@@ -1,0 +1,137 @@
+{
+  "name": "core-ledger-ui",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/core-ledger-ui/src",
+  "prefix": "app",
+  "tags": ["type:app", "scope:frontend"],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "options": {
+        "browser": "apps/core-ledger-ui/src/main.ts",
+        "tsConfig": "apps/core-ledger-ui/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/core-ledger-ui/public"
+          },
+          {
+            "glob": "IBMPlexSans-{Light,Regular,Medium,SemiBold,Bold}.woff2",
+            "input": "node_modules/@ibm/plex/IBM-Plex-Sans/fonts/complete/woff2",
+            "output": "assets/fonts/ibm-plex-sans"
+          },
+          {
+            "glob": "IBMPlexMono-{Light,Regular,Medium,SemiBold,Bold}.woff2",
+            "input": "node_modules/@ibm/plex/IBM-Plex-Mono/fonts/complete/woff2",
+            "output": "assets/fonts/ibm-plex-mono"
+          }
+        ],
+        "styles": ["apps/core-ledger-ui/src/styles.scss"],
+        "polyfills": ["@angular/localize/init"],
+        "outputPath": "dist/apps/core-ledger-ui"
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kB",
+              "maximumError": "1MB"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kB",
+              "maximumError": "8kB"
+            }
+          ],
+          "outputHashing": "all",
+          "fileReplacements": [
+            {
+              "replace": "apps/core-ledger-ui/src/environments/environment.ts",
+              "with": "apps/core-ledger-ui/src/environments/environment.production.ts"
+            },
+            {
+              "replace": "apps/core-ledger-ui/src/app/auth/mock-tokens.ts",
+              "with": "apps/core-ledger-ui/src/app/auth/mock-tokens.production.ts"
+            },
+            {
+              "replace": "apps/core-ledger-ui/src/app/auth/mock-users.ts",
+              "with": "apps/core-ledger-ui/src/app/auth/mock-users.production.ts"
+            },
+            {
+              "replace": "apps/core-ledger-ui/src/app/api/mock-data/index.ts",
+              "with": "apps/core-ledger-ui/src/app/api/mock-data.production.ts"
+            },
+            {
+              "replace": "apps/core-ledger-ui/src/app/services/mock-notification-hub.service.ts",
+              "with": "apps/core-ledger-ui/src/app/services/mock-notification-hub.service.production.ts"
+            }
+          ]
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "fileReplacements": [
+            {
+              "replace": "apps/core-ledger-ui/src/environments/environment.ts",
+              "with": "apps/core-ledger-ui/src/environments/environment.development.ts"
+            }
+          ]
+        },
+        "local-auth": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "fileReplacements": [
+            {
+              "replace": "apps/core-ledger-ui/src/environments/environment.ts",
+              "with": "apps/core-ledger-ui/src/environments/environment.local-auth.ts"
+            }
+          ]
+        },
+        "local-noauth": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "fileReplacements": [
+            {
+              "replace": "apps/core-ledger-ui/src/environments/environment.ts",
+              "with": "apps/core-ledger-ui/src/environments/environment.local-noauth.ts"
+            }
+          ]
+        }
+      },
+      "defaultConfiguration": "local-noauth"
+    },
+    "serve": {
+      "executor": "@angular/build:dev-server",
+      "options": {
+        "proxyConfig": "apps/core-ledger-ui/src/proxy.conf.json"
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "core-ledger-ui:build:production"
+        },
+        "development": {
+          "buildTarget": "core-ledger-ui:build:development"
+        },
+        "local-auth": {
+          "buildTarget": "core-ledger-ui:build:local-auth"
+        },
+        "local-noauth": {
+          "buildTarget": "core-ledger-ui:build:local-noauth"
+        }
+      },
+      "defaultConfiguration": "local-noauth"
+    },
+    "test": {
+      "executor": "@angular/build:unit-test",
+      "options": {
+        "tsConfig": "apps/core-ledger-ui/tsconfig.spec.json"
+      }
+    }
+  }
+}

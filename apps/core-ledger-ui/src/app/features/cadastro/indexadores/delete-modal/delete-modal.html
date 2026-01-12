@@ -1,0 +1,109 @@
+<div class="modal-header">
+  <h5 id="modal-title" class="modal-title">Excluir Indexador</h5>
+  <button
+    type="button"
+    class="btn-close"
+    aria-label="Fechar"
+    (click)="activeModal.dismiss()"
+  ></button>
+</div>
+<div class="modal-body">
+  @if (indexador(); as idx) {
+    <p>Tem certeza que deseja excluir este indexador?</p>
+
+    <!-- Warning based on historico count -->
+    @if (idx.historicoCount > 0) {
+      <div class="alert alert-danger" role="alert">
+        <div class="d-flex align-items-start">
+          <i class="bi bi-exclamation-triangle-fill fs-4 me-2" aria-hidden="true"></i>
+          <div>
+            <strong>Atencao:</strong> Este indexador possui <strong>{{ idx.historicoCount }}</strong> registro(s) de historico.
+            Excluir o indexador ira remover permanentemente todo o historico.
+            <strong>Considere inativar ao inves de excluir.</strong>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="alert alert-warning" role="alert">
+        <div class="d-flex align-items-start">
+          <i class="bi bi-exclamation-triangle-fill fs-4 me-2" aria-hidden="true"></i>
+          <div>
+            <strong>Atencao:</strong> Esta acao nao pode ser desfeita.
+          </div>
+        </div>
+      </div>
+    }
+
+    <div class="card bg-body-tertiary border-0">
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-4">Codigo:</dt>
+          <dd class="col-sm-8 fw-semibold font-monospace">{{ idx.codigo }}</dd>
+
+          <dt class="col-sm-4">Nome:</dt>
+          <dd class="col-sm-8">{{ idx.nome }}</dd>
+
+          <dt class="col-sm-4">Tipo:</dt>
+          <dd class="col-sm-8">
+            <span class="tipo-indicator" [style.color]="getTipoColor(idx)">
+              <i class="bi {{ getTipoIcon(idx) }} me-1"></i>
+              {{ idx.tipoDescricao }}
+            </span>
+          </dd>
+
+          <dt class="col-sm-4">Periodicidade:</dt>
+          <dd class="col-sm-8">{{ idx.periodicidadeDescricao }}</dd>
+
+          @if (idx.fonte) {
+            <dt class="col-sm-4">Fonte:</dt>
+            <dd class="col-sm-8">{{ idx.fonte }}</dd>
+          }
+
+          <dt class="col-sm-4">Status:</dt>
+          <dd class="col-sm-8">
+            @if (idx.ativo) {
+              <span class="badge bg-success">Ativo</span>
+            } @else {
+              <span class="badge bg-secondary">Inativo</span>
+            }
+          </dd>
+
+          <!-- Historico stats -->
+          @if (idx.ultimoValor !== null) {
+            <dt class="col-sm-4">Ultimo Valor:</dt>
+            <dd class="col-sm-8 font-monospace">{{ idx.ultimoValor | number:'1.2-6' }}</dd>
+          }
+
+          @if (idx.ultimaData) {
+            <dt class="col-sm-4">Ultima Data:</dt>
+            <dd class="col-sm-8">{{ idx.ultimaData | date:'dd/MM/yyyy' }}</dd>
+          }
+
+          <dt class="col-sm-4">Registros:</dt>
+          <dd class="col-sm-8">
+            @if (idx.historicoCount > 0) {
+              <span class="badge bg-info text-dark">{{ idx.historicoCount }} registro(s)</span>
+            } @else {
+              <span class="text-muted">Nenhum registro</span>
+            }
+          </dd>
+        </dl>
+      </div>
+    </div>
+  }
+</div>
+<div class="modal-footer">
+  @if (indexador(); as idx) {
+    <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">Cancelar</button>
+    @if (idx.ativo && idx.historicoCount > 0) {
+      <button type="button" class="btn btn-warning" (click)="activeModal.close('inactivate')">
+        <i class="bi bi-pause-circle me-1" aria-hidden="true"></i>
+        Inativar
+      </button>
+    }
+    <button type="button" class="btn btn-danger" (click)="activeModal.close('confirm')">
+      <i class="bi bi-trash me-1" aria-hidden="true"></i>
+      Excluir
+    </button>
+  }
+</div>

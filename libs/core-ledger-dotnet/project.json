@@ -1,0 +1,29 @@
+{
+  "name": "core-ledger-dotnet",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/core-ledger-dotnet",
+  "tags": ["type:lib", "scope:backend"],
+  "targets": {
+    "build": {
+      "command": "dotnet build CoreLedger.Infrastructure/CoreLedger.Infrastructure.csproj --configuration Release",
+      "options": { "cwd": "libs/core-ledger-dotnet" },
+      "cache": true,
+      "inputs": ["{projectRoot}/**/*.cs", "{projectRoot}/**/*.csproj"],
+      "outputs": ["{projectRoot}/CoreLedger.Domain/bin", "{projectRoot}/CoreLedger.Application/bin", "{projectRoot}/CoreLedger.Infrastructure/bin"]
+    },
+    "test": {
+      "command": "dotnet test CoreLedger.UnitTests/CoreLedger.UnitTests.csproj",
+      "options": { "cwd": "libs/core-ledger-dotnet" },
+      "cache": true
+    },
+    "test:unit": {
+      "command": "dotnet test CoreLedger.UnitTests/CoreLedger.UnitTests.csproj",
+      "options": { "cwd": "libs/core-ledger-dotnet" }
+    },
+    "test:integration": {
+      "command": "dotnet test CoreLedger.IntegrationTests/CoreLedger.IntegrationTests.csproj",
+      "options": { "cwd": "libs/core-ledger-dotnet" }
+    }
+  }
+}

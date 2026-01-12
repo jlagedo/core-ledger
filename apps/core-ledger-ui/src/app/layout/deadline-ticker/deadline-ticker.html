@@ -1,0 +1,127 @@
+@let urgent = mostUrgent();
+@if (activeDeadlines().length > 0) {
+  <div class="deadline-ticker"
+       [class.deadline-ticker--collapsed]="isCollapsed()"
+       [class.deadline-ticker--minimized]="isMinimized() && !isCollapsed()"
+       [class.deadline-ticker--critical]="hasCritical()"
+       (mouseenter)="showExpanded()"
+       (mouseleave)="hideExpanded()">
+
+    @if (isCollapsed()) {
+      <!-- Sidenav Recolhida: Mostrar apenas indicador -->
+      <div class="deadline-ticker__indicator"
+           [class.deadline-ticker__indicator--critical]="hasCritical()"
+           [class.deadline-ticker__indicator--warning]="urgent?.urgency === 'warning'">
+        <i class="bi bi-clock-history"></i>
+        <span class="deadline-ticker__badge">{{ totalCount() }}</span>
+      </div>
+    } @else if (isMinimized()) {
+      <!-- Usuário Minimizou: Pílula compacta com contagem e hora mais urgente -->
+      <button type="button"
+              class="deadline-ticker__pill"
+              [class.deadline-ticker__pill--critical]="hasCritical()"
+              [class.deadline-ticker__pill--warning]="urgent?.urgency === 'warning'"
+              (click)="toggleMinimized()"
+              aria-label="Expandir ticker de prazos">
+        <span class="deadline-ticker__pill-icon">
+          <i class="bi bi-broadcast"></i>
+        </span>
+        <span class="deadline-ticker__pill-count">
+          <span class="deadline-ticker__pill-number">{{ totalCount() }}</span>
+          <span class="deadline-ticker__pill-label">ATIVO</span>
+        </span>
+        <span class="deadline-ticker__pill-divider"></span>
+        <span class="deadline-ticker__pill-urgent">
+          <span class="deadline-ticker__pill-status"
+                [class.deadline-ticker__pill-status--safe]="urgent?.urgency === 'safe'"
+                [class.deadline-ticker__pill-status--warning]="urgent?.urgency === 'warning'"
+                [class.deadline-ticker__pill-status--critical]="urgent?.urgency === 'critical'">
+          </span>
+          <span class="deadline-ticker__pill-time">{{ urgent?.remainingFormatted }}</span>
+        </span>
+        <span class="deadline-ticker__pill-expand">
+          <i class="bi bi-chevron-down"></i>
+        </span>
+      </button>
+    } @else {
+      <!-- Expandido: Mostrar lista completa do ticker -->
+      <div class="deadline-ticker__header">
+        <span class="deadline-ticker__title">
+          <i class="bi bi-broadcast" aria-hidden="true"></i>
+          <span>STATUS DAS OPS</span>
+        </span>
+        <div class="deadline-ticker__controls">
+          @if (hasMoreItems()) {
+            <button type="button"
+                    class="deadline-ticker__nav-btn"
+                    (click)="cyclePrev(); $event.stopPropagation()"
+                    aria-label="Prazos anteriores">
+              <i class="bi bi-chevron-up"></i>
+            </button>
+            <button type="button"
+                    class="deadline-ticker__nav-btn"
+                    (click)="cycleNext(); $event.stopPropagation()"
+                    aria-label="Próximos prazos">
+              <i class="bi bi-chevron-down"></i>
+            </button>
+          }
+          <button type="button"
+                  class="deadline-ticker__minimize-btn"
+                  (click)="toggleMinimized(); $event.stopPropagation()"
+                  aria-label="Minimizar ticker">
+            <i class="bi bi-dash"></i>
+          </button>
+        </div>
+      </div>
+
+      <ul class="deadline-ticker__list" role="list">
+        @for (deadline of visibleDeadlines(); track deadline.id) {
+          <li class="deadline-ticker__item"
+              [class.deadline-ticker__item--safe]="deadline.urgency === 'safe'"
+              [class.deadline-ticker__item--warning]="deadline.urgency === 'warning'"
+              [class.deadline-ticker__item--critical]="deadline.urgency === 'critical'"
+              [class.deadline-ticker__item--expired]="deadline.expired">
+            <span class="deadline-ticker__status" aria-hidden="true"></span>
+            <span class="deadline-ticker__label">{{ deadline.label }}</span>
+            <span class="deadline-ticker__time">{{ deadline.remainingFormatted }}</span>
+          </li>
+        }
+      </ul>
+
+      @if (hasMoreItems()) {
+        <div class="deadline-ticker__more">
+          <span>{{ totalCount() }} total</span>
+        </div>
+      }
+    }
+
+    <!-- Flyout panel for full list (only when not minimized and hovered) -->
+    @if (isExpanded() && !isCollapsed() && !isMinimized()) {
+      <div class="deadline-ticker__flyout"
+           (mouseenter)="showExpanded()"
+           (mouseleave)="hideExpanded()">
+        <div class="deadline-ticker__flyout-header">
+          <i class="bi bi-clock-history"></i>
+          <span>Operational Deadlines</span>
+        </div>
+        <ul class="deadline-ticker__flyout-list">
+          @for (deadline of activeDeadlines(); track deadline.id) {
+            <li class="deadline-ticker__flyout-item"
+                [class.deadline-ticker__flyout-item--safe]="deadline.urgency === 'safe'"
+                [class.deadline-ticker__flyout-item--warning]="deadline.urgency === 'warning'"
+                [class.deadline-ticker__flyout-item--critical]="deadline.urgency === 'critical'">
+              <div class="deadline-ticker__flyout-row">
+                <span class="deadline-ticker__flyout-status"></span>
+                <span class="deadline-ticker__flyout-label">{{ deadline.label }}</span>
+                <span class="deadline-ticker__flyout-time">{{ deadline.remainingFormatted }}</span>
+              </div>
+              @if (deadline.description) {
+                <div class="deadline-ticker__flyout-desc">{{ deadline.description }}</div>
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
+}

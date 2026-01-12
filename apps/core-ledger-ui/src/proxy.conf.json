@@ -1,0 +1,20 @@
+{
+  "/api/**": {
+    "target": "http://localhost:5071",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "ws": true
+  },
+  "/hubs/**": {
+    "target": "http://localhost:5071",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "ws": true,
+    "timeout": 0,
+    "proxyTimeout": 0,
+    "proxyReadTimeout": 0,
+    "proxyWriteTimeout": 0
+  }
+}

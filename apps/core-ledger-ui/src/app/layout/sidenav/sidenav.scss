@@ -1,0 +1,1017 @@
+// ============================================================
+// SIDENAV — Bloomberg Terminal Navigation Panel
+//
+// A sophisticated navigation system with the signature
+// Bloomberg terminal aesthetic: amber accents, grid overlays,
+// and subtle glow effects.
+// ============================================================
+
+// ============================================================
+// ANIMATIONS
+// ============================================================
+
+@keyframes status-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 8px var(--terminal-glow);
+  }
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 4px var(--terminal-glow);
+  }
+}
+
+// ============================================================
+// HOST
+// ============================================================
+
+:host {
+  display: contents;
+}
+
+// ============================================================
+// SIDENAV WRAPPER
+// ============================================================
+
+.sidenav-wrapper {
+  // Terminal glow is set via theme variables (--terminal-glow)
+  --grid-line: var(--bs-border-color);
+
+  // Flyout-specific effects (dark mode defaults, light mode overrides below)
+  --flyout-shadow: 4px 4px 24px rgba(0, 0, 0, 0.6), 0 0 2px var(--terminal-glow-muted);
+  --flyout-grid-pattern:
+    linear-gradient(90deg, var(--terminal-glow-bg) 1px, transparent 1px),
+    linear-gradient(var(--terminal-glow-bg) 1px, transparent 1px);
+  --flyout-icon-glow: 0 0 8px var(--terminal-glow);
+  --flyout-dot-glow: 0 0 6px var(--terminal-glow);
+  --flyout-dot-glow-active: 0 0 8px var(--terminal-glow);
+
+  position: relative;
+  background-color: var(--sidenav-bg);
+  color: var(--sidenav-color);
+  border-color: var(--sidenav-border-color) !important;
+  overflow: visible; // Allow flyout to extend outside wrapper
+
+  // Gradient background
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: var(--sidenav-gradient);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  // Grid pattern overlay (subtle terminal texture)
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(var(--grid-line) 1px, transparent 1px);
+    background-size: 32px 32px;
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  // Left accent line (terminal edge glow)
+  .sidenav-accent-line {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(
+      180deg,
+      var(--terminal-glow) 0%,
+      transparent 20%,
+      transparent 80%,
+      var(--terminal-glow) 100%
+    );
+    opacity: 0.5;
+    z-index: 2;
+  }
+
+  // Ensure content appears above overlays (except flyout which needs absolute positioning)
+  > *:not(.nav-flyout) {
+    position: relative;
+    z-index: 1;
+  }
+
+  // Navigation links base
+  .nav-link,
+  a,
+  span {
+    color: inherit;
+    border-color: var(--sidenav-border-color);
+  }
+}
+
+// ============================================================
+// WIDTH TRANSITION
+// ============================================================
+
+.sidenav-width-transition {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ============================================================
+// HEADER SECTION (Logo & Toggle)
+// Aligned with page-header total height (breadcrumb + main row)
+// ============================================================
+
+.header-section {
+  // Uses shared --header-height CSS variable for perfect alignment
+  // with the page-header component (breadcrumb + title rows)
+  padding: 1rem;
+  border-bottom: 1px solid var(--sidenav-divider);
+  height: var(--header-height, 67px);
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  // Logo styling
+  .sidenav-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+
+    &:hover {
+      .sidenav-logo__icon {
+        color: var(--terminal-glow);
+        text-shadow: 0 0 12px var(--terminal-glow);
+      }
+    }
+  }
+
+  .sidenav-logo__icon {
+    font-size: 1.25rem;
+    color: var(--terminal-glow);
+    transition: all 0.3s ease;
+  }
+
+  .sidenav-logo__text {
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    // Use sidenav's own color context (cream on dark sidebar)
+    color: var(--sidenav-color);
+  }
+
+  // Status indicator (pulsing dot)
+  .sidenav-status {
+    width: 6px;
+    height: 6px;
+    background: var(--terminal-glow);
+    border-radius: 1px;
+    animation: status-pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  // Toggle button
+  .sidenav-toggle {
+    background: transparent;
+    border: none;
+    color: var(--sidenav-color);
+    padding: 0.25rem;
+    border-radius: 2px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--sidenav-link-hover-bg);
+      color: var(--terminal-glow);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--terminal-glow);
+      outline-offset: 2px;
+    }
+
+    i {
+      font-size: 1.25rem;
+      transition: transform 0.2s ease;
+    }
+  }
+}
+
+// ============================================================
+// SEARCH FILTER
+// Bloomberg Terminal-style inline search with amber accents
+// ============================================================
+
+@keyframes search-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 1px var(--terminal-glow-subtle);
+  }
+  50% {
+    box-shadow: 0 0 0 1px var(--terminal-glow-muted), 0 0 8px var(--terminal-glow-subtle);
+  }
+}
+
+.sidenav-search {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--sidenav-divider);
+  flex-shrink: 0;
+  position: relative;
+  transition: all 0.2s ease;
+
+  &__wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--sidenav-link-hover-bg);
+    border: 1px solid var(--sidenav-divider);
+    border-radius: 2px;
+    transition: all 0.2s ease;
+
+    &:focus-within {
+      border-color: var(--terminal-glow-muted);
+      background: var(--sidenav-active-bg);
+      animation: search-glow-pulse 2s ease-in-out infinite;
+    }
+  }
+
+  &__icon {
+    position: absolute;
+    left: 0.5rem;
+    font-size: 0.625rem;
+    color: var(--terminal-glow-muted);
+    transition: color 0.2s ease;
+    pointer-events: none;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 0.375rem 1.75rem 0.375rem 1.5rem;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 0.6875rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    color: var(--sidenav-color);
+
+    &::placeholder {
+      color: var(--sidenav-color);
+      opacity: 0.4;
+      font-style: italic;
+    }
+
+    &:focus::placeholder {
+      opacity: 0.6;
+    }
+  }
+
+  &__clear {
+    position: absolute;
+    right: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 2px;
+    color: var(--sidenav-color);
+    opacity: 0.5;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    i {
+      font-size: 0.75rem;
+    }
+
+    &:hover {
+      opacity: 1;
+      background: var(--sidenav-hover);
+      color: var(--terminal-glow);
+    }
+  }
+
+  &__no-results {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0 0.25rem;
+    font-size: 0.625rem;
+    color: var(--sidenav-color);
+    opacity: 0.5;
+
+    i {
+      font-size: 0.75rem;
+    }
+  }
+
+  // Active state - when search has content or is focused
+  &--active {
+    .sidenav-search__icon {
+      color: var(--terminal-glow);
+    }
+  }
+}
+
+// Search highlight styling (for highlighted matches)
+.search-highlight {
+  background: var(--terminal-glow-subtle);
+  color: var(--terminal-glow);
+  padding: 0 0.125rem;
+  border-radius: 1px;
+  font-weight: 600;
+}
+
+// ============================================================
+// SECTION LABELS
+// ============================================================
+
+.sidenav-section {
+  padding: 0.75rem 1rem 0.375rem;
+
+  &__label {
+    font-size: 0.5625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--terminal-glow);
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        var(--sidenav-divider) 0%,
+        transparent 100%
+      );
+    }
+  }
+
+  // Hide label when collapsed
+  &--collapsed {
+    padding: 0.5rem 0;
+
+    .sidenav-section__label {
+      justify-content: center;
+
+      span {
+        display: none;
+      }
+
+      &::after {
+        display: none;
+      }
+
+      &::before {
+        content: '';
+        width: 16px;
+        height: 1px;
+        background: var(--sidenav-divider);
+      }
+    }
+  }
+}
+
+// ============================================================
+// SCROLLABLE NAVIGATION CONTAINER
+// ============================================================
+
+.sidenav-scroll-container {
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 0; // Critical for flex item scrolling
+
+  // Reserve scrollbar space to prevent layout shift when content overflows
+  scrollbar-gutter: stable;
+
+  // Custom scrollbar styling (Bloomberg terminal aesthetic)
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--sidenav-divider);
+    border-radius: 2px;
+
+    &:hover {
+      background: var(--terminal-glow-muted);
+    }
+  }
+
+  // Firefox scrollbar
+  scrollbar-width: thin;
+  scrollbar-color: var(--sidenav-divider) transparent;
+
+  // Fade effect at top/bottom edges (indicates scrollable content)
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    black 8px,
+    black calc(100% - 8px),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    black 8px,
+    black calc(100% - 8px),
+    transparent 100%
+  );
+}
+
+// ============================================================
+// NAVIGATION MENU
+// ============================================================
+
+.sidenav-nav {
+  padding: 0.25rem 0;
+  margin-bottom: 0; // Remove mb-auto since scroll container handles spacing
+}
+
+// ============================================================
+// NAVIGATION ITEMS
+// ============================================================
+
+.nav-item {
+  margin: 1px 0;
+}
+
+.nav-link {
+  white-space: nowrap;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0;
+  border-left: 2px solid transparent;
+  transition: all 0.2s ease;
+  position: relative;
+
+  // Icon styling
+  i.bi {
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    opacity: 0.85;
+  }
+
+  // Hover state
+  &:hover {
+    background-color: var(--sidenav-link-hover-bg);
+    border-left-color: var(--terminal-glow-muted);
+
+    i.bi {
+      opacity: 1;
+      color: var(--terminal-glow);
+    }
+  }
+
+  // Active state
+  &.active {
+    background-color: var(--sidenav-active-bg);
+    border-left-color: var(--sidenav-active-border);
+    color: var(--bs-emphasis-color);
+
+    i.bi {
+      opacity: 1;
+      color: var(--terminal-glow);
+      text-shadow: 0 0 8px var(--terminal-glow);
+    }
+
+    // Subtle glow effect
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--terminal-glow);
+      box-shadow: 0 0 8px var(--terminal-glow);
+      opacity: 0.8;
+    }
+  }
+
+  // Parent active state - when a child route is active
+  // Shows a subtle indicator that user is within this section
+  &.parent-active {
+    background-color: var(--sidenav-hover);
+    color: var(--bs-emphasis-color);
+
+    i.bi {
+      opacity: 1;
+      color: var(--terminal-glow);
+    }
+
+    // Muted left indicator (less prominent than active)
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--terminal-glow);
+      opacity: 0.5;
+    }
+
+    // Chevron should indicate expanded/active section
+    .bi-chevron-right,
+    .bi-chevron-down {
+      opacity: 0.9;
+      color: var(--terminal-glow-muted);
+    }
+  }
+
+  // Parent item (with children) styling
+  &.nav-link--parent {
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-size: 0.6875rem;
+  }
+
+  // Chevron icon rotation
+  .bi-chevron-right,
+  .bi-chevron-down {
+    font-size: 0.625rem;
+    opacity: 0.6;
+    transition: transform 0.25s ease, opacity 0.2s ease;
+  }
+
+  .bi-chevron-down {
+    transform: rotate(0deg);
+  }
+
+  .bi-chevron-right {
+    transform: rotate(-90deg);
+  }
+
+  &:hover .bi-chevron-right,
+  &:hover .bi-chevron-down {
+    opacity: 1;
+  }
+}
+
+// ============================================================
+// SUBMENU
+// ============================================================
+
+.btn-toggle-nav {
+  padding-left: 0;
+  margin-top: 2px;
+  border-left: 1px solid var(--sidenav-divider);
+  margin-left: 1.5rem;
+
+  .nav-link {
+    font-size: 0.6875rem;
+    font-weight: 400;
+    padding: 0.375rem 0.75rem;
+    text-transform: none;
+    letter-spacing: 0;
+    border-left: none;
+
+    &:hover {
+      border-left: none;
+      padding-left: 0.875rem;
+    }
+
+    &.active {
+      border-left: none;
+
+      &::before {
+        display: none;
+      }
+
+      // Indicator dot for active submenu item
+      &::after {
+        content: '';
+        position: absolute;
+        left: -0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 4px;
+        background: var(--terminal-glow);
+        border-radius: 1px;
+        box-shadow: 0 0 6px var(--terminal-glow);
+      }
+    }
+  }
+}
+
+// ============================================================
+// FLYOUT SUBMENU (Collapsed State)
+// Bloomberg Terminal-style CSS hover panel
+// ============================================================
+
+@keyframes flyout-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// Child count indicator badge
+.nav-child-indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  font-size: 0.5rem;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+  background: var(--terminal-glow-subtle);
+  color: var(--terminal-glow);
+  border-radius: 2px;
+  transition: all 0.2s ease;
+  opacity: 0.8;
+}
+
+// Flyout trigger - extends hover area for smooth mouse transition
+.nav-flyout-trigger {
+  position: relative;
+
+  // Hover bridge - extends hover area to reach the flyout
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 100%;
+    width: 16px;
+    height: 100%;
+    background: transparent;
+  }
+
+  &:hover {
+    .nav-child-indicator {
+      background: var(--terminal-glow);
+      color: var(--sidenav-bg);
+      opacity: 1;
+      box-shadow: 0 0 8px var(--terminal-glow);
+    }
+  }
+}
+
+// Flyout panel - positioned absolute relative to sidenav-wrapper
+// Using !important to override the > * rule on sidenav-wrapper
+.nav-flyout {
+  position: absolute !important;
+  left: 100% !important; // Right edge of sidenav
+  min-width: 180px !important;
+  max-width: 220px;
+  width: auto;
+  background: var(--sidenav-bg) !important;
+  border: 1px solid var(--sidenav-divider) !important;
+  border-left: 2px solid var(--terminal-glow) !important;
+  border-radius: 0 4px 4px 0;
+  box-shadow: var(--flyout-shadow);
+  z-index: 1060 !important;
+  animation: flyout-enter 0.15s ease-out forwards;
+  overflow: visible;
+
+  // Grid pattern overlay
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--flyout-grid-pattern);
+    background-size: 24px 24px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &__header {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    border-bottom: 1px solid var(--sidenav-divider);
+    background: var(--terminal-glow-bg);
+  }
+
+  &__icon {
+    font-size: 0.875rem;
+    color: var(--terminal-glow);
+    text-shadow: var(--flyout-icon-glow);
+  }
+
+  &__title {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--bs-emphasis-color);
+  }
+
+  &__list {
+    position: relative;
+    z-index: 1;
+    list-style: none;
+    margin: 0;
+    padding: 0.375rem 0;
+  }
+
+  &__link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.6875rem;
+    font-weight: 400;
+    color: var(--sidenav-color);
+    text-decoration: none;
+    transition: all 0.15s ease;
+    position: relative;
+
+    &:hover {
+      background: var(--sidenav-link-hover-bg);
+      color: var(--bs-emphasis-color);
+
+      .nav-flyout__dot {
+        background: var(--terminal-glow);
+        box-shadow: var(--flyout-dot-glow);
+      }
+    }
+
+    &.active {
+      background: var(--sidenav-active-bg);
+      color: var(--bs-emphasis-color);
+
+      .nav-flyout__dot {
+        background: var(--terminal-glow);
+        box-shadow: var(--flyout-dot-glow-active);
+        animation: status-pulse 2s ease-in-out infinite;
+      }
+
+      // Left accent bar
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--terminal-glow);
+        box-shadow: var(--flyout-dot-glow);
+      }
+    }
+  }
+
+  &__dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 1px;
+    background: var(--terminal-glow-muted);
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+}
+
+// ============================================================
+// COLLAPSED STATE OVERRIDES
+// ============================================================
+
+.sidenav-wrapper--collapsed {
+  .nav-link {
+    justify-content: center;
+    padding: 0.625rem;
+    border-left-width: 0;
+
+    i.bi {
+      font-size: 1rem;
+    }
+
+    &:hover {
+      border-left-width: 0;
+
+      i.bi {
+        transform: scale(1.1);
+        text-shadow: 0 0 8px var(--terminal-glow);
+      }
+    }
+
+    &.active {
+      &::before {
+        width: 2px;
+        left: 0;
+      }
+    }
+
+    // Parent active in collapsed mode - subtle highlight
+    &.parent-active {
+      background-color: var(--sidenav-hover);
+
+      i.bi {
+        color: var(--terminal-glow);
+      }
+
+      &::before {
+        width: 2px;
+        left: 0;
+        opacity: 0.5;
+      }
+    }
+  }
+}
+
+// ============================================================
+// FOOTER / USER SECTION
+// ============================================================
+
+.sidenav-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--sidenav-divider);
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20%;
+    right: 20%;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--terminal-glow-muted),
+      transparent
+    );
+  }
+
+  // Inner container for deadline ticker + user profile layout
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+
+    // Deadline ticker takes available space
+    app-deadline-ticker {
+      flex: 1;
+      min-width: 0;
+    }
+
+    // User profile at bottom
+    app-user-profile {
+      flex-shrink: 0;
+    }
+
+    // Collapsed state - stack vertically with centered items
+    &--collapsed {
+      padding: 0.5rem;
+      align-items: center;
+
+      app-deadline-ticker,
+      app-user-profile {
+        width: auto;
+      }
+    }
+  }
+}
+
+.sidenav-wrapper button {
+  color: inherit;
+
+  i {
+    color: inherit;
+  }
+}
+
+// ============================================================
+// DARK MODE ENHANCEMENTS
+// ============================================================
+
+[data-bs-theme="dark"] {
+  .sidenav-wrapper {
+    background: var(--sidenav-bg);
+
+    &::after {
+      opacity: 0.04;
+    }
+  }
+
+  .sidenav-accent-line {
+    opacity: 0.7;
+  }
+
+  .sidenav-logo__icon {
+    text-shadow: 0 0 8px var(--terminal-glow);
+  }
+
+  .nav-link.active {
+    background-color: var(--sidenav-active-bg);
+  }
+
+  .nav-child-indicator {
+    background: var(--terminal-glow-subtle);
+    color: var(--terminal-glow);
+  }
+}
+
+// ============================================================
+// LIGHT MODE ADJUSTMENTS
+// ============================================================
+
+[data-bs-theme="light"] {
+  .sidenav-wrapper {
+    // Light mode flyout effects - no glow, subtle shadows
+    --flyout-shadow: 4px 4px 20px rgba(0, 0, 0, 0.12), 0 0 1px var(--terminal-glow-muted);
+    --flyout-icon-glow: none;
+    --flyout-dot-glow: none;
+    --flyout-dot-glow-active: none;
+
+    &::after {
+      opacity: 0.02;
+    }
+  }
+
+  .sidenav-accent-line {
+    opacity: 0.4;
+  }
+
+  .sidenav-section__label {
+    color: var(--terminal-glow);
+  }
+
+  .nav-link.active {
+    i.bi {
+      text-shadow: none;
+    }
+
+    &::before {
+      box-shadow: none;
+    }
+  }
+
+  .nav-child-indicator {
+    background: var(--terminal-glow-subtle);
+    color: var(--terminal-glow);
+  }
+
+  .nav-flyout-trigger:hover .nav-child-indicator {
+    background: var(--terminal-glow);
+    box-shadow: none;
+  }
+
+  // Flyout light mode - use white for contrast against warm body bg
+  .nav-flyout {
+    background: var(--surface-base) !important;
+    border-color: var(--bs-border-color) !important;
+    box-shadow: 4px 4px 20px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+
+    &__header {
+      background: var(--bs-tertiary-bg);
+    }
+
+    &__link {
+      color: var(--bs-body-color);
+
+      &.active .nav-flyout__dot {
+        animation: none;
+      }
+    }
+  }
+
+  // Search light mode - more subtle styling
+  .sidenav-search {
+    &__wrapper {
+      background: var(--sidenav-link-hover-bg);
+      border-color: var(--sidenav-divider);
+
+      &:focus-within {
+        background: var(--sidenav-active-bg);
+        animation: none;
+        box-shadow: 0 0 0 1px var(--terminal-glow-muted);
+      }
+    }
+  }
+
+  .search-highlight {
+    background: rgba(var(--terminal-glow), 0.2);
+  }
+}

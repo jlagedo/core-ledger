@@ -1,0 +1,19 @@
+<main class="d-flex align-items-center justify-content-center vh-100 bg-body-tertiary">
+  <div class="card bg-body shadow-sm border-0 rounded-4 w-100" style="max-width: 25rem;">
+    <div class="card-body p-5 text-center">
+      <img ngSrc="apple-touch-icon.png" alt="Logo Core Ledger" width="64" height="64" class="mb-4">
+      <h1 class="h3 mb-3">Core Ledger</h1>
+      <p class="text-body-secondary mb-4">Sistema de Contabilidade de Fundos</p>
+      <button (click)="login()" class="btn btn-primary btn-lg w-100">
+        <i class="bi bi-box-arrow-in-right me-2"></i>
+        {{ isMockMode ? 'Entrar (Modo Simulado)' : 'Entrar com Auth0' }}
+      </button>
+      @if (isMockMode) {
+      <p class="text-warning mt-3 small mb-0">
+        <i class="bi bi-exclamation-triangle me-1"></i>
+        Autenticação simulada ativa
+      </p>
+      }
+    </div>
+  </div>
+</main>

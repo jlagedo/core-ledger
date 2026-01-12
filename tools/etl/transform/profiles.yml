@@ -1,0 +1,22 @@
+b3_etl:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      port: 5432
+      user: postgres
+      password: "{{ env_var('TARGET_POSTGRES_PASSWORD') }}"
+      database: core_ledger_db
+      schema: public
+      threads: 4
+      keepalives_idle: 0
+    prod:
+      type: postgres
+      host: "{{ env_var('PROD_DB_HOST', 'localhost') }}"
+      port: "{{ env_var('PROD_DB_PORT', 5432) | int }}"
+      user: "{{ env_var('PROD_DB_USER', 'postgres') }}"
+      password: "{{ env_var('PROD_DB_PASSWORD') }}"
+      database: "{{ env_var('PROD_DB_NAME', 'core_ledger_db') }}"
+      schema: public
+      threads: 8

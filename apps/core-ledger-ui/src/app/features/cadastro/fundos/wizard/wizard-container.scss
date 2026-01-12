@@ -1,0 +1,523 @@
+// ============================================================
+// WIZARD CONTAINER — Bloomberg Terminal Data Entry Interface
+// Precision financial workflow with CRT phosphor aesthetics
+// ============================================================
+
+// --- Design Tokens ---
+$sidebar-width: 260px;
+$card-radius: 2px;
+$glow-amber: rgba(255, 160, 40, 0.5);
+$glow-teal: rgba(74, 246, 195, 0.5);
+
+// ============================================================
+// LAYOUT — Main Structure
+// ============================================================
+
+.wizard-main {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem 2rem;
+
+  @media (min-width: 768px) {
+    padding: 0 1.5rem 2rem;
+  }
+
+  @media (min-width: 1200px) {
+    padding: 0 2rem 2rem;
+  }
+}
+
+.wizard-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+
+  @media (min-width: 1200px) {
+    grid-template-columns: 1fr $sidebar-width;
+    gap: 2rem;
+  }
+}
+
+.wizard-content {
+  min-width: 0; // Prevent grid blowout
+}
+
+// ============================================================
+// PROGRESS BADGE — Header Element
+// ============================================================
+
+.wizard-progress-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  background: rgba(255, 160, 40, 0.12);
+  border: 1px solid rgba(255, 160, 40, 0.25);
+  border-radius: $card-radius;
+  color: var(--accent-amber, #FFA028);
+  text-shadow: 0 0 8px $glow-amber;
+
+  i {
+    font-size: 0.625rem;
+  }
+}
+
+[data-bs-theme="light"] {
+  .wizard-progress-badge {
+    background: rgba(180, 83, 9, 0.08);
+    border-color: rgba(180, 83, 9, 0.2);
+    color: var(--daylight-amber, #B45309);
+    text-shadow: none;
+  }
+}
+
+// ============================================================
+// WIZARD CARD — Main Content Container
+// ============================================================
+
+.wizard-card {
+  background: var(--card-bg);
+  border: 1px solid var(--table-border-color);
+  border-radius: $card-radius;
+  overflow: hidden;
+
+  // Subtle inner glow
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+// --- Card Header ---
+.wizard-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 160, 40, 0.06) 0%,
+    transparent 100%
+  );
+  border-bottom: 2px solid var(--accent-amber, #FFA028);
+  gap: 1rem;
+
+  @media (min-width: 768px) {
+    padding: 1.25rem 1.5rem;
+  }
+}
+
+.wizard-card__header-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  min-width: 0;
+}
+
+.wizard-card__step-indicator {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  background: rgba(255, 160, 40, 0.12);
+  border: 1px solid var(--accent-amber, #FFA028);
+  border-radius: $card-radius;
+  color: var(--accent-amber, #FFA028);
+  text-shadow: 0 0 12px $glow-amber;
+}
+
+.wizard-card__header-text {
+  min-width: 0;
+}
+
+.wizard-card__title {
+  margin: 0 0 0.25rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bs-emphasis-color);
+  line-height: 1.3;
+}
+
+.wizard-card__subtitle {
+  margin: 0;
+  font-size: 0.6875rem;
+  color: var(--bs-secondary-color);
+  line-height: 1.4;
+}
+
+.wizard-card__icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.125rem;
+  color: var(--terminal-text-muted);
+  opacity: 0.5;
+}
+
+// --- Card Body ---
+.wizard-card__body {
+  padding: 1.5rem 1.25rem;
+
+  @media (min-width: 768px) {
+    padding: 2rem 1.5rem;
+  }
+}
+
+// --- Card Footer ---
+.wizard-card__footer {
+  padding: 0;
+  background: var(--table-header-bg);
+  border-top: 1px solid var(--table-border-color);
+}
+
+// ============================================================
+// SIDEBAR — Quick Stats Panel
+// ============================================================
+
+.wizard-sidebar {
+  position: sticky;
+  top: 80px; // Below fixed header
+  height: fit-content;
+}
+
+.wizard-stats {
+  background: var(--card-bg);
+  border: 1px solid var(--table-border-color);
+  border-radius: $card-radius;
+  overflow: hidden;
+}
+
+.wizard-stats__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--bs-emphasis-color);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 160, 40, 0.06) 0%,
+    transparent 100%
+  );
+  border-bottom: 1px solid var(--table-border-color);
+
+  i {
+    color: var(--accent-amber, #FFA028);
+    font-size: 0.625rem;
+  }
+}
+
+// --- Stats Grid ---
+.wizard-stats__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  padding: 1px;
+  background: var(--table-border-color);
+}
+
+.wizard-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.875rem 0.5rem;
+  background: var(--card-bg);
+  text-align: center;
+}
+
+.wizard-stat__value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+  color: var(--terminal-text-muted);
+
+  &--success {
+    color: var(--accent-teal, #4af6c3);
+    text-shadow: 0 0 10px $glow-teal;
+  }
+
+  &--pending {
+    color: var(--terminal-text-secondary);
+  }
+
+  &--current {
+    color: var(--accent-amber, #FFA028);
+    text-shadow: 0 0 10px $glow-amber;
+  }
+}
+
+.wizard-stat__label {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--bs-secondary-color);
+}
+
+// --- Quick Navigation ---
+.wizard-stats__nav {
+  border-top: 1px solid var(--table-border-color);
+}
+
+.wizard-stats__nav-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--bs-emphasis-color);
+  background: rgba(255, 160, 40, 0.03);
+  border-bottom: 1px solid var(--table-border-color);
+
+  i {
+    color: var(--accent-amber, #FFA028);
+    font-size: 0.625rem;
+  }
+}
+
+.wizard-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.375rem 0;
+}
+
+.wizard-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 1rem;
+  font-size: 0.6875rem;
+  color: var(--terminal-text-muted);
+  cursor: default;
+  transition: all 0.15s ease;
+
+  &--clickable {
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(255, 160, 40, 0.06);
+
+      .wizard-nav-item__label {
+        color: var(--bs-emphasis-color);
+      }
+    }
+
+    &:focus-visible {
+      outline: none;
+      background: rgba(255, 160, 40, 0.08);
+    }
+  }
+
+  &--completed {
+    .wizard-nav-item__number {
+      color: var(--accent-teal, #4af6c3);
+    }
+
+    .wizard-nav-item__label {
+      color: var(--bs-secondary-color);
+    }
+
+    .wizard-nav-item__status {
+      color: var(--accent-teal, #4af6c3);
+    }
+  }
+
+  &--current {
+    background: rgba(255, 160, 40, 0.08);
+
+    .wizard-nav-item__number,
+    .wizard-nav-item__status {
+      color: var(--accent-amber, #FFA028);
+    }
+
+    .wizard-nav-item__label {
+      color: var(--bs-emphasis-color);
+      font-weight: 600;
+    }
+  }
+}
+
+.wizard-nav-item__number {
+  flex-shrink: 0;
+  width: 1.25rem;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.wizard-nav-item__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wizard-nav-item__status {
+  flex-shrink: 0;
+  width: 1rem;
+  text-align: right;
+  font-size: 0.625rem;
+}
+
+// ============================================================
+// FORM SECTION TITLE — Reusable Utility
+// ============================================================
+
+.form-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--bs-secondary-color);
+  border-bottom: 1px solid var(--table-border-color);
+
+  &::before {
+    content: '//';
+    color: var(--accent-amber, #FFA028);
+    opacity: 0.6;
+  }
+}
+
+// ============================================================
+// LIGHT MODE OVERRIDES
+// ============================================================
+
+[data-bs-theme="light"] {
+  .wizard-card {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .wizard-card__header {
+    background: linear-gradient(
+      180deg,
+      rgba(180, 83, 9, 0.04) 0%,
+      transparent 100%
+    );
+    border-bottom-color: var(--daylight-amber, #B45309);
+  }
+
+  .wizard-card__step-indicator {
+    background: rgba(180, 83, 9, 0.08);
+    border-color: var(--daylight-amber, #B45309);
+    color: var(--daylight-amber, #B45309);
+    text-shadow: none;
+  }
+
+  .wizard-stats__header,
+  .wizard-stats__nav-header {
+    background: rgba(180, 83, 9, 0.03);
+
+    i {
+      color: var(--daylight-amber, #B45309);
+    }
+  }
+
+  .wizard-stat__value {
+    &--success {
+      color: #059669;
+      text-shadow: none;
+    }
+
+    &--current {
+      color: var(--daylight-amber, #B45309);
+      text-shadow: none;
+    }
+  }
+
+  .wizard-nav-item {
+    &--clickable:hover {
+      background: rgba(180, 83, 9, 0.04);
+    }
+
+    &--completed {
+      .wizard-nav-item__number,
+      .wizard-nav-item__status {
+        color: #059669;
+      }
+    }
+
+    &--current {
+      background: rgba(180, 83, 9, 0.06);
+
+      .wizard-nav-item__number,
+      .wizard-nav-item__status {
+        color: var(--daylight-amber, #B45309);
+      }
+    }
+  }
+
+  .form-section-title::before {
+    color: var(--daylight-amber, #B45309);
+  }
+}
+
+// ============================================================
+// ANIMATIONS — Entrance Effects
+// ============================================================
+
+.wizard-card {
+  animation: card-enter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wizard-sidebar {
+  animation: sidebar-enter 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+}
+
+@keyframes sidebar-enter {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// ============================================================
+// REDUCED MOTION
+// ============================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .wizard-card,
+  .wizard-sidebar {
+    animation: none;
+  }
+}

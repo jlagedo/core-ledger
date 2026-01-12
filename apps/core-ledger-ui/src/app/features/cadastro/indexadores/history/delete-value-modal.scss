@@ -1,0 +1,37 @@
+// Delete Value Modal — Confirmation styling
+
+.modal-header.border-danger {
+  border-bottom-color: var(--bs-danger) !important;
+}
+
+.value-details {
+  background: rgba(220, 53, 69, 0.08);
+  border: 1px solid rgba(220, 53, 69, 0.2);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.375rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  &:first-child {
+    padding-top: 0;
+  }
+}
+
+.detail-label {
+  font-size: 0.8125rem;
+  color: var(--bs-secondary-color);
+}
+
+.detail-value {
+  font-weight: 500;
+}

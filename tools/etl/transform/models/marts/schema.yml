@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: b3_instruments_enriched
+    description: "B3 instruments with generated human-readable names and security type IDs (54 columns)"
+    columns:
+      - name: TckrSymb
+        description: "Ticker symbol (primary key)"
+        quote: true
+        tests:
+          - unique
+          - not_null
+
+      - name: instrument_name
+        description: "Generated human-readable instrument name"
+        tests:
+          - not_null
+
+      - name: securityTypeId
+        description: "Security type ID based on b3_type_mapping.md (NULL for unmapped types)"
+        tests:
+          - accepted_values:
+              values: [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+              quote: false
+
+      - name: SgmtNm
+        description: "Segment name"
+        quote: true
+
+      - name: MktNm
+        description: "Market name"
+        quote: true
+
+      - name: SctyCtgyNm
+        description: "Security category name"
+        quote: true

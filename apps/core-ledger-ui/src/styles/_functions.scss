@@ -1,0 +1,25 @@
+// ============================================================
+// HELPER FUNCTIONS
+//
+// Utility functions for accessing theme and alert token maps.
+// ============================================================
+
+@use "sass:map";
+@use "theme-tokens" as *;
+@use "alert-tokens" as *;
+
+/// Get a value from the theme tokens map
+/// @param {String} $mode - 'light' or 'dark'
+/// @param {String} $key - Token key
+/// @return {*} Token value
+@function theme-get($mode, $key) {
+  @return map.get(map.get($theme-tokens, $mode), $key);
+}
+
+/// Get a value from the alert tokens map
+/// @param {String} $type - Alert type (success, info, etc.)
+/// @param {String} $key - Token key with mode prefix (light-bg, dark-color, etc.)
+/// @return {*} Token value
+@function alert-get($type, $key) {
+  @return map.get(map.get($alert-tokens, $type), $key);
+}

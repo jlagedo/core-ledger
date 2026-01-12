@@ -1,0 +1,30 @@
+<div class="terminal-toast-wrapper">
+  @for (toast of toastService.toasts(); track toast) {
+    <div
+      class="terminal-toast terminal-toast--{{ toast.type }}"
+      [style.--toast-duration.ms]="toast.delay || 5000"
+      role="alert"
+      aria-live="polite"
+    >
+      <div class="terminal-toast__icon">
+        <i class="bi {{ getToastIcon(toast.type) }}"></i>
+      </div>
+
+      <div class="terminal-toast__content">
+        <div class="terminal-toast__type">
+          {{ getTypeLabel(toast.type) }}
+          <span class="timestamp">{{ formatTimestamp() }}</span>
+        </div>
+        <div class="terminal-toast__message">{{ toast.message }}</div>
+      </div>
+
+      <button
+        class="terminal-toast__close"
+        (click)="toastService.remove(toast)"
+        aria-label="Dismiss notification"
+      >
+        <i class="bi bi-x"></i>
+      </button>
+    </div>
+  }
+</div>

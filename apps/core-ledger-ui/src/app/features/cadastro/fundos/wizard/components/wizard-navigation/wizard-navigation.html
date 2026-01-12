@@ -1,0 +1,67 @@
+<div class="wizard-navigation">
+  <div class="wizard-navigation__actions">
+    <!-- Previous Button -->
+    <button
+      type="button"
+      class="wizard-btn wizard-btn--secondary"
+      [class.wizard-btn--disabled]="!canGoPrevious() || isSubmitting()"
+      [disabled]="!canGoPrevious() || isSubmitting()"
+      (click)="onPrevious()"
+      aria-label="Voltar para o passo anterior"
+    >
+      <span class="wizard-btn__icon">◂</span>
+      <span class="wizard-btn__text">Anterior</span>
+    </button>
+
+    <!-- Spacer -->
+    <div class="wizard-navigation__spacer"></div>
+
+    <!-- Cancel Button -->
+    <button
+      type="button"
+      class="wizard-btn wizard-btn--ghost"
+      [class.wizard-btn--disabled]="isSubmitting()"
+      [disabled]="isSubmitting()"
+      (click)="onCancel()"
+      aria-label="Cancelar e sair do cadastro"
+    >
+      <span class="wizard-btn__text">Cancelar</span>
+    </button>
+
+    <!-- Next Button (not last step) -->
+    @if (!isLastStep()) {
+      <button
+        type="button"
+        class="wizard-btn wizard-btn--primary"
+        [class.wizard-btn--disabled]="!canGoNext() || isSubmitting()"
+        [disabled]="!canGoNext() || isSubmitting()"
+        (click)="onNext()"
+        aria-label="Avançar para o próximo passo"
+      >
+        <span class="wizard-btn__text">Próximo</span>
+        <span class="wizard-btn__icon">▸</span>
+      </button>
+    }
+
+    <!-- Submit Button (last step) -->
+    @if (isLastStep()) {
+      <button
+        type="button"
+        class="wizard-btn wizard-btn--submit"
+        [class.wizard-btn--disabled]="!canSubmit() || isSubmitting()"
+        [class.wizard-btn--loading]="isSubmitting()"
+        [disabled]="!canSubmit() || isSubmitting()"
+        (click)="onSubmit()"
+        aria-label="Salvar e criar o fundo"
+      >
+        @if (isSubmitting()) {
+          <span class="wizard-btn__spinner"></span>
+          <span class="wizard-btn__text">Salvando...</span>
+        } @else {
+          <span class="wizard-btn__icon">✓</span>
+          <span class="wizard-btn__text">Salvar Fundo</span>
+        }
+      </button>
+    }
+  </div>
+</div>

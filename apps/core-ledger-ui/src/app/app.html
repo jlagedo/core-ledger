@@ -1,0 +1,21 @@
+<!-- Link para pular para conteúdo principal para usuários de teclado -->
+<a href="#main-content"
+   class="skip-link visually-hidden-focusable"
+   (click)="skipToMain($event)"
+   (keydown.enter)="skipToMain($event)">
+  Pular para conteúdo principal
+</a>
+
+<div class="d-flex flex-nowrap">
+  @if (isLoggedIn()) {
+  <app-sidenav (sidenavToggle)="onSidenavToggle($event)" />
+  }
+
+  <main id="main-content"
+        class="flex-fill p-0 overflow-y-auto vh-100"
+        tabindex="-1">
+    <router-outlet />
+  </main>
+</div>
+
+<app-toasts-container aria-atomic="true" aria-live="polite" />

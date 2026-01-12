@@ -1,0 +1,28 @@
+version: 2
+
+sources:
+  - name: b3_raw
+    description: "B3 instruments data loaded by Meltano target-postgres"
+    database: core_ledger_db
+    schema: public
+    quoting:
+      identifier: true
+    tables:
+      - name: b3_instruments
+        description: "Raw B3 instruments consolidated file (99,190 records)"
+        columns:
+          - name: TckrSymb
+            description: "Ticker symbol (primary key)"
+            quote: true
+            tests:
+              - unique
+              - not_null
+          - name: SgmtNm
+            description: "Segment name (CASH, FINANCIAL, AGRIBUSINESS)"
+            quote: true
+          - name: MktNm
+            description: "Market name (EQUITY-CASH, FUTURE, EQUITY-DERIVATE)"
+            quote: true
+          - name: SctyCtgyNm
+            description: "Security category (STOCK FUTURE, SHARES, etc.)"
+            quote: true

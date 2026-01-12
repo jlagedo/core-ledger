@@ -1,0 +1,269 @@
+<div class="identificacao-step">
+  <form [formGroup]="form" class="step-form" novalidate>
+    <!-- Section: Identificacao Fiscal -->
+    <div class="step-form__section">
+      <h6 class="form-section-title">Identificacao Fiscal</h6>
+
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- CNPJ Field -->
+        <div class="step-field">
+          <label for="cnpj" class="step-field__label">
+            <span class="step-field__label-text">CNPJ</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <div class="step-field__input-wrapper">
+            <input
+              type="text"
+              class="form-control step-field__input font-monospace"
+              [class.is-invalid]="isInvalid('cnpj')"
+              [class.is-valid]="isValid('cnpj')"
+              id="cnpj"
+              formControlName="cnpj"
+              appCnpjMask
+              placeholder="00.000.000/0000-00"
+              autocomplete="off"
+              maxlength="18"
+            />
+            @if (cnpjValidating()) {
+            <div class="step-field__spinner">
+              <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+              <span class="visually-hidden">Verificando CNPJ...</span>
+            </div>
+            }
+          </div>
+          @if (isInvalid('cnpj')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            @if (hasError('cnpj', 'required')) {
+              CNPJ e obrigatorio
+            } @else if (hasError('cnpj', 'cnpjInvalid')) {
+              CNPJ invalido
+            } @else if (hasError('cnpj', 'cnpjDuplicate')) {
+              {{ getControl('cnpj').errors?.['cnpjDuplicate']?.message }}
+            }
+          </div>
+          } @if (isValid('cnpj')) {
+          <div class="step-field__success">
+            <i class="bi bi-check-circle" aria-hidden="true"></i>
+            CNPJ valido e disponivel
+          </div>
+          }
+        </div>
+
+        <!-- Tipo de Fundo Field -->
+        <div class="step-field">
+          <label for="tipoFundo" class="step-field__label">
+            <span class="step-field__label-text">Tipo de Fundo</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <select
+            class="form-select step-field__input"
+            [class.is-invalid]="isInvalid('tipoFundo')"
+            [class.is-valid]="isValid('tipoFundo')"
+            id="tipoFundo"
+            formControlName="tipoFundo"
+          >
+            <option [ngValue]="null">Selecione o tipo</option>
+            @for (option of tipoFundoOptions; track option.value) {
+            <option [ngValue]="option.value">{{ option.description }} - {{ option.name }}</option>
+            }
+          </select>
+          @if (isInvalid('tipoFundo')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Tipo de fundo e obrigatorio
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Dados do Fundo -->
+    <div class="step-form__section">
+      <h6 class="form-section-title">Dados do Fundo</h6>
+
+      <div class="step-form__grid step-form__grid--1-col">
+        <!-- Razao Social -->
+        <div class="step-field">
+          <label for="razaoSocial" class="step-field__label">
+            <span class="step-field__label-text">Razao Social</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control step-field__input"
+            [class.is-invalid]="isInvalid('razaoSocial')"
+            [class.is-valid]="isValid('razaoSocial')"
+            id="razaoSocial"
+            formControlName="razaoSocial"
+            placeholder="Nome completo conforme registro"
+            maxlength="200"
+          />
+          @if (isInvalid('razaoSocial')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            @if (hasError('razaoSocial', 'required')) { Razao social e obrigatoria } @else if
+            (hasError('razaoSocial', 'minlength')) { Razao social deve ter no minimo 10 caracteres }
+            @else if (hasError('razaoSocial', 'maxlength')) { Razao social deve ter no maximo 200
+            caracteres }
+          </div>
+          }
+        </div>
+      </div>
+
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Nome Fantasia -->
+        <div class="step-field">
+          <label for="nomeFantasia" class="step-field__label">
+            <span class="step-field__label-text">Nome Fantasia</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control step-field__input"
+            [class.is-invalid]="isInvalid('nomeFantasia')"
+            [class.is-valid]="isValid('nomeFantasia')"
+            id="nomeFantasia"
+            formControlName="nomeFantasia"
+            placeholder="Nome comercial do fundo"
+            maxlength="100"
+          />
+          @if (isInvalid('nomeFantasia')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            @if (hasError('nomeFantasia', 'required')) { Nome fantasia e obrigatorio } @else if
+            (hasError('nomeFantasia', 'minlength')) { Nome fantasia deve ter no minimo 3 caracteres
+            } @else if (hasError('nomeFantasia', 'maxlength')) { Nome fantasia deve ter no maximo
+            100 caracteres }
+          </div>
+          }
+        </div>
+
+        <!-- Nome Curto -->
+        <div class="step-field">
+          <label for="nomeCurto" class="step-field__label">
+            <span class="step-field__label-text">Nome Curto</span>
+            <span class="step-field__optional">(opcional)</span>
+          </label>
+          <input
+            type="text"
+            class="form-control step-field__input font-monospace"
+            [class.is-invalid]="isInvalid('nomeCurto')"
+            id="nomeCurto"
+            formControlName="nomeCurto"
+            placeholder="Ex: FI-VALOR"
+            maxlength="50"
+          />
+          @if (isInvalid('nomeCurto')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Nome curto deve ter no maximo 50 caracteres
+          </div>
+          }
+          <div class="step-field__hint">
+            <span class="step-field__hint-icon">i</span>
+            Codigo abreviado para uso em relatorios
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Datas -->
+    <div class="step-form__section">
+      <h6 class="form-section-title">Datas</h6>
+
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Data de Constituicao -->
+        <div class="step-field">
+          <label for="dataConstituicao" class="step-field__label">
+            <span class="step-field__label-text">Data de Constituicao</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <div class="input-group">
+            <input
+              #dataConstituicaoPicker="ngbDatepicker"
+              type="text"
+              class="form-control step-field__input font-monospace"
+              [class.is-invalid]="isInvalid('dataConstituicao') || hasDataConstituicaoFuturaError"
+              [class.is-valid]="isValid('dataConstituicao') && !hasDataConstituicaoFuturaError"
+              id="dataConstituicao"
+              formControlName="dataConstituicao"
+              ngbDatepicker
+              placeholder="dd/mm/aaaa"
+            />
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              (click)="dataConstituicaoPicker.toggle()"
+              aria-label="Abrir calendario"
+            >
+              <i class="bi bi-calendar3" aria-hidden="true"></i>
+            </button>
+          </div>
+          @if (isInvalid('dataConstituicao')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Data de constituicao e obrigatoria
+          </div>
+          } @if (hasDataConstituicaoFuturaError) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Data de constituicao nao pode ser futura
+          </div>
+          }
+        </div>
+
+        <!-- Data de Inicio de Atividade -->
+        <div class="step-field">
+          <label for="dataInicioAtividade" class="step-field__label">
+            <span class="step-field__label-text">Data de Inicio de Atividade</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <div class="input-group">
+            <input
+              #dataInicioAtividadePicker="ngbDatepicker"
+              type="text"
+              class="form-control step-field__input font-monospace"
+              [class.is-invalid]="isInvalid('dataInicioAtividade') || hasDateRangeError"
+              [class.is-valid]="isValid('dataInicioAtividade') && !hasDateRangeError"
+              id="dataInicioAtividade"
+              formControlName="dataInicioAtividade"
+              ngbDatepicker
+              placeholder="dd/mm/aaaa"
+            />
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              (click)="dataInicioAtividadePicker.toggle()"
+              aria-label="Abrir calendario"
+            >
+              <i class="bi bi-calendar3" aria-hidden="true"></i>
+            </button>
+          </div>
+          @if (isInvalid('dataInicioAtividade')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Data de inicio de atividade e obrigatoria
+          </div>
+          } @if (hasDateRangeError) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Data de inicio deve ser maior ou igual a data de constituicao
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Footer: Help Text -->
+    <div class="step-form__footer">
+      <div class="step-hint">
+        <span class="step-hint__icon">i</span>
+        <span class="step-hint__text">
+          Preencha todos os campos obrigatorios (<span class="text-danger">*</span>) para habilitar
+          o botao "Proximo"
+        </span>
+      </div>
+    </div>
+  </form>
+</div>

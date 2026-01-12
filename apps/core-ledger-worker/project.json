@@ -1,0 +1,21 @@
+{
+  "name": "core-ledger-worker",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/core-ledger-worker",
+  "tags": ["type:app", "scope:backend"],
+  "implicitDependencies": ["core-ledger-dotnet"],
+  "targets": {
+    "build": {
+      "command": "dotnet build CoreLedger.Worker/CoreLedger.Worker.csproj --configuration Release",
+      "options": { "cwd": "apps/core-ledger-worker" },
+      "cache": true,
+      "inputs": ["{projectRoot}/**/*.cs", "{projectRoot}/**/*.csproj", "{workspaceRoot}/libs/core-ledger-dotnet/**/*.cs"],
+      "outputs": ["{projectRoot}/CoreLedger.Worker/bin"]
+    },
+    "serve": {
+      "command": "dotnet watch run --project CoreLedger.Worker/CoreLedger.Worker.csproj",
+      "options": { "cwd": "apps/core-ledger-worker" }
+    }
+  }
+}

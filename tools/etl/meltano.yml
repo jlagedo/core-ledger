@@ -1,0 +1,44 @@
+default_environment: dev
+project_id: 019b660c-23f3-7921-b6d9-b7924c6d6508
+environments:
+- name: dev
+- name: staging
+- name: prod
+plugins:
+  extractors:
+  - name: tap-csv
+    variant: meltanolabs
+    pip_url: git+https://github.com/MeltanoLabs/tap-csv.git
+    config:
+      files:
+      - entity: b3_instruments
+        path: InstrumentsConsolidatedFile_clean.csv
+        keys:
+        - TckrSymb
+        delimiter: ;
+  loaders:
+  - name: target-postgres
+    variant: meltanolabs
+    pip_url: meltanolabs-target-postgres
+    config:
+      host: localhost
+      port: 5432
+      database: core_ledger_db
+      user: postgres
+      default_target_schema: public
+      load_method: overwrite
+  transformers:
+  - name: dbt-postgres
+    variant: dbt-labs
+    pip_url: dbt-core~=1.9.0 dbt-postgres~=1.9.0
+    config:
+      project_dir: $MELTANO_PROJECT_ROOT/transform
+      profiles_dir: $MELTANO_PROJECT_ROOT/transform
+      target: dev
+      profile: b3_etl
+jobs:
+  - name: b3_instruments_pipeline
+    tasks:
+      - tap-csv target-postgres
+      - dbt-postgres:run
+      - dbt-postgres:test

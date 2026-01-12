@@ -1,0 +1,191 @@
+// ============================================================
+// MIXINS — CSS Variable Generation
+//
+// Mixins for generating theme-aware CSS custom properties.
+// ============================================================
+
+@use "sass:map";
+@use "sass:list";
+@use "theme-tokens" as *;
+@use "alert-tokens" as *;
+
+/// Generate all theme CSS variables for a given mode
+/// @param {String} $mode - 'light' or 'dark'
+@mixin generate-theme-vars($mode) {
+  $t: map.get($theme-tokens, $mode);
+  $prefix: if($mode == light, light, dark);
+
+  // --- Core ---
+  --bs-body-bg: #{map.get($t, body-bg)};
+  --bs-body-color: #{map.get($t, body-color)};
+  --bs-emphasis-color: #{map.get($t, emphasis)};
+
+  // --- Links ---
+  --bs-link-color: #{map.get($t, link)};
+  --bs-link-hover-color: #{map.get($t, link-hover)};
+  --link-visited-color: #{map.get($t, link-visited)};
+
+  // --- Borders ---
+  --bs-border-color: #{map.get($t, border)};
+  --bs-border-color-translucent: #{map.get($t, border-translucent)};
+
+  // --- Shadows ---
+  --bs-box-shadow-sm: #{map.get($t, shadow-sm)};
+  --bs-box-shadow: #{map.get($t, shadow-md)};
+  --bs-box-shadow-lg: #{map.get($t, shadow-lg)};
+
+  // --- Focus ---
+  --bs-focus-ring-color: #{map.get($t, focus-ring)};
+  --btn-focus-outline: #{map.get($t, focus-outline)};
+  --focus-ring-offset: #{map.get($t, focus-ring-offset)};
+
+  // --- Validation ---
+  --bs-form-valid-color: #{map.get($t, valid)};
+  --bs-form-valid-border-color: #{map.get($t, valid-border)};
+  --bs-form-invalid-color: #{map.get($t, invalid)};
+  --bs-form-invalid-border-color: #{map.get($t, invalid-border)};
+
+  // --- Disabled ---
+  --disabled-bg: #{map.get($t, disabled-bg)};
+  --disabled-color: #{map.get($t, disabled-color)};
+  --disabled-border: #{map.get($t, disabled-border)};
+  --disabled-opacity: #{map.get($t, disabled-opacity)};
+
+  // --- Card ---
+  --card-bg: #{map.get($t, card-bg)};
+  --card-border-color: #{map.get($t, card-border)};
+  --card-header-bg: #{map.get($t, card-header)};
+  --card-shadow: #{map.get($t, shadow-sm)};
+  --card-hover-shadow: #{map.get($t, shadow-lg)};
+
+  // --- Glass ---
+  --glass-bg: #{map.get($t, glass-bg)};
+  --glass-border: #{map.get($t, glass-border)};
+  --glass-shadow: #{map.get($t, glass-shadow)};
+
+  // --- Input ---
+  --input-bg: #{map.get($t, input-bg)};
+  --input-border: #{map.get($t, input-border)};
+  --input-focus-border: #{map.get($t, input-focus)};
+  --input-focus-shadow: #{map.get($t, input-focus-shadow)};
+  --input-placeholder-color: #{map.get($t, input-placeholder)};
+  --input-error-bg: #{map.get($t, input-error-bg)};
+
+  // --- Table ---
+  --table-bg: #{map.get($t, table-bg)};
+  --table-header-bg: #{map.get($t, table-header-bg)};
+  --table-header-color: #{map.get($t, table-header-color)};
+  --table-striped-bg: #{map.get($t, table-striped)};
+  --table-hover-bg: #{map.get($t, table-hover)};
+  --table-active-bg: #{map.get($t, table-active-bg)};
+  --table-active-color: #{map.get($t, table-active-color)};
+  --table-active-border: #{map.get($t, table-active-border)};
+  --table-border-color: #{map.get($t, table-border)};
+  --table-cell-color: #{map.get($t, table-cell)};
+  --table-action-color: #{map.get($t, table-action)};
+  --table-action-hover-color: #{map.get($t, table-action-hover)};
+
+  // --- Button ---
+  --btn-primary-hover-bg: #{map.get($t, btn-primary-hover)};
+  --btn-primary-hover-border: #{map.get($t, btn-primary-hover)};
+  --btn-secondary-bg: #{map.get($t, btn-secondary-bg)};
+  --btn-secondary-border: #{map.get($t, btn-secondary-bg)};
+  --btn-secondary-color: #{map.get($t, btn-secondary-color)};
+  --btn-secondary-hover-bg: #{map.get($t, btn-secondary-hover)};
+
+  // --- Navigation ---
+  --nav-link-active-color: #{map.get($t, nav-active)};
+  --nav-link-underline: #{map.get($t, nav-underline)};
+
+  // --- Scrollbar ---
+  --scrollbar-track: #{map.get($t, scrollbar-track)};
+  --scrollbar-thumb: #{map.get($t, scrollbar-thumb)};
+
+  // --- Selection ---
+  --selection-bg: #{map.get($t, selection)};
+
+  // --- Dropdown ---
+  --dropdown-bg: #{map.get($t, dropdown-bg)};
+  --dropdown-border: #{map.get($t, dropdown-border)};
+
+  // --- Sidenav ---
+  --sidenav-bg: #{map.get($t, sidenav-bg)};
+  --sidenav-color: #{map.get($t, sidenav-color)};
+  --sidenav-gradient: #{map.get($t, sidenav-gradient)};
+  --sidenav-link-hover-bg: #{map.get($t, sidenav-hover)};
+  --sidenav-active-bg: #{map.get($t, sidenav-active-bg)};
+  --sidenav-active-border: #{map.get($t, sidenav-active-border)};
+  --sidenav-divider: #{map.get($t, sidenav-divider)};
+  --sidenav-border-color: #{map.get($t, border)};
+
+  // --- Terminal Glow ---
+  --terminal-glow: #{map.get($t, terminal-glow)};
+  --terminal-glow-muted: #{map.get($t, terminal-glow-muted)};
+  --terminal-glow-subtle: #{map.get($t, terminal-glow-subtle)};
+  --terminal-glow-bg: #{map.get($t, terminal-glow-bg)};
+
+  // --- Amber Opacity Scale ---
+  --amber-4: #{map.get($t, amber-4)};
+  --amber-6: #{map.get($t, amber-6)};
+  --amber-8: #{map.get($t, amber-8)};
+  --amber-10: #{map.get($t, amber-10)};
+  --amber-12: #{map.get($t, amber-12)};
+  --amber-15: #{map.get($t, amber-15)};
+  --amber-20: #{map.get($t, amber-20)};
+  --amber-25: #{map.get($t, amber-25)};
+  --amber-30: #{map.get($t, amber-30)};
+  --amber-40: #{map.get($t, amber-40)};
+  --amber-50: #{map.get($t, amber-50)};
+
+  // --- Status Indicators (Ticker/Alerts) ---
+  --status-safe: #{map.get($t, status-safe)};
+  --status-safe-muted: #{map.get($t, status-safe-muted)};
+  --status-warning: #{map.get($t, status-warning)};
+  --status-warning-glow: #{map.get($t, status-warning-glow)};
+  --status-critical: #{map.get($t, status-critical)};
+  --status-critical-glow: #{map.get($t, status-critical-glow)};
+  --status-expired: #{map.get($t, status-expired)};
+
+  // --- Semantic Status Colors (Data Displays) ---
+  --status-positive: #{map.get($t, status-positive)};
+  --status-positive-bg: #{map.get($t, status-positive-bg)};
+  --status-positive-border: #{map.get($t, status-positive-border)};
+  --status-positive-muted: #{map.get($t, status-positive-muted)};
+  --status-negative: #{map.get($t, status-negative)};
+  --status-negative-bg: #{map.get($t, status-negative-bg)};
+  --status-negative-border: #{map.get($t, status-negative-border)};
+  --status-info: #{map.get($t, status-info)};
+  --status-info-bg: #{map.get($t, status-info-bg)};
+  --status-info-border: #{map.get($t, status-info-border)};
+  --status-pending: #{map.get($t, status-pending)};
+  --status-pending-bg: #{map.get($t, status-pending-bg)};
+  --status-pending-border: #{map.get($t, status-pending-border)};
+  --status-neutral: #{map.get($t, status-neutral)};
+  --status-neutral-bg: #{map.get($t, status-neutral-bg)};
+  --status-neutral-border: #{map.get($t, status-neutral-border)};
+
+  // --- Surface Elevation ---
+  --surface-base: #{map.get($t, surface-base)};
+  --surface-elevated: #{map.get($t, surface-elevated)};
+  --surface-subtle: #{map.get($t, surface-subtle)};
+  --surface-muted: #{map.get($t, surface-muted)};
+
+  // --- Alerts ---
+  @each $type, $config in $alert-tokens {
+    --alert-#{$type}-bg: #{map.get($config, #{$prefix}-bg)};
+    --alert-#{$type}-border: #{map.get($config, #{$prefix}-border)};
+    --alert-#{$type}-color: #{map.get($config, #{$prefix}-color)};
+    --alert-#{$type}-accent: #{map.get($config, #{$prefix}-accent)};
+
+    @if map.has-key($config, #{$prefix}-shadow) {
+      --alert-#{$type}-text-shadow: #{map.get($config, #{$prefix}-shadow)};
+    }
+  }
+
+  // --- Badges ---
+  @each $type, $config in $badge-tokens {
+    $values: map.get($config, $prefix);
+    --badge-#{$type}-bg: #{list.nth($values, 1)};
+    --badge-#{$type}-color: #{list.nth($values, 2)};
+  }
+}

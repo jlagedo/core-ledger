@@ -1,0 +1,288 @@
+// ============================================================
+// IDENTIFICACAO STEP — Fund Identification Form
+// Terminal-style form with Bloomberg aesthetic
+// ============================================================
+
+$field-radius: 2px;
+$glow-amber: rgba(255, 160, 40, 0.5);
+$glow-teal: rgba(74, 246, 195, 0.5);
+
+.identificacao-step {
+  animation: step-enter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes step-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================================
+// STEP FORM LAYOUT
+// ============================================================
+
+.step-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.step-form__section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.step-form__grid {
+  display: grid;
+  gap: 1rem;
+
+  &--1-col {
+    grid-template-columns: 1fr;
+  }
+
+  &--2-cols {
+    grid-template-columns: 1fr;
+
+    @media (min-width: 576px) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+  }
+}
+
+.step-form__footer {
+  padding-top: 1rem;
+  border-top: 1px dashed var(--table-border-color);
+}
+
+// ============================================================
+// STEP FIELD STYLES
+// ============================================================
+
+.step-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.step-field__label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bs-body-color);
+}
+
+.step-field__required {
+  color: var(--accent-coral, #ff433d);
+  font-weight: 700;
+}
+
+.step-field__optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--terminal-text-muted);
+  font-size: 0.625rem;
+}
+
+.step-field__input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.step-field__spinner {
+  position: absolute;
+  right: 0.75rem;
+  color: var(--accent-amber, #ffa028);
+}
+
+.step-field__input {
+  font-size: 0.8125rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: $field-radius;
+  transition: all 0.2s ease;
+
+  &::placeholder {
+    color: var(--terminal-text-placeholder);
+    font-style: italic;
+  }
+
+  &:focus {
+    border-color: var(--accent-amber, #ffa028);
+    box-shadow: 0 0 0 2px rgba(255, 160, 40, 0.15);
+  }
+
+  &.is-valid {
+    border-color: var(--accent-teal, #4af6c3);
+    box-shadow: 0 0 0 2px rgba(74, 246, 195, 0.1);
+  }
+
+  &.is-invalid {
+    border-color: var(--accent-coral, #ff433d);
+    box-shadow: 0 0 0 2px rgba(255, 67, 61, 0.1);
+  }
+}
+
+// For inputs with spinner
+.step-field__input-wrapper .step-field__input {
+  padding-right: 2.5rem;
+}
+
+// ============================================================
+// VALIDATION FEEDBACK
+// ============================================================
+
+.step-field__error,
+.step-field__success {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  animation: feedback-enter 0.2s ease;
+
+  i {
+    font-size: 0.6875rem;
+  }
+}
+
+.step-field__error {
+  color: var(--accent-coral, #ff433d);
+}
+
+.step-field__success {
+  color: var(--accent-teal, #4af6c3);
+}
+
+@keyframes feedback-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================================
+// HINTS
+// ============================================================
+
+.step-field__hint {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.625rem;
+  color: var(--bs-secondary-color);
+  margin-top: 0.25rem;
+}
+
+.step-field__hint-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.875rem;
+  height: 0.875rem;
+  font-size: 0.5rem;
+  font-weight: 700;
+  background: var(--table-border-color);
+  border-radius: 50%;
+  color: var(--bs-secondary-color);
+}
+
+.step-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  background: rgba(255, 160, 40, 0.04);
+  border: 1px dashed rgba(255, 160, 40, 0.2);
+  border-radius: $field-radius;
+}
+
+.step-hint__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  background: rgba(255, 160, 40, 0.15);
+  border-radius: 50%;
+  color: var(--accent-amber, #ffa028);
+}
+
+.step-hint__text {
+  font-size: 0.6875rem;
+  color: var(--bs-secondary-color);
+}
+
+// ============================================================
+// LIGHT MODE OVERRIDES
+// ============================================================
+
+[data-bs-theme='light'] {
+  .step-field__input {
+    &:focus {
+      border-color: var(--daylight-amber, #b45309);
+      box-shadow: 0 0 0 2px rgba(180, 83, 9, 0.1);
+    }
+
+    &.is-valid {
+      border-color: #059669;
+      box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.1);
+    }
+
+    &.is-invalid {
+      border-color: #dc2626;
+      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+    }
+  }
+
+  .step-field__error {
+    color: #dc2626;
+  }
+
+  .step-field__success {
+    color: #059669;
+  }
+
+  .step-field__spinner {
+    color: var(--daylight-amber, #b45309);
+  }
+
+  .step-hint {
+    background: rgba(180, 83, 9, 0.03);
+    border-color: rgba(180, 83, 9, 0.15);
+  }
+
+  .step-hint__icon {
+    background: rgba(180, 83, 9, 0.1);
+    color: var(--daylight-amber, #b45309);
+  }
+}
+
+// ============================================================
+// REDUCED MOTION
+// ============================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .identificacao-step,
+  .step-field__error,
+  .step-field__success {
+    animation: none;
+  }
+}

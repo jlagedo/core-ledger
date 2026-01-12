@@ -1,0 +1,21 @@
+name: 'b3_etl'
+version: '1.0.0'
+config-version: 2
+
+profile: 'b3_etl'
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  b3_etl:
+    +materialized: table
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

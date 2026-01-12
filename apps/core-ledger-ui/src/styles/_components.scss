@@ -1,0 +1,728 @@
+// ============================================================
+// COMPONENT STYLES
+//
+// Theme-aware styles for Bootstrap and custom components.
+// ============================================================
+
+@use "variables" as *;
+@use "alert-tokens" as *;
+
+// ============================================================
+// TYPOGRAPHY — Bloomberg Terminal Style
+// ============================================================
+
+body {
+  // Ensure all numbers align (tabular figures)
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+// ============================================================
+// CARD
+// ============================================================
+
+.card {
+  background-color: var(--card-bg);
+  border-color: var(--card-border-color);
+  box-shadow: var(--card-shadow);
+  transition: box-shadow $transition-fast;
+
+  &:hover {
+    box-shadow: var(--card-hover-shadow);
+  }
+
+  .card-header {
+    background-color: var(--card-header-bg);
+    border-bottom-color: var(--card-border-color);
+  }
+}
+
+// ============================================================
+// GLASS EFFECT
+// ============================================================
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur($blur-sm);
+  -webkit-backdrop-filter: blur($blur-sm);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+// ============================================================
+// BUTTONS
+// ============================================================
+
+.btn {
+  transition: all $transition-smooth;
+
+  // Icon spacing inside buttons
+  > i.bi {
+    &:first-child:not(:last-child) {
+      margin-right: 0.375rem;
+    }
+
+    &:last-child:not(:first-child) {
+      margin-left: 0.375rem;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--btn-focus-outline);
+    outline-offset: var(--focus-ring-offset);
+    box-shadow: 0 0 0 4px var(--bs-focus-ring-color);
+  }
+
+  &:disabled,
+  &.disabled {
+    background-color: var(--disabled-bg);
+    border-color: var(--disabled-border);
+    color: var(--disabled-color);
+    opacity: var(--disabled-opacity);
+    pointer-events: none;
+  }
+}
+
+.btn-primary:hover {
+  background-color: var(--btn-primary-hover-bg);
+  border-color: var(--btn-primary-hover-border);
+}
+
+.btn-secondary {
+  --bs-btn-bg: var(--btn-secondary-bg);
+  --bs-btn-border-color: var(--btn-secondary-border);
+  --bs-btn-color: var(--btn-secondary-color);
+  --bs-btn-hover-bg: var(--btn-secondary-hover-bg);
+  --bs-btn-hover-border-color: var(--btn-secondary-hover-bg);
+  --bs-btn-hover-color: #{$neutral-white};
+}
+
+// ============================================================
+// FORMS
+// ============================================================
+
+.form-control,
+.form-select {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--bs-body-color);
+  transition: border-color $transition-fast, box-shadow $transition-fast, background-color $transition-fast;
+
+  &:focus {
+    border-color: var(--input-focus-border);
+    box-shadow: var(--input-focus-shadow);
+  }
+
+  &::placeholder {
+    color: var(--input-placeholder-color);
+  }
+
+  &:disabled,
+  &[readonly] {
+    background-color: var(--disabled-bg);
+    border-color: var(--disabled-border);
+    color: var(--disabled-color);
+    opacity: var(--disabled-opacity);
+  }
+
+  &.is-invalid,
+  &:invalid:not(:placeholder-shown) {
+    background-color: var(--input-error-bg);
+    border-color: var(--bs-form-invalid-border-color);
+
+    &:focus {
+      box-shadow: 0 0 0 0.25rem rgba(var(--bs-danger-rgb, 230, 57, 70), 0.2);
+    }
+  }
+}
+
+.form-label {
+  color: var(--bs-body-color);
+  font-weight: 500;
+}
+
+// ============================================================
+// INPUT GROUPS
+// ============================================================
+
+.input-group {
+  .btn-outline-secondary,
+  .btn-outline-primary,
+  .input-group-text {
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--bs-body-color);
+
+    &:hover {
+      background-color: var(--table-hover-bg);
+      border-color: var(--input-focus-border);
+      color: var(--bs-emphasis-color);
+    }
+
+    &:focus {
+      border-color: var(--input-focus-border);
+      box-shadow: var(--input-focus-shadow);
+    }
+  }
+
+  // Datepicker button styling
+  [ngbdatepickertoggle] .btn,
+  .ngb-dp-button,
+  button[type="button"]:has(i.bi-calendar),
+  .btn:has(.bi-calendar),
+  .btn:has(.bi-calendar3) {
+    background-color: var(--btn-secondary-bg);
+    border-color: var(--input-border);
+    color: var(--btn-secondary-color);
+
+    &:hover {
+      background-color: var(--btn-secondary-hover-bg);
+      border-color: var(--input-focus-border);
+    }
+  }
+}
+
+// Dark mode overrides - Bloomberg Terminal
+[data-bs-theme="dark"] {
+  // Button overrides
+  .btn-outline-secondary {
+    --bs-btn-color: #{$neutral-100};
+    --bs-btn-border-color: rgba(#{$brand-blue-400}, 0.3);
+    --bs-btn-hover-color: #{$neutral-white};
+    --bs-btn-hover-bg: #{$neutral-600};
+    --bs-btn-hover-border-color: #{$brand-blue-400};
+    --bs-btn-active-color: #{$neutral-white};
+    --bs-btn-active-bg: #{$neutral-500};
+  }
+
+  // Text hierarchy using distinct colors (not opacity)
+  .text-secondary {
+    color: var(--terminal-text-secondary) !important;
+  }
+
+  .text-muted {
+    color: var(--terminal-text-muted) !important;
+  }
+
+  // Form placeholders
+  .form-control::placeholder,
+  .form-select::placeholder {
+    color: var(--input-placeholder-color);
+  }
+
+  // Table headers should use emphasis color (white)
+  .table thead th,
+  .table-light th {
+    background-color: var(--table-header-bg) !important;
+    color: var(--table-header-color) !important;
+  }
+}
+
+// ============================================================
+// TABLES — Bloomberg Terminal Density
+// ============================================================
+
+.table {
+  --bs-table-bg: var(--table-bg);
+  --bs-table-striped-bg: var(--table-striped-bg);
+  --bs-table-hover-bg: var(--table-hover-bg);
+  --bs-table-border-color: var(--table-border-color);
+  background-color: var(--table-bg);
+  font-size: 0.75rem;  // 12px for terminal density
+
+  thead th {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-color);
+    font-weight: 600;
+    font-size: 0.6875rem;  // 11px for headers
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom-width: 2px;
+  }
+
+  tbody td {
+    background-color: var(--table-bg);
+    color: var(--table-cell-color);
+  }
+
+  td {
+    color: var(--table-cell-color);
+  }
+}
+
+// Table row states
+.table > tbody > tr.table-primary,
+.table > tbody > tr.table-active,
+.table > tbody > tr[aria-selected="true"] {
+  --bs-table-bg: var(--table-active-bg);
+  --bs-table-color: var(--table-active-color);
+  --bs-table-striped-bg: var(--table-active-bg);
+  --bs-table-accent-bg: var(--table-active-bg);
+  --bs-table-hover-bg: var(--table-active-bg);
+  background-color: var(--table-active-bg) !important;
+  border-left: 3px solid var(--table-active-border);
+
+  > td,
+  > th {
+    color: var(--table-active-color) !important;
+    background-color: var(--table-active-bg) !important;
+  }
+
+  &:hover > td,
+  &:hover > th {
+    background-color: var(--table-active-bg) !important;
+    color: var(--table-active-color) !important;
+  }
+
+  .table-row-actions {
+    opacity: 1;
+    color: var(--table-action-hover-color);
+  }
+}
+
+.table-row-actions {
+  opacity: 0.85;
+  color: var(--table-action-color);
+  transition: opacity $transition-fast, color $transition-fast;
+
+  &:hover,
+  &:focus-within {
+    opacity: 1;
+    color: var(--table-action-hover-color);
+  }
+}
+
+// Disabled table rows
+.table > tbody > tr.disabled,
+.table > tbody > tr[aria-disabled="true"] {
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+
+  > td {
+    color: var(--disabled-color);
+  }
+}
+
+// ============================================================
+// ALERTS
+// ============================================================
+
+.alert {
+  border-left-width: 4px;
+  border-radius: var(--bs-border-radius);
+}
+
+@each $type, $_ in $alert-tokens {
+  .alert-#{$type} {
+    background-color: var(--alert-#{$type}-bg);
+    border-color: var(--alert-#{$type}-border);
+    border-left-color: var(--alert-#{$type}-accent);
+    color: var(--alert-#{$type}-color);
+    text-shadow: var(--alert-#{$type}-text-shadow, none);
+
+    .alert-link {
+      color: var(--alert-#{$type}-color);
+      filter: brightness(0.9);
+    }
+  }
+}
+
+// ============================================================
+// BADGES
+// ============================================================
+
+@each $type, $_ in $badge-tokens {
+  .badge.bg-#{$type} {
+    background-color: var(--badge-#{$type}-bg) !important;
+    color: var(--badge-#{$type}-color) !important;
+  }
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+
+.nav-link {
+  transition: all $transition-smooth;
+  position: relative;
+
+  &.active {
+    color: var(--nav-link-active-color) !important;
+    text-shadow: var(--nav-link-active-text-shadow, none);
+  }
+}
+
+// ============================================================
+// LINKS
+// ============================================================
+
+a:visited:not(.btn):not(.nav-link):not(.dropdown-item) {
+  color: var(--link-visited-color);
+}
+
+// ============================================================
+// FOCUS
+// ============================================================
+
+:focus-visible {
+  outline: 2px solid var(--btn-focus-outline);
+  outline-offset: var(--focus-ring-offset, 2px);
+}
+
+// ============================================================
+// DROPDOWN
+// ============================================================
+
+.dropdown-menu {
+  --bs-dropdown-bg: var(--dropdown-bg);
+  backdrop-filter: blur($blur-md);
+  box-shadow: var(--bs-box-shadow-lg);
+  border-color: var(--dropdown-border);
+}
+
+// ============================================================
+// USER PROFILE DROPDOWN (renders in body via container="body")
+// ============================================================
+
+.user-profile__dropdown {
+  background: var(--dropdown-bg);
+  border: 1px solid var(--dropdown-border);
+  border-radius: 2px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  min-width: 220px;
+  overflow: hidden;
+
+  .user-profile__info {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--bs-border-color);
+    background: var(--bs-tertiary-bg);
+  }
+
+  .user-profile__name {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--bs-emphasis-color);
+    margin-bottom: 0.125rem;
+  }
+
+  .user-profile__email {
+    font-size: 0.6875rem;
+    color: var(--bs-secondary-color);
+  }
+
+  .user-profile__meta {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--bs-border-color);
+  }
+
+  .user-profile__id {
+    font-size: 0.625rem;
+    font-weight: 600;
+    padding: 0.125rem 0.375rem;
+    background: var(--terminal-glow-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 2px;
+    color: var(--accent-amber, #FFA028);
+  }
+
+  .user-profile__login {
+    font-size: 0.625rem;
+    color: var(--bs-tertiary-color);
+    margin-top: 0.375rem;
+
+    .font-monospace {
+      color: var(--bs-secondary-color);
+    }
+  }
+
+  .dropdown-item {
+    font-size: 0.75rem;
+    padding: 0.5rem 1rem;
+    color: var(--bs-body-color);
+    transition: all 0.15s ease;
+
+    i {
+      opacity: 0.7;
+      transition: opacity 0.15s ease;
+    }
+
+    &:hover {
+      background: var(--bs-tertiary-bg);
+      color: var(--bs-emphasis-color);
+
+      i {
+        opacity: 1;
+        color: var(--accent-amber, #FFA028);
+      }
+    }
+
+    &:focus {
+      background: var(--bs-tertiary-bg);
+      outline: none;
+    }
+  }
+
+  .dropdown-divider {
+    border-color: var(--bs-border-color);
+    margin: 0.25rem 0;
+  }
+}
+
+// Light mode dropdown overrides
+[data-bs-theme="light"] {
+  .user-profile__dropdown {
+    background: var(--surface-base);
+    border-color: var(--bs-border-color);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+
+    .user-profile__info {
+      background: var(--surface-subtle);
+    }
+
+    .user-profile__name {
+      color: var(--bs-emphasis-color);
+    }
+
+    .user-profile__email {
+      color: var(--bs-secondary-color);
+    }
+
+    .user-profile__id {
+      background: var(--status-pending-bg);
+      border-color: var(--status-pending-border);
+      color: var(--status-pending);
+    }
+
+    .user-profile__login {
+      color: var(--bs-secondary-color);
+
+      .font-monospace {
+        color: var(--bs-tertiary-color);
+      }
+    }
+
+    .dropdown-item {
+      color: var(--bs-emphasis-color) !important;
+
+      i {
+        color: var(--bs-secondary-color);
+      }
+
+      &:hover {
+        background: var(--surface-subtle);
+        color: var(--bs-emphasis-color) !important;
+
+        i {
+          color: var(--terminal-glow);
+        }
+      }
+
+      &:focus {
+        background: var(--surface-subtle);
+        color: var(--bs-emphasis-color) !important;
+      }
+    }
+  }
+}
+
+// ============================================================
+// SCROLLBAR
+// ============================================================
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 2px;
+}
+
+// ============================================================
+// SELECTION
+// ============================================================
+
+::selection {
+  background: var(--selection-bg);
+  color: var(--bs-emphasis-color);
+}
+
+// ============================================================
+// DATA GRID CONTAINER — Wide Layout for Data-Dense Views
+// ============================================================
+
+.container-data {
+  width: 100%;
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+
+  @media (min-width: 768px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  @media (min-width: 1200px) {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  @media (min-width: 1920px) {
+    max-width: 1800px;
+  }
+}
+
+// ============================================================
+// DATA CARD — Minimal Terminal-Style Card for Data Grids
+// ============================================================
+
+.card-data {
+  background: var(--card-bg);
+  border: 1px solid var(--table-border-color, var(--amber-20));
+  border-radius: 2px;
+
+  > .card-body {
+    padding: 1rem;
+
+    @media (min-width: 768px) {
+      padding: 1.25rem;
+    }
+  }
+}
+
+// Light mode adjustments
+[data-bs-theme="light"] {
+  .card-data,
+  .card-form {
+    border-color: rgba(180, 83, 9, 0.15);
+  }
+}
+
+// ============================================================
+// FORM CONTAINER — Focused Layout for Data Entry
+// ============================================================
+
+.container-form {
+  width: 100%;
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1.5rem 1rem;
+
+  @media (min-width: 768px) {
+    padding: 2rem 1.5rem;
+  }
+}
+
+// Wide variant for complex forms (transaction entry)
+.container-form-wide {
+  @extend .container-form;
+  max-width: 1100px;
+}
+
+// ============================================================
+// FORM CARD — Terminal-Style Card for Forms
+// ============================================================
+
+.card-form {
+  background: var(--card-bg);
+  border: 1px solid var(--table-border-color, var(--amber-20));
+  border-radius: 2px;
+
+  > .card-header {
+    background: var(--table-header-bg);
+    border-bottom: 2px solid var(--accent-amber, #FFA028);
+    padding: 0.875rem 1.25rem;
+
+    .card-title {
+      margin: 0;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--bs-emphasis-color);
+    }
+  }
+
+  > .card-body {
+    padding: 1.5rem 1.25rem;
+  }
+}
+
+// ============================================================
+// FORM FIELD ENHANCEMENTS — Terminal Data Entry Style
+// ============================================================
+
+// Terminal-style form labels
+.form-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.375rem;
+  color: var(--bs-body-color);
+}
+
+// Monospace fields get extra letter spacing
+.form-control.font-monospace {
+  letter-spacing: 0.08em;
+}
+
+// Form field section separator
+.form-section {
+  border-top: 1px solid var(--table-border-color, var(--amber-15));
+  padding-top: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+// ============================================================
+// RADIO & CHECKBOX ENHANCEMENTS
+// ============================================================
+
+.form-check-input {
+  border-color: var(--input-border);
+  background-color: var(--input-bg);
+  transition: background-color $transition-fast, border-color $transition-fast, box-shadow $transition-fast;
+
+  &:checked {
+    background-color: var(--accent-amber, #FFA028);
+    border-color: var(--accent-amber, #FFA028);
+  }
+
+  &:focus {
+    border-color: var(--accent-amber, #FFA028);
+    box-shadow: 0 0 0 0.25rem var(--amber-25);
+  }
+}
+
+.form-check-label {
+  font-size: 0.8125rem;
+}
+
+// ============================================================
+// FORM ACTION BUTTONS — Visual Hierarchy
+// ============================================================
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--table-border-color, var(--amber-15));
+  margin-top: 1.5rem;
+}
+
+// Primary button emphasis
+.btn-primary {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}

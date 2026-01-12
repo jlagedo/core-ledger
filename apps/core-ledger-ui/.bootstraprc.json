@@ -1,0 +1,6 @@
+{
+  "bootstrapVersion": 5,
+  "useCustomizer": false,
+  "precompiledSass": false,
+  "overridingBootstrapVariables": {}
+}

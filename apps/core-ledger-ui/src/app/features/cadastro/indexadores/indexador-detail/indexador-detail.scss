@@ -1,0 +1,122 @@
+// Indexador Detail — Summary Cards, Tabs, and History Grid
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.5rem;
+  height: 100%;
+}
+
+.summary-card__label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--bs-secondary-color);
+}
+
+.summary-card__value {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--bs-body-color);
+}
+
+// Dark mode enhancements
+[data-bs-theme='dark'] {
+  .summary-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: var(--amber-15);
+  }
+}
+
+// Light mode enhancements
+[data-bs-theme='light'] {
+  .summary-card {
+    background: #fff;
+    border-color: var(--bs-border-color);
+  }
+}
+
+// Nav tabs styling
+.nav-tabs {
+  .nav-link {
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.875rem 1rem;
+    color: var(--bs-body-color);
+    font-weight: 500;
+    font-size: 0.875rem;
+
+    &:hover {
+      border-color: var(--bs-border-color);
+      color: var(--bs-primary);
+    }
+
+    &.active {
+      border-color: var(--bs-primary);
+      color: var(--bs-primary);
+      background: transparent;
+    }
+
+    i {
+      opacity: 0.7;
+    }
+
+    &.active i {
+      opacity: 1;
+    }
+  }
+}
+
+// History grid styling
+.history-grid {
+  height: 450px;
+  width: 100%;
+
+  --ag-header-background-color: transparent;
+  --ag-row-hover-color: var(--amber-8);
+  --ag-selected-row-background-color: var(--amber-12);
+  --ag-odd-row-background-color: transparent;
+  --ag-background-color: transparent;
+  --ag-border-color: var(--bs-border-color);
+  --ag-header-foreground-color: var(--bs-body-color);
+  --ag-foreground-color: var(--bs-body-color);
+  --ag-font-size: 0.8125rem;
+  --ag-row-border-width: 1px;
+  --ag-row-border-color: rgba(255, 255, 255, 0.05);
+
+  .ag-header-cell {
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .ag-cell {
+    display: flex;
+    align-items: center;
+  }
+}
+
+// Status bar
+.status-bar {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 0.25rem;
+}
+
+// Definition list styling for config tab
+dl {
+  dt {
+    font-weight: 500;
+    color: var(--bs-secondary-color);
+    font-size: 0.8125rem;
+  }
+
+  dd {
+    margin-bottom: 0.75rem;
+  }
+}

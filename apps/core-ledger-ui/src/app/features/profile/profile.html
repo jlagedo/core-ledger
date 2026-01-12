@@ -1,0 +1,321 @@
+<app-page-header title="Perfil do Usuário" />
+
+<main class="profile container-fluid px-3 pb-4">
+
+  <!-- ============================================================
+       CARTÃO DE IDENTIDADE (Seção Principal)
+       ============================================================ -->
+  <section class="terminal-panel" style="animation-delay: 0.1s">
+    <header class="terminal-panel__header">
+      <h2 class="terminal-panel__title">
+        <span class="fn-key">USR</span>
+        Identidade
+      </h2>
+      <div class="terminal-panel__actions">
+        <span class="text-success fs-6">
+          <i class="bi bi-circle-fill me-1"></i>
+          Online
+        </span>
+      </div>
+    </header>
+    <div class="identity-card">
+      <div class="identity-card__avatar">
+        @if (userProfile()?.picture) {
+          <img
+            [src]="userProfile()!.picture"
+            [alt]="userProfile()!.name"
+            referrerpolicy="no-referrer"
+          />
+        } @else {
+          <div class="avatar-placeholder">
+            <i class="bi bi-person"></i>
+          </div>
+        }
+        <span class="identity-card__status" title="Online"></span>
+      </div>
+
+      <div class="identity-card__info">
+        <h1 class="identity-card__name">{{ userProfile()?.name ?? 'Usuário Desconhecido' }}</h1>
+        <p class="identity-card__email">{{ userProfile()?.email ?? 'Sem email' }}</p>
+        <span class="identity-card__role">
+          <i class="bi bi-shield-check"></i>
+          {{ userRole() }}
+        </span>
+      </div>
+
+      <div class="identity-card__meta">
+        <div class="identity-card__meta-item">
+          <span class="label">Membro Desde</span>
+          <span class="value">{{ memberSince() | date:'MMM yyyy' }}</span>
+        </div>
+        <div class="identity-card__meta-item">
+          <span class="label">Último Acesso</span>
+          <span class="value">{{ formatRelativeTime(lastLogin()) }}</span>
+        </div>
+        <div class="identity-card__meta-item">
+          <span class="label">Sessões</span>
+          <span class="value">{{ sessions().length }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       GRID DE DETALHES DE CONTA
+       ============================================================ -->
+  <section class="terminal-panel" style="animation-delay: 0.15s">
+    <header class="terminal-panel__header">
+      <h2 class="terminal-panel__title">
+        <span class="fn-key">F5</span>
+        Detalhes da Conta
+      </h2>
+    </header>
+    <div class="terminal-panel__body">
+      <div class="row g-3 g-md-4">
+        <div class="col-md-6">
+          <div>
+            <div class="text-uppercase text-secondary fw-semibold mb-2 fs-6">Nome Completo</div>
+            <div class="fs-5">{{ userProfile()?.name ?? '—' }}</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div>
+            <div class="text-uppercase text-secondary fw-semibold mb-2 fs-6">Endereço de Email</div>
+            <div class="fs-5">{{ userProfile()?.email ?? '—' }}</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div>
+            <div class="text-uppercase text-secondary fw-semibold mb-2 fs-6">Função</div>
+            <div class="fs-5 text-primary">{{ userRole() }}</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div>
+            <div class="text-uppercase text-secondary fw-semibold mb-2 fs-6">ID do Usuário</div>
+            <div class="fs-5 font-monospace">{{ userProfile()?.sub ?? '—' }}</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div>
+            <div class="text-uppercase text-secondary fw-semibold mb-2 fs-6">Provedor de Autenticação</div>
+            <div class="fs-5">Auth0 OIDC</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div>
+            <div class="text-uppercase text-secondary fw-semibold mb-2 fs-6">Status MFA</div>
+            <div class="fs-5 text-success">Ativado</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="row g-3">
+    <!-- ============================================================
+         SESSÕES ATIVAS
+         ============================================================ -->
+    <div class="col-lg-6">
+      <section class="terminal-panel" style="animation-delay: 0.2s">
+        <header class="terminal-panel__header">
+          <h2 class="terminal-panel__title">
+            <span class="fn-key">F6</span>
+            Sessões Ativas
+          </h2>
+          <button class="btn btn-sm btn-link text-secondary p-1" title="Atualizar">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+        </header>
+        <div class="terminal-panel__body">
+          <ul class="session-list">
+            @for (session of sessions(); track session.id) {
+              <li class="session-list__item" [class.session-list__item--current]="session.isCurrent">
+                <div class="session-list__icon">
+                  <i class="bi {{ getDeviceIcon(session.device) }}"></i>
+                </div>
+                <div class="session-list__info">
+                  <div class="session-list__device">
+                    {{ session.device }}
+                    @if (session.isCurrent) {
+                      <span class="text-body-secondary">(este dispositivo)</span>
+                    }
+                  </div>
+                  <div class="session-list__details">
+                    {{ session.browser }} · {{ session.location }} · {{ session.ip }}
+                  </div>
+                </div>
+                @if (session.isCurrent) {
+                  <span class="session-list__status session-list__status--active">Ativo</span>
+                } @else {
+                  <button
+                    class="btn btn-sm btn-link text-secondary p-1"
+                    title="Revogar sessão"
+                    (click)="revokeSession(session.id)"
+                  >
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                }
+              </li>
+            }
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================================================
+         AÇÕES RÁPIDAS
+         ============================================================ -->
+    <div class="col-lg-6">
+      <section class="terminal-panel" style="animation-delay: 0.25s">
+        <header class="terminal-panel__header">
+          <h2 class="terminal-panel__title">Ações de Segurança</h2>
+        </header>
+        <div class="terminal-panel__body">
+          <div class="quick-actions">
+            @for (action of quickActions(); track action.key) {
+              <button
+                class="quick-actions__btn"
+                [class.quick-actions__btn--danger]="action.isDanger"
+                (click)="handleAction(action.action)"
+              >
+                <span class="quick-actions__key">{{ action.key }}</span>
+                <span class="quick-actions__label">{{ action.label }}</span>
+                <i class="quick-actions__icon bi {{ action.icon }}"></i>
+              </button>
+            }
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       ATALHOS DE TECLADO
+       ============================================================ -->
+  <section class="terminal-panel keyboard-shortcuts-panel" style="animation-delay: 0.3s">
+    <header class="terminal-panel__header">
+      <h2 class="terminal-panel__title">
+        <span class="fn-key">F9</span>
+        Atalhos de Teclado
+      </h2>
+      <div class="terminal-panel__actions">
+        <span class="keyboard-shortcuts__hint">
+          @if (isMac) {
+            <kbd class="key-combo key-combo--symbol">⇧</kbd>
+            <kbd class="key-combo">?</kbd>
+          } @else {
+            <kbd class="key-combo">Shift</kbd>
+            <span class="key-separator">+</span>
+            <kbd class="key-combo">?</kbd>
+          }
+          <span class="hint-text">para mostrar em qualquer lugar</span>
+        </span>
+      </div>
+    </header>
+    <div class="terminal-panel__body p-0">
+      <div class="keyboard-shortcuts">
+        @for (entry of shortcutsByCategory() | keyvalue; track entry.key) {
+          <div class="shortcut-category">
+            <header class="shortcut-category__header">
+              <i class="bi {{ getCategoryIcon(entry.key) }} shortcut-category__icon" aria-hidden="true"></i>
+              <span class="shortcut-category__name">{{ entry.key }}</span>
+              <span class="shortcut-category__count">{{ entry.value.length }}</span>
+            </header>
+            <ul class="shortcut-list" role="list">
+              @for (shortcut of entry.value; track shortcut.id) {
+                <li class="shortcut-list__item">
+                  <div class="shortcut-list__keys" [class.shortcut-list__keys--mac]="isMac" aria-label="Keyboard shortcut">
+                    @for (part of getShortcutKeyParts(shortcut.keys); track $index; let last = $last) {
+                      <kbd class="shortcut-key" [class.shortcut-key--symbol]="isMac && part.length === 1">{{ part }}</kbd>
+                      @if (!last && !isMac) {
+                        <span class="shortcut-key__separator" aria-hidden="true">+</span>
+                      }
+                    }
+                  </div>
+                  <span class="shortcut-list__label">{{ shortcut.label }}</span>
+                  <span class="shortcut-list__indicator" aria-hidden="true"></span>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <div class="row g-3">
+    <!-- ============================================================
+         LOG DE ATIVIDADES
+         ============================================================ -->
+    <div class="col-lg-8">
+      <section class="terminal-panel" style="animation-delay: 0.3s">
+        <header class="terminal-panel__header">
+          <h2 class="terminal-panel__title">
+            <span class="fn-key">F7</span>
+            Log de Atividades
+          </h2>
+          <button class="btn btn-sm btn-link text-secondary p-1" title="Ver Tudo">
+            <i class="bi bi-arrow-right"></i>
+          </button>
+        </header>
+        <div class="terminal-panel__body">
+          <ul class="activity-log">
+            @for (item of activityLog(); track item.id) {
+              <li class="activity-log__item">
+                <span class="activity-log__time">{{ formatRelativeTime(item.time) }}</span>
+                <span class="activity-log__action">
+                  {{ item.action }}
+                  @if (item.entity) {
+                    <span class="pipe">|</span>
+                    <span class="entity">{{ item.entity }}</span>
+                  }
+                </span>
+                <i class="activity-log__icon bi {{ getActivityIcon(item.type) }} {{ getActivityIconClass(item.type) }}"></i>
+              </li>
+            }
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================================================
+         PREFERÊNCIAS
+         ============================================================ -->
+    <div class="col-lg-4">
+      <section class="terminal-panel" style="animation-delay: 0.35s">
+        <header class="terminal-panel__header">
+          <h2 class="terminal-panel__title">
+            <span class="fn-key">F8</span>
+            Preferências
+          </h2>
+        </header>
+        <div class="terminal-panel__body">
+          <ul class="pref-list">
+            @for (pref of preferences(); track pref.id) {
+              <li class="pref-list__item">
+                <div class="pref-list__info">
+                  <div class="pref-list__label">{{ pref.label }}</div>
+                  <div class="pref-list__desc">{{ pref.description }}</div>
+                </div>
+                <div class="pref-list__control">
+                  <div class="form-check form-switch mb-0">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      role="switch"
+                      [id]="pref.id"
+                      [checked]="pref.enabled"
+                      (change)="togglePreference(pref.id)"
+                    />
+                  </div>
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+      </section>
+    </div>
+  </div>
+
+</main>

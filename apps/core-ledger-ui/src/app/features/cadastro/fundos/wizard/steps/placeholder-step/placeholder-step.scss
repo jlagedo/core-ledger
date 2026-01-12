@@ -1,0 +1,309 @@
+// ============================================================
+// PLACEHOLDER STEP — Development Test Component
+// Terminal-style test form with visual feedback
+// ============================================================
+
+// --- Design Tokens ---
+$field-radius: 2px;
+$glow-amber: rgba(255, 160, 40, 0.5);
+$glow-teal: rgba(74, 246, 195, 0.5);
+
+.placeholder-step {
+  animation: step-enter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes step-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================================
+// DEVELOPMENT NOTICE — Info Banner
+// ============================================================
+
+.placeholder-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  margin-bottom: 1.5rem;
+  background: rgba(0, 104, 255, 0.06);
+  border: 1px solid rgba(0, 104, 255, 0.2);
+  border-left: 3px solid var(--accent-blue, #0068ff);
+  border-radius: $field-radius;
+}
+
+.placeholder-notice__icon {
+  flex-shrink: 0;
+  font-size: 1.125rem;
+  color: var(--accent-blue, #0068ff);
+  opacity: 0.8;
+}
+
+.placeholder-notice__content {
+  min-width: 0;
+}
+
+.placeholder-notice__title {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent-blue, #0068ff);
+  margin-bottom: 0.25rem;
+}
+
+.placeholder-notice__text {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--bs-secondary-color);
+
+  strong {
+    color: var(--bs-emphasis-color);
+  }
+}
+
+// ============================================================
+// PLACEHOLDER FORM — Test Form Layout
+// ============================================================
+
+.placeholder-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.placeholder-form__header {
+  margin-bottom: 0.25rem;
+}
+
+.placeholder-form__description {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--bs-secondary-color);
+  line-height: 1.4;
+}
+
+.placeholder-form__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+
+  @media (min-width: 576px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+.placeholder-form__footer {
+  padding-top: 1rem;
+  border-top: 1px dashed var(--table-border-color);
+}
+
+// ============================================================
+// PLACEHOLDER FIELD — Form Field Styling
+// ============================================================
+
+.placeholder-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.placeholder-field__label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bs-body-color);
+}
+
+.placeholder-field__label-text {
+  // Base style from label
+}
+
+.placeholder-field__required {
+  color: var(--accent-coral, #ff433d);
+  font-weight: 700;
+}
+
+.placeholder-field__optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--terminal-text-muted);
+  font-size: 0.625rem;
+}
+
+.placeholder-field__input {
+  font-size: 0.8125rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: $field-radius;
+  transition: all 0.2s ease;
+
+  &::placeholder {
+    color: var(--terminal-text-placeholder);
+    font-style: italic;
+  }
+
+  &:focus {
+    border-color: var(--accent-amber, #FFA028);
+    box-shadow: 0 0 0 2px rgba(255, 160, 40, 0.15);
+  }
+
+  // Valid state
+  &.is-valid {
+    border-color: var(--accent-teal, #4af6c3);
+    box-shadow: 0 0 0 2px rgba(74, 246, 195, 0.1);
+  }
+
+  // Invalid state
+  &.is-invalid {
+    border-color: var(--accent-coral, #ff433d);
+    box-shadow: 0 0 0 2px rgba(255, 67, 61, 0.1);
+  }
+}
+
+// --- Validation Feedback ---
+.placeholder-field__error,
+.placeholder-field__success {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  animation: feedback-enter 0.2s ease;
+
+  i {
+    font-size: 0.6875rem;
+  }
+}
+
+.placeholder-field__error {
+  color: var(--accent-coral, #ff433d);
+}
+
+.placeholder-field__success {
+  color: var(--accent-teal, #4af6c3);
+}
+
+@keyframes feedback-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================================
+// PLACEHOLDER HINT — Help Text
+// ============================================================
+
+.placeholder-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  background: rgba(255, 160, 40, 0.04);
+  border: 1px dashed rgba(255, 160, 40, 0.2);
+  border-radius: $field-radius;
+}
+
+.placeholder-hint__icon {
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: var(--accent-amber, #FFA028);
+  animation: hint-pulse 1.5s ease-in-out infinite;
+}
+
+.placeholder-hint__text {
+  font-size: 0.6875rem;
+  color: var(--bs-secondary-color);
+
+  strong {
+    color: var(--accent-amber, #FFA028);
+  }
+}
+
+@keyframes hint-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+// ============================================================
+// LIGHT MODE OVERRIDES
+// ============================================================
+
+[data-bs-theme="light"] {
+  .placeholder-notice {
+    background: rgba(0, 104, 255, 0.04);
+    border-color: rgba(0, 104, 255, 0.15);
+    border-left-color: var(--accent-blue, #0068ff);
+  }
+
+  .placeholder-field__input {
+    &:focus {
+      border-color: var(--daylight-amber, #B45309);
+      box-shadow: 0 0 0 2px rgba(180, 83, 9, 0.1);
+    }
+
+    &.is-valid {
+      border-color: #059669;
+      box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.1);
+    }
+
+    &.is-invalid {
+      border-color: #DC2626;
+      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+    }
+  }
+
+  .placeholder-field__error {
+    color: #DC2626;
+  }
+
+  .placeholder-field__success {
+    color: #059669;
+  }
+
+  .placeholder-hint {
+    background: rgba(180, 83, 9, 0.03);
+    border-color: rgba(180, 83, 9, 0.15);
+  }
+
+  .placeholder-hint__icon {
+    color: var(--daylight-amber, #B45309);
+  }
+
+  .placeholder-hint__text strong {
+    color: var(--daylight-amber, #B45309);
+  }
+}
+
+// ============================================================
+// REDUCED MOTION
+// ============================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .placeholder-step,
+  .placeholder-field__error,
+  .placeholder-field__success {
+    animation: none;
+  }
+
+  .placeholder-hint__icon {
+    animation: none;
+  }
+}

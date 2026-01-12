@@ -1,0 +1,377 @@
+<app-page-header title="Indexadores">
+  <button type="button" class="btn btn-secondary btn-sm" (click)="onRefresh()">
+    <i class="bi bi-arrow-clockwise"></i>
+  </button>
+  <button
+    type="button"
+    aria-label="Criar novo indexador"
+    class="btn btn-primary"
+    routerLink="/cadastro/indexadores/new"
+  >
+    <i class="bi bi-plus-lg"></i>
+    <span>Novo</span>
+  </button>
+</app-page-header>
+
+<main class="container-data">
+  <div class="card-data">
+    <div class="card-body p-0">
+      <!-- Preset Quick Filters -->
+      <div class="preset-bar">
+        <span class="preset-bar__label">PRESETS</span>
+        <div class="preset-bar__chips">
+          @for (preset of presets; track preset.id) {
+            <button
+              type="button"
+              class="preset-chip"
+              [class.preset-chip--active]="isPresetActive(preset.id)"
+              [title]="preset.description"
+              (click)="onPresetClick(preset.id)"
+            >
+              <i class="bi {{ preset.icon }} preset-chip__icon"></i>
+              <span class="preset-chip__label">{{ preset.shortLabel }}</span>
+            </button>
+          }
+        </div>
+        @if (activePreset()) {
+          <button
+            type="button"
+            class="preset-bar__clear"
+            title="Limpar preset"
+            (click)="onPresetClick(null)"
+          >
+            <i class="bi bi-x-lg"></i>
+          </button>
+        }
+      </div>
+
+      <!-- Quick Filter Bar -->
+      <div class="filter-bar">
+        <!-- Search Input -->
+        <div class="filter-bar__search">
+          <i class="bi bi-search filter-bar__search-icon"></i>
+          <input
+            type="text"
+            class="filter-bar__search-input"
+            placeholder="Buscar..."
+            [(ngModel)]="searchTerm"
+            (keydown.enter)="onSearch()"
+            aria-label="Buscar indexadores"
+          />
+          @if (searchTerm()) {
+            <button
+              class="filter-bar__search-clear"
+              type="button"
+              (click)="onClearSearch()"
+              aria-label="Limpar busca"
+            >
+              <i class="bi bi-x"></i>
+            </button>
+          }
+        </div>
+
+        <div class="filter-bar__divider"></div>
+
+        <!-- Filter Dropdowns -->
+        <div class="filter-bar__filters">
+          <!-- Tipo Filter -->
+          <div class="filter-dropdown" ngbDropdown>
+            <button
+              class="filter-dropdown__trigger"
+              [class.filter-dropdown__trigger--active]="filters().tipo !== null"
+              ngbDropdownToggle
+            >
+              <span class="filter-dropdown__label">Tipo</span>
+              @if (selectedTipoLabel()) {
+                <span class="filter-dropdown__value">{{ selectedTipoLabel() }}</span>
+              }
+              <i class="bi bi-chevron-down filter-dropdown__chevron"></i>
+            </button>
+            <div ngbDropdownMenu class="filter-dropdown__menu">
+              <button ngbDropdownItem (click)="onTipoChange(null)" [class.active]="filters().tipo === null">
+                <span>Todos</span>
+              </button>
+              <div class="dropdown-divider"></div>
+              @for (option of tipoOptions; track option.value) {
+                <button
+                  ngbDropdownItem
+                  (click)="onTipoChange(option.value)"
+                  [class.active]="filters().tipo === option.value"
+                >
+                  <i class="bi {{ option.icon }} me-2" [style.color]="option.color"></i>
+                  <span>{{ option.name }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Periodicidade Filter -->
+          <div class="filter-dropdown" ngbDropdown>
+            <button
+              class="filter-dropdown__trigger"
+              [class.filter-dropdown__trigger--active]="filters().periodicidade !== null"
+              ngbDropdownToggle
+            >
+              <span class="filter-dropdown__label">Period.</span>
+              @if (selectedPeriodicidadeLabel()) {
+                <span class="filter-dropdown__value">{{ selectedPeriodicidadeLabel() }}</span>
+              }
+              <i class="bi bi-chevron-down filter-dropdown__chevron"></i>
+            </button>
+            <div ngbDropdownMenu class="filter-dropdown__menu">
+              <button ngbDropdownItem (click)="onPeriodicidadeChange(null)" [class.active]="filters().periodicidade === null">
+                <span>Todos</span>
+              </button>
+              <div class="dropdown-divider"></div>
+              @for (option of periodicidadeOptions; track option.value) {
+                <button
+                  ngbDropdownItem
+                  (click)="onPeriodicidadeChange(option.value)"
+                  [class.active]="filters().periodicidade === option.value"
+                >
+                  <span>{{ option.name }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Fonte Filter -->
+          <div class="filter-dropdown" ngbDropdown>
+            <button
+              class="filter-dropdown__trigger"
+              [class.filter-dropdown__trigger--active]="filters().fonte !== null"
+              ngbDropdownToggle
+            >
+              <span class="filter-dropdown__label">Fonte</span>
+              @if (selectedFonteLabel()) {
+                <span class="filter-dropdown__value">{{ selectedFonteLabel() }}</span>
+              }
+              <i class="bi bi-chevron-down filter-dropdown__chevron"></i>
+            </button>
+            <div ngbDropdownMenu class="filter-dropdown__menu">
+              <button ngbDropdownItem (click)="onFonteChange(null)" [class.active]="filters().fonte === null">
+                <span>Todos</span>
+              </button>
+              <div class="dropdown-divider"></div>
+              @for (option of fonteOptions; track option.value) {
+                <button
+                  ngbDropdownItem
+                  (click)="onFonteChange(option.value)"
+                  [class.active]="filters().fonte === option.value"
+                >
+                  <span>{{ option.name }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Status Filter -->
+          <div class="filter-dropdown" ngbDropdown>
+            <button
+              class="filter-dropdown__trigger"
+              [class.filter-dropdown__trigger--active]="filters().ativo !== null"
+              ngbDropdownToggle
+            >
+              <span class="filter-dropdown__label">Status</span>
+              @if (selectedAtivoLabel()) {
+                <span class="filter-dropdown__value">{{ selectedAtivoLabel() }}</span>
+              }
+              <i class="bi bi-chevron-down filter-dropdown__chevron"></i>
+            </button>
+            <div ngbDropdownMenu class="filter-dropdown__menu">
+              <button ngbDropdownItem (click)="onAtivoChange(null)" [class.active]="filters().ativo === null">
+                <span>Todos</span>
+              </button>
+              <div class="dropdown-divider"></div>
+              @for (option of ativoOptions; track option.value) {
+                <button
+                  ngbDropdownItem
+                  (click)="onAtivoChange(option.value)"
+                  [class.active]="filters().ativo === option.value"
+                >
+                  <span>{{ option.name }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Importacao Auto Filter -->
+          <div class="filter-dropdown" ngbDropdown>
+            <button
+              class="filter-dropdown__trigger"
+              [class.filter-dropdown__trigger--active]="filters().importacaoAutomatica !== null"
+              ngbDropdownToggle
+            >
+              <span class="filter-dropdown__label">Import.</span>
+              @if (selectedImportacaoAutoLabel()) {
+                <span class="filter-dropdown__value">{{ selectedImportacaoAutoLabel() }}</span>
+              }
+              <i class="bi bi-chevron-down filter-dropdown__chevron"></i>
+            </button>
+            <div ngbDropdownMenu class="filter-dropdown__menu">
+              <button ngbDropdownItem (click)="onImportacaoAutoChange(null)" [class.active]="filters().importacaoAutomatica === null">
+                <span>Todos</span>
+              </button>
+              <div class="dropdown-divider"></div>
+              @for (option of importacaoAutoOptions; track option.value) {
+                <button
+                  ngbDropdownItem
+                  (click)="onImportacaoAutoChange(option.value)"
+                  [class.active]="filters().importacaoAutomatica === option.value"
+                >
+                  <span>{{ option.name }}</span>
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Clear All Filters -->
+        @if (hasActiveFilters()) {
+          <div class="filter-bar__divider"></div>
+          <button
+            type="button"
+            class="filter-bar__clear-all"
+            (click)="clearAllFilters()"
+            title="Limpar todos os filtros"
+          >
+            <i class="bi bi-x-circle"></i>
+            <span>Limpar</span>
+          </button>
+        }
+
+        <!-- Filter Count Badge -->
+        @if (activeFilterCount() > 0) {
+          <span class="filter-bar__count">{{ activeFilterCount() }}</span>
+        }
+      </div>
+
+      <!-- Active Filter Pills -->
+      @if (hasActiveFilters()) {
+        <div class="filter-pills">
+          @if (searchTerm()) {
+            <span class="filter-pill">
+              <span class="filter-pill__label">Busca:</span>
+              <span class="filter-pill__value">{{ searchTerm() }}</span>
+              <button class="filter-pill__remove" (click)="onClearSearch()">
+                <i class="bi bi-x"></i>
+              </button>
+            </span>
+          }
+          @if (selectedTipoLabel()) {
+            <span class="filter-pill">
+              <span class="filter-pill__label">Tipo:</span>
+              <span class="filter-pill__value">{{ selectedTipoLabel() }}</span>
+              <button class="filter-pill__remove" (click)="clearFilter('tipo')">
+                <i class="bi bi-x"></i>
+              </button>
+            </span>
+          }
+          @if (selectedPeriodicidadeLabel()) {
+            <span class="filter-pill">
+              <span class="filter-pill__label">Period.:</span>
+              <span class="filter-pill__value">{{ selectedPeriodicidadeLabel() }}</span>
+              <button class="filter-pill__remove" (click)="clearFilter('periodicidade')">
+                <i class="bi bi-x"></i>
+              </button>
+            </span>
+          }
+          @if (selectedFonteLabel()) {
+            <span class="filter-pill">
+              <span class="filter-pill__label">Fonte:</span>
+              <span class="filter-pill__value">{{ selectedFonteLabel() }}</span>
+              <button class="filter-pill__remove" (click)="clearFilter('fonte')">
+                <i class="bi bi-x"></i>
+              </button>
+            </span>
+          }
+          @if (selectedAtivoLabel()) {
+            <span class="filter-pill">
+              <span class="filter-pill__label">Status:</span>
+              <span class="filter-pill__value">{{ selectedAtivoLabel() }}</span>
+              <button class="filter-pill__remove" (click)="clearFilter('ativo')">
+                <i class="bi bi-x"></i>
+              </button>
+            </span>
+          }
+          @if (selectedImportacaoAutoLabel()) {
+            <span class="filter-pill">
+              <span class="filter-pill__label">Import.:</span>
+              <span class="filter-pill__value">{{ selectedImportacaoAutoLabel() }}</span>
+              <button class="filter-pill__remove" (click)="clearFilter('importacaoAutomatica')">
+                <i class="bi bi-x"></i>
+              </button>
+            </span>
+          }
+        </div>
+      }
+
+      <!-- AG Grid -->
+      <ag-grid-angular
+        style="width: 100%; height: 500px"
+        [theme]="gridTheme()"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        [getRowId]="getRowId"
+        [rowModelType]="'infinite'"
+        [cacheBlockSize]="50"
+        [maxBlocksInCache]="10"
+        [blockLoadDebounceMillis]="200"
+        [pagination]="false"
+        [animateRows]="false"
+        (gridReady)="onGridReady($event)"
+        (sortChanged)="onSortChanged($event)"
+        (cellClicked)="onCellClicked($event)"
+      />
+
+      <!-- Status Bar -->
+      <div class="grid-status-bar">
+        <div class="status-bar__section status-bar__records">
+          <span class="status-bar__label">REGISTROS</span>
+          <span class="status-bar__value status-bar__value--primary">
+            {{ paginationStats().totalCount | number }}
+          </span>
+        </div>
+
+        <div class="status-bar__divider"></div>
+
+        <div class="status-bar__section status-bar__loaded">
+          <span class="status-bar__label">CARREGADOS</span>
+          <span class="status-bar__value">
+            {{ paginationStats().loadedCount | number }}
+          </span>
+          @if (paginationStats().totalCount > 0) {
+            <span class="status-bar__percentage">
+              {{ (paginationStats().loadedCount / paginationStats().totalCount * 100) | number: '1.0-0' }}%
+            </span>
+          }
+        </div>
+
+        <div class="status-bar__divider"></div>
+
+        <div class="status-bar__section status-bar__range">
+          <span class="status-bar__label">VISUALIZANDO</span>
+          <span class="status-bar__value">
+            @if (paginationStats().totalCount > 0) {
+              {{ paginationStats().currentRangeStart | number }}–{{ paginationStats().currentRangeEnd | number }}
+            } @else {
+              —
+            }
+          </span>
+        </div>
+
+        <div class="status-bar__spacer"></div>
+
+        <div class="status-bar__section status-bar__status">
+          @if (isLoading()) {
+            <span class="status-bar__indicator status-bar__indicator--loading"></span>
+            <span class="status-bar__label">CARREGANDO</span>
+          } @else {
+            <span class="status-bar__indicator status-bar__indicator--ready"></span>
+            <span class="status-bar__label">PRONTO</span>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

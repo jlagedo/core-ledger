@@ -1,0 +1,799 @@
+// ============================================================
+// DEADLINE TICKER — Bloomberg Terminal Status Panel
+//
+// Financial terminal-inspired countdown display with
+// urgency-based color coding and rolling ticker animation.
+//
+// Uses theme CSS variables for all colors - no hardcoded values.
+// ============================================================
+
+// ============================================================
+// ANIMATIONS
+// ============================================================
+
+@keyframes pulse-critical {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 var(--status-critical-glow);
+  }
+  50% {
+    opacity: 0.85;
+    box-shadow: 0 0 8px 2px var(--status-critical-glow);
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.7;
+  }
+}
+
+@keyframes glow-warning {
+  0%, 100% {
+    text-shadow: 0 0 4px var(--status-warning-glow);
+  }
+  50% {
+    text-shadow: 0 0 12px var(--status-warning-glow);
+  }
+}
+
+@keyframes scan-line {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes ticker-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================================
+// HOST
+// ============================================================
+
+:host {
+  display: block;
+  position: relative;
+}
+
+// ============================================================
+// MAIN CONTAINER
+// ============================================================
+
+.deadline-ticker {
+  position: relative;
+  background: var(--terminal-glow-bg);
+  border: 1px solid var(--sidenav-divider);
+  border-radius: 2px;
+  overflow: hidden;
+  font-size: 0.6875rem;
+  line-height: 1.3;
+
+  // Scan line effect
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      var(--terminal-glow-bg) 50%,
+      transparent 100%
+    );
+    pointer-events: none;
+    animation: scan-line 4s linear infinite;
+  }
+
+  // Critical state glow
+  &--critical {
+    border-color: var(--status-critical-glow);
+    animation: pulse-critical 2s ease-in-out infinite;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 2px;
+      box-shadow: inset 0 0 12px var(--status-critical-glow);
+      pointer-events: none;
+    }
+  }
+}
+
+// ============================================================
+// HEADER
+// ============================================================
+
+.deadline-ticker__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.375rem 0.5rem;
+  border-bottom: 1px solid var(--sidenav-divider);
+  background: var(--terminal-glow-bg);
+}
+
+.deadline-ticker__title {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--sidenav-color);
+  opacity: 0.6;
+
+  i {
+    font-size: 0.625rem;
+    color: var(--terminal-glow);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+}
+
+.deadline-ticker__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.deadline-ticker__nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 1px;
+  color: var(--sidenav-color);
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  i {
+    font-size: 0.625rem;
+  }
+
+  &:hover {
+    color: var(--terminal-glow);
+    border-color: var(--sidenav-divider);
+    background: var(--terminal-glow-bg);
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--terminal-glow);
+    outline-offset: 1px;
+  }
+}
+
+.deadline-ticker__minimize-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  margin-left: 0.25rem;
+  background: transparent;
+  border: 1px solid var(--sidenav-divider);
+  border-radius: 1px;
+  color: var(--sidenav-color);
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  i {
+    font-size: 0.75rem;
+  }
+
+  &:hover {
+    color: var(--terminal-glow);
+    border-color: var(--terminal-glow);
+    background: var(--terminal-glow-bg);
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--terminal-glow);
+    outline-offset: 1px;
+  }
+}
+
+// ============================================================
+// TICKER LIST
+// ============================================================
+
+.deadline-ticker__list {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem 0;
+}
+
+.deadline-ticker__item {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  animation: ticker-enter 0.2s ease-out;
+
+  // Status indicator dot
+  .deadline-ticker__status {
+    flex-shrink: 0;
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  // Label
+  .deadline-ticker__label {
+    flex: 1;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // Countdown time
+  .deadline-ticker__time {
+    flex-shrink: 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.05em;
+  }
+
+  // Urgency states
+  &--safe {
+    color: var(--status-safe);
+
+    .deadline-ticker__status {
+      opacity: 0.6;
+    }
+  }
+
+  &--warning {
+    color: var(--status-warning);
+
+    .deadline-ticker__time {
+      animation: glow-warning 2s ease-in-out infinite;
+    }
+
+    .deadline-ticker__status {
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+  }
+
+  &--critical {
+    color: var(--status-critical);
+
+    .deadline-ticker__status {
+      animation: pulse-dot 0.8s ease-in-out infinite;
+      box-shadow: 0 0 6px var(--status-critical-glow);
+    }
+
+    .deadline-ticker__time {
+      font-weight: 700;
+      text-shadow: 0 0 8px var(--status-critical-glow);
+    }
+  }
+
+  &--expired {
+    color: var(--status-expired);
+    opacity: 0.5;
+    text-decoration: line-through;
+  }
+}
+
+// ============================================================
+// MORE INDICATOR
+// ============================================================
+
+.deadline-ticker__more {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.5625rem;
+  color: var(--sidenav-color);
+  opacity: 0.6;
+  text-align: center;
+  border-top: 1px solid var(--sidenav-divider);
+  background: var(--terminal-glow-bg);
+}
+
+// ============================================================
+// COLLAPSED STATE
+// ============================================================
+
+.deadline-ticker--collapsed {
+  background: transparent;
+  border: none;
+
+  &::before {
+    display: none;
+  }
+}
+
+.deadline-ticker__indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 2px;
+  background: var(--terminal-glow-bg);
+  border: 1px solid var(--sidenav-divider);
+  color: var(--status-safe);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  i {
+    font-size: 1rem;
+  }
+
+  &:hover {
+    border-color: var(--terminal-glow);
+    background: var(--terminal-glow-subtle);
+    color: var(--terminal-glow);
+  }
+
+  &--warning {
+    color: var(--status-warning);
+    border-color: var(--status-warning-glow);
+
+    i {
+      animation: glow-warning 2s ease-in-out infinite;
+    }
+  }
+
+  &--critical {
+    color: var(--status-critical);
+    border-color: var(--status-critical-glow);
+    animation: pulse-critical 1.5s ease-in-out infinite;
+  }
+}
+
+.deadline-ticker__badge {
+  position: absolute;
+  top: -0.25rem;
+  right: -0.25rem;
+  min-width: 0.875rem;
+  height: 0.875rem;
+  padding: 0 0.25rem;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  line-height: 0.875rem;
+  text-align: center;
+  color: var(--sidenav-bg);
+  background: var(--terminal-glow);
+  border-radius: 1px;
+  box-shadow: 0 0 6px var(--status-warning-glow);
+}
+
+// ============================================================
+// MINIMIZED PILL STATE
+// ============================================================
+
+.deadline-ticker--minimized {
+  background: transparent;
+  border: none;
+  overflow: visible;
+
+  &::before {
+    display: none;
+  }
+}
+
+.deadline-ticker__pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  background: var(--terminal-glow-bg);
+  border: 1px solid var(--sidenav-divider);
+  border-radius: 2px;
+  color: var(--status-safe);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+
+  // Scan line effect
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--terminal-glow-bg) 50%,
+      transparent 100%
+    );
+    pointer-events: none;
+    animation: scan-line 3s linear infinite;
+  }
+
+  &:hover {
+    border-color: var(--terminal-glow);
+    background: var(--terminal-glow-subtle);
+
+    .deadline-ticker__pill-expand {
+      color: var(--terminal-glow);
+      transform: translateY(1px);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--terminal-glow);
+    outline-offset: 2px;
+  }
+
+  // Warning state
+  &--warning {
+    border-color: var(--status-warning-glow);
+
+    .deadline-ticker__pill-time {
+      color: var(--status-warning);
+      animation: glow-warning 2s ease-in-out infinite;
+    }
+  }
+
+  // Critical state
+  &--critical {
+    border-color: var(--status-critical-glow);
+    animation: pulse-critical 2s ease-in-out infinite;
+
+    .deadline-ticker__pill-time {
+      color: var(--status-critical);
+      text-shadow: 0 0 8px var(--status-critical-glow);
+    }
+
+    .deadline-ticker__pill-number {
+      color: var(--status-critical);
+    }
+  }
+}
+
+.deadline-ticker__pill-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  i {
+    font-size: 0.75rem;
+    color: var(--terminal-glow);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+}
+
+.deadline-ticker__pill-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 2rem;
+}
+
+.deadline-ticker__pill-number {
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--terminal-glow);
+}
+
+.deadline-ticker__pill-label {
+  font-size: 0.4375rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--sidenav-color);
+  opacity: 0.6;
+  line-height: 1;
+  margin-top: 0.125rem;
+}
+
+.deadline-ticker__pill-divider {
+  width: 1px;
+  height: 1.5rem;
+  background: var(--sidenav-divider);
+  flex-shrink: 0;
+}
+
+.deadline-ticker__pill-urgent {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.deadline-ticker__pill-status {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--status-safe);
+
+  &--safe {
+    opacity: 0.6;
+  }
+
+  &--warning {
+    background: var(--status-warning);
+    animation: pulse-dot 1.5s ease-in-out infinite;
+    box-shadow: 0 0 4px var(--status-warning-glow);
+  }
+
+  &--critical {
+    background: var(--status-critical);
+    animation: pulse-dot 0.8s ease-in-out infinite;
+    box-shadow: 0 0 6px var(--status-critical-glow);
+  }
+}
+
+.deadline-ticker__pill-time {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+  color: var(--status-safe);
+  white-space: nowrap;
+}
+
+.deadline-ticker__pill-expand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--sidenav-color);
+  transition: all 0.15s ease;
+
+  i {
+    font-size: 0.625rem;
+  }
+}
+
+// ============================================================
+// FLYOUT PANEL
+// ============================================================
+
+.deadline-ticker__flyout {
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  left: 0;
+  min-width: 220px;
+  background: var(--dropdown-bg);
+  border: 1px solid var(--sidenav-divider);
+  border-radius: 2px;
+  box-shadow: var(--bs-box-shadow-lg);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  animation: ticker-enter 0.15s ease-out;
+
+  // Arrow pointer
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 1rem;
+    width: 10px;
+    height: 10px;
+    background: var(--dropdown-bg);
+    border-right: 1px solid var(--sidenav-divider);
+    border-bottom: 1px solid var(--sidenav-divider);
+    transform: rotate(45deg);
+  }
+}
+
+.deadline-ticker__flyout-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--terminal-glow);
+  background: var(--terminal-glow-bg);
+  border-bottom: 1px solid var(--sidenav-divider);
+
+  i {
+    font-size: 0.875rem;
+  }
+}
+
+.deadline-ticker__flyout-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.375rem 0;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.deadline-ticker__flyout-item {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--terminal-glow-bg);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &--safe {
+    .deadline-ticker__flyout-status {
+      background: var(--status-safe);
+      opacity: 0.6;
+    }
+    .deadline-ticker__flyout-label,
+    .deadline-ticker__flyout-time {
+      color: var(--status-safe);
+    }
+  }
+
+  &--warning {
+    .deadline-ticker__flyout-status {
+      background: var(--status-warning);
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+    .deadline-ticker__flyout-label,
+    .deadline-ticker__flyout-time {
+      color: var(--status-warning);
+    }
+  }
+
+  &--critical {
+    background: var(--status-critical-glow);
+
+    .deadline-ticker__flyout-status {
+      background: var(--status-critical);
+      animation: pulse-dot 0.8s ease-in-out infinite;
+      box-shadow: 0 0 6px var(--status-critical-glow);
+    }
+    .deadline-ticker__flyout-label,
+    .deadline-ticker__flyout-time {
+      color: var(--status-critical);
+    }
+  }
+}
+
+.deadline-ticker__flyout-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.deadline-ticker__flyout-status {
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+}
+
+.deadline-ticker__flyout-label {
+  flex: 1;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.deadline-ticker__flyout-time {
+  flex-shrink: 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+}
+
+.deadline-ticker__flyout-desc {
+  margin-top: 0.25rem;
+  padding-left: 1rem;
+  font-size: 0.5625rem;
+  color: var(--bs-secondary-color);
+}
+
+// ============================================================
+// LIGHT MODE ADJUSTMENTS
+// ============================================================
+
+[data-bs-theme="light"] {
+  .deadline-ticker__pill {
+    &--warning .deadline-ticker__pill-time {
+      animation: none;
+    }
+
+    &--critical {
+      animation: none;
+
+      .deadline-ticker__pill-time {
+        text-shadow: none;
+      }
+    }
+  }
+
+  .deadline-ticker__indicator {
+    &--warning i {
+      animation: none;
+    }
+
+    &--critical {
+      animation: none;
+    }
+  }
+
+  .deadline-ticker__item {
+    &--warning .deadline-ticker__time {
+      animation: none;
+    }
+
+    &--critical .deadline-ticker__time {
+      text-shadow: none;
+    }
+  }
+
+  .deadline-ticker--critical {
+    animation: none;
+
+    &::after {
+      display: none;
+    }
+  }
+}
+
+// ============================================================
+// SCROLLBAR (Flyout)
+// ============================================================
+
+.deadline-ticker__flyout-list {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sidenav-divider) transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--sidenav-divider);
+    border-radius: 2px;
+
+    &:hover {
+      background: var(--terminal-glow-muted);
+    }
+  }
+}

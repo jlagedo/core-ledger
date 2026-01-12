@@ -1,0 +1,25 @@
+{
+  "name": "core-ledger-api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/core-ledger-api",
+  "tags": ["type:app", "scope:backend"],
+  "implicitDependencies": ["core-ledger-dotnet"],
+  "targets": {
+    "build": {
+      "command": "dotnet build CoreLedger.API/CoreLedger.API.csproj --configuration Release",
+      "options": { "cwd": "apps/core-ledger-api" },
+      "cache": true,
+      "inputs": ["{projectRoot}/**/*.cs", "{projectRoot}/**/*.csproj", "{workspaceRoot}/libs/core-ledger-dotnet/**/*.cs"],
+      "outputs": ["{projectRoot}/CoreLedger.API/bin"]
+    },
+    "serve": {
+      "command": "dotnet watch run --project CoreLedger.API/CoreLedger.API.csproj",
+      "options": { "cwd": "apps/core-ledger-api" }
+    },
+    "migrate": {
+      "command": "dotnet ef database update --project ../../../libs/core-ledger-dotnet/CoreLedger.Infrastructure --startup-project CoreLedger.API",
+      "options": { "cwd": "apps/core-ledger-api/CoreLedger.API" }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "angular-cli": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@angular/cli", "mcp"]
+    },
+    "nuget": {
+      "type": "stdio",
+      "command": "dnx",
+      "args": ["NuGet.Mcp.Server", "--prerelease", "--yes"]
+    },
+    "postgres": {
+      "type": "stdio",
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "-e", "DATABASE_URI", "crystaldba/postgres-mcp", "--access-mode=unrestricted"],
+      "env": {
+        "DATABASE_URI": "postgresql://postgres:postgres@localhost:5432/core_ledger_db"
+      }
+    },
+    "microsoft-docs": {
+      "type": "http",
+      "url": "https://learn.microsoft.com/api/mcp"
+    }
+  }
+}

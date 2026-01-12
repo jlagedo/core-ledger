@@ -1,0 +1,34 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "ignoreDependencies": [
+    "bootstrap",
+    "bootstrap-icons",
+    "@vitest/coverage-v8",
+    "source-map-explorer",
+    "ts-node",
+    "@micro-sentry/core"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "angular": {
+    "entry": [
+      "src/main.ts",
+      "src/environments/**/*.ts",
+      "tools/**/*.ts"
+    ]
+  },
+  "ignore": [
+    "**/*.spec.ts",
+    "src/app/api/mock-data/*.production.ts",
+    "src/app/auth/mock-tokens.production.ts"
+  ],
+  "ignoreWorkspaces": [],
+  "rules": {
+    "unlisted": "error",
+    "unresolved": "error",
+    "exports": "warn",
+    "types": "warn",
+    "nsTypes": "warn",
+    "nsExports": "warn",
+    "duplicates": "error"
+  }
+}

@@ -1,0 +1,219 @@
+<main class="dashboard container-fluid px-3 pb-4">
+
+  <!-- ============================================================
+       BARRA DE MÉTRICAS PRINCIPAIS
+       ============================================================ -->
+  <section class="hero-metrics" aria-label="Métricas-chave">
+    @for (metric of heroMetrics(); track metric.label) {
+      <div class="hero-metrics__item" [class.hero-metrics__item--primary]="metric.isPrimary">
+        <div class="hero-metrics__label">
+          {{ metric.label }}
+          @if (metric.isLive) {
+            <span class="live-indicator" title="Dados ao vivo"></span>
+          }
+        </div>
+        <div class="hero-metrics__value"
+             [class.hero-metrics__value--positive]="metric.change > 0 && metric.format !== 'number'"
+             [class.hero-metrics__value--negative]="metric.change < 0 && metric.format !== 'number'">
+          {{ formatMetricValue(metric) }}
+        </div>
+        <div class="hero-metrics__change"
+             [class.hero-metrics__change--up]="metric.change >= 0"
+             [class.hero-metrics__change--down]="metric.change < 0">
+          <i class="bi" [class.bi-caret-up-fill]="metric.change >= 0" [class.bi-caret-down-fill]="metric.change < 0"></i>
+          {{ metric.change >= 0 ? '+' : '' }}{{ metric.changePercent | number:'1.2-2' }}%
+        </div>
+      </div>
+    }
+  </section>
+
+  <!-- ============================================================
+       TICKER DE PULSO DE MERCADO
+       ============================================================ -->
+  <section class="market-pulse" aria-label="Ticker de Desempenho de Fundos">
+    <div class="market-pulse__track">
+      @for (item of tickerTrack(); track $index) {
+        <div class="market-pulse__item">
+          <span class="market-pulse__symbol">{{ item.symbol }}</span>
+          <span class="market-pulse__value">{{ item.value | number:'1.2-2' }}</span>
+          <span class="market-pulse__change"
+                [class.market-pulse__change--up]="item.change >= 0"
+                [class.market-pulse__change--down]="item.change < 0">
+            {{ item.change >= 0 ? '+' : '' }}{{ item.change | number:'1.2-2' }}%
+          </span>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- ============================================================
+       GRID DO CENTRO DE COMANDO
+       ============================================================ -->
+  <div class="command-grid">
+
+    <!-- ESQUERDA: Área Principal do Gráfico (ocupa 2 linhas) -->
+    <section class="terminal-panel terminal-panel--chart" style="animation-delay: 0.1s">
+      <header class="terminal-panel__header">
+        <h2 class="terminal-panel__title">
+          <span class="fn-key">F7</span>
+          Alocação de Ativos
+        </h2>
+        <div class="terminal-panel__actions">
+          <button class="btn btn-sm btn-link text-secondary p-1" title="Atualizar">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+          <button class="btn btn-sm btn-link text-secondary p-1" title="Expandir">
+            <i class="bi bi-arrows-fullscreen"></i>
+          </button>
+        </div>
+      </header>
+      <div class="terminal-panel__body">
+        @defer {
+          <app-dashboard-allocation-chart />
+        } @placeholder {
+          <div class="d-flex align-items-center justify-content-center placeholder-glow" style="height: 280px;">
+            <span class="placeholder rounded-circle" style="width: 180px; height: 180px;"></span>
+          </div>
+        }
+
+        <!-- Grid de Estatísticas Compacto -->
+        <div class="stats-grid mt-3">
+          <div class="stats-grid__item">
+            <div class="stats-grid__label">Títulos</div>
+            <div class="stats-grid__value">{{ statsData().totalSecurities | number }}</div>
+          </div>
+          <div class="stats-grid__item">
+            <div class="stats-grid__label">Contas</div>
+            <div class="stats-grid__value">{{ statsData().activeAccounts | number }}</div>
+          </div>
+          <div class="stats-grid__item">
+            <div class="stats-grid__label">Pendente</div>
+            <div class="stats-grid__value">{{ statsData().pendingSettlements }}</div>
+          </div>
+          <div class="stats-grid__item">
+            <div class="stats-grid__label">Vencido</div>
+            <div class="stats-grid__value">{{ statsData().overdueItems }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIREITA SUPERIOR: Ações Rápidas -->
+    <section class="terminal-panel" style="animation-delay: 0.2s">
+      <header class="terminal-panel__header">
+        <h2 class="terminal-panel__title">Ações Rápidas</h2>
+      </header>
+      <div class="terminal-panel__body">
+        <div class="quick-actions">
+          @for (action of quickActions(); track action.key) {
+            <a [routerLink]="action.route" class="quick-actions__btn">
+              <span class="quick-actions__key">{{ action.key }}</span>
+              <span class="quick-actions__label">{{ action.label }}</span>
+              <i class="quick-actions__icon bi {{ action.icon }}"></i>
+            </a>
+          }
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ============================================================
+       LINHA INFERIOR: Atividade e Períodos
+       ============================================================ -->
+  <div class="row g-3 mt-0">
+
+    <!-- Feed de Atividade -->
+    <div class="col-lg-8">
+      <section class="terminal-panel terminal-panel--tall" style="animation-delay: 0.4s">
+        <header class="terminal-panel__header">
+          <h2 class="terminal-panel__title">
+            <span class="fn-key">F9</span>
+            Feed de Atividade
+          </h2>
+          <div class="terminal-panel__actions">
+            <span class="live-indicator me-2" title="Atualizações ao vivo"></span>
+            <button class="btn btn-sm btn-link text-secondary p-1" title="Filtrar">
+              <i class="bi bi-funnel"></i>
+            </button>
+          </div>
+        </header>
+        <div class="terminal-panel__body">
+          <ul class="activity-feed">
+            @for (item of activityItems(); track item.id) {
+              <li class="activity-feed__item">
+                <span class="activity-feed__time">{{ formatRelativeTime(item.time) }}</span>
+                <span class="activity-feed__content">
+                  <span class="entity">{{ item.entity }}</span>
+                  <span class="pipe">|</span>
+                  {{ item.description }}
+                  @if (item.amount) {
+                    <span class="pipe">|</span>
+                    <span class="amount">{{ item.amount | currency:'USD':'symbol':'1.0-0' }}</span>
+                  }
+                </span>
+                <span class="activity-feed__status activity-feed__status--{{ item.status }}">
+                  {{ item.status }}
+                </span>
+              </li>
+            }
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <!-- Períodos de Lançamento -->
+    <div class="col-lg-4">
+      <section class="terminal-panel terminal-panel--tall" style="animation-delay: 0.5s">
+        <header class="terminal-panel__header">
+          <h2 class="terminal-panel__title">
+            <span class="fn-key">F10</span>
+            Períodos de Lançamento
+          </h2>
+          <a routerLink="/posting-periods" class="btn btn-sm btn-link text-secondary p-1" title="Gerenciar">
+            <i class="bi bi-gear"></i>
+          </a>
+        </header>
+        <div class="terminal-panel__body">
+          <div class="period-timeline">
+            @for (period of postingPeriods(); track period.id) {
+              <div class="period-timeline__item period-timeline__item--{{ period.status }}">
+                <div>
+                  <div class="period-timeline__period">{{ period.name }}</div>
+                  <div class="period-timeline__dates">
+                    {{ period.startDate | date:'MMM d' }} - {{ period.endDate | date:'MMM d, yyyy' }}
+                  </div>
+                </div>
+                <span class="period-timeline__status period-timeline__status--{{ period.status }}">
+                  @switch (period.status) {
+                    @case ('current') { Ativo }
+                    @case ('open') { Aberto }
+                    @case ('closed') { Fechado }
+                  }
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    </div>
+
+  </div>
+
+  <!-- ============================================================
+       INFERIOR: Gráfico de Contas (existente)
+       ============================================================ -->
+  <div class="row g-3 mt-0">
+    <div class="col-12">
+      <section class="terminal-panel" style="animation-delay: 0.6s">
+        <header class="terminal-panel__header">
+          <h2 class="terminal-panel__title">
+            <span class="fn-key">F11</span>
+            Contas Ativas por Tipo
+          </h2>
+        </header>
+      </section>
+    </div>
+  </div>
+
+</main>

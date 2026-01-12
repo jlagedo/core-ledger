@@ -1,0 +1,346 @@
+// ============================================================
+// TOASTS CONTAINER — Bloomberg Terminal Message Output
+//
+// Terminal-style notification system that appears at the bottom
+// like command output in a Bloomberg terminal.
+// ============================================================
+
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toast-slide-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes toast-progress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0;
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes scanline {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 4px;
+  }
+}
+
+// ============================================================
+// CONTAINER POSITIONING
+// ============================================================
+
+:host {
+  position: fixed !important;
+  bottom: 1rem !important;
+  right: 1rem !important;
+  left: auto !important;
+  top: auto !important;
+  transform: none;
+  z-index: 1090 !important;
+  padding: 0 !important;
+  max-width: 28rem;
+  min-width: 20rem;
+  pointer-events: none;
+
+  @media (max-width: 768px) {
+    left: 0 !important;
+    right: 0 !important;
+    max-width: 100%;
+    min-width: 100%;
+    bottom: 0 !important;
+    border-radius: 0;
+  }
+}
+
+// ============================================================
+// TOAST WRAPPER
+// ============================================================
+
+.terminal-toast-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: auto;
+}
+
+// ============================================================
+// TOAST ITEM
+// ============================================================
+
+.terminal-toast {
+  display: flex;
+  align-items: stretch;
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-left: 3px solid var(--toast-accent, var(--bs-border-color));
+  border-radius: 4px;
+  animation: toast-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  position: relative;
+  overflow: hidden;
+  font-family: 'IBM Plex Mono', monospace;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  // Scanline overlay for terminal feel
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 4px
+    );
+    pointer-events: none;
+    animation: scanline 0.1s linear infinite;
+    opacity: 0.5;
+  }
+
+  // Progress bar
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: var(--toast-accent, var(--bs-border-color));
+    animation: toast-progress var(--toast-duration, 5000ms) linear forwards;
+    opacity: 0.6;
+  }
+
+  &--exiting {
+    animation: toast-slide-out 0.3s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+  }
+
+  // ============================================================
+  // TYPE VARIANTS
+  // ============================================================
+
+  &--success {
+    --toast-accent: var(--accent-teal, #4af6c3);
+    --toast-icon-bg: rgba(74, 246, 195, 0.12);
+    --toast-icon-color: var(--accent-teal, #4af6c3);
+  }
+
+  &--error {
+    --toast-accent: var(--accent-coral, #ff433d);
+    --toast-icon-bg: rgba(255, 67, 61, 0.12);
+    --toast-icon-color: var(--accent-coral, #ff433d);
+  }
+
+  &--warning {
+    --toast-accent: var(--accent-amber, #FFA028);
+    --toast-icon-bg: var(--amber-12);
+    --toast-icon-color: var(--accent-amber, #FFA028);
+  }
+
+  &--info {
+    --toast-accent: var(--accent-blue, #0068ff);
+    --toast-icon-bg: rgba(0, 104, 255, 0.12);
+    --toast-icon-color: var(--accent-blue, #0068ff);
+  }
+}
+
+// ============================================================
+// TOAST ICON
+// ============================================================
+
+.terminal-toast__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  min-width: 2.5rem;
+  background: var(--toast-icon-bg, var(--bs-tertiary-bg));
+  color: var(--toast-icon-color, var(--bs-body-color));
+  font-size: 1rem;
+  border-right: 1px solid var(--bs-border-color);
+  position: relative;
+  z-index: 1;
+
+  i {
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+}
+
+// ============================================================
+// TOAST CONTENT
+// ============================================================
+
+.terminal-toast__content {
+  flex: 1;
+  padding: 0.625rem 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.terminal-toast__type {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--toast-icon-color, var(--bs-secondary-color));
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+
+  .timestamp {
+    font-weight: 400;
+    color: var(--bs-tertiary-color);
+    letter-spacing: 0.02em;
+  }
+}
+
+.terminal-toast__message {
+  font-size: 0.75rem;
+  color: var(--bs-emphasis-color);
+  line-height: 1.4;
+  word-break: break-word;
+
+  // Terminal cursor blink effect
+  &::after {
+    content: '▌';
+    color: var(--toast-accent, var(--bs-body-color));
+    animation: pulse-dot 1s step-end infinite;
+    font-size: 0.625rem;
+    margin-left: 0.25rem;
+    opacity: 0.6;
+  }
+}
+
+// ============================================================
+// TOAST CLOSE BUTTON
+// ============================================================
+
+.terminal-toast__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  min-width: 2rem;
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--bs-border-color);
+  color: var(--bs-tertiary-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 1;
+
+  &:hover {
+    background: var(--bs-tertiary-bg);
+    color: var(--toast-icon-color, var(--bs-body-color));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--toast-accent, var(--bs-primary));
+    outline-offset: -2px;
+  }
+
+  i {
+    font-size: 0.75rem;
+  }
+}
+
+// ============================================================
+// LIGHT MODE ADJUSTMENTS
+// ============================================================
+
+[data-bs-theme="light"] {
+  .terminal-toast {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    &::before {
+      opacity: 0.3;
+    }
+
+    &--success {
+      --toast-accent: #065F3E;
+      --toast-icon-bg: rgba(6, 95, 62, 0.08);
+      --toast-icon-color: #065F3E;
+    }
+
+    &--error {
+      --toast-accent: #B91C1C;
+      --toast-icon-bg: rgba(185, 28, 28, 0.08);
+      --toast-icon-color: #B91C1C;
+    }
+
+    &--warning {
+      --toast-accent: #B45309;
+      --toast-icon-bg: rgba(180, 83, 9, 0.08);
+      --toast-icon-color: #B45309;
+    }
+
+    &--info {
+      --toast-accent: #0068ff;
+      --toast-icon-bg: rgba(0, 104, 255, 0.08);
+      --toast-icon-color: #0068ff;
+    }
+  }
+
+  .terminal-toast__message::after {
+    opacity: 0.4;
+  }
+}
+
+// ============================================================
+// DARK MODE ENHANCEMENTS
+// ============================================================
+
+[data-bs-theme="dark"] {
+  .terminal-toast {
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  }
+}
+
+// ============================================================
+// RESPONSIVE ADJUSTMENTS
+// ============================================================
+
+@media (max-width: 768px) {
+  .terminal-toast__content {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .terminal-toast__icon {
+    width: 2.25rem;
+    min-width: 2.25rem;
+  }
+}

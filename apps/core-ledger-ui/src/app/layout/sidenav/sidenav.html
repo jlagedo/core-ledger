@@ -1,0 +1,223 @@
+<div [attr.aria-label]="store.isSidenavCollapsed() ? 'Sidenav recolhida' : 'Sidenav expandida'"
+     [style.width]="store.isSidenavCollapsed() ? '4rem' : '15rem'"
+     [class.sidenav-wrapper--collapsed]="store.isSidenavCollapsed()"
+     class="d-flex flex-column flex-shrink-0 sidenav-width-transition sidenav-wrapper vh-100">
+
+  <!-- Linha de destaque esquerda -->
+  <span class="sidenav-accent-line" aria-hidden="true"></span>
+
+  <!-- Seção de Cabeçalho (Logo e Alternância) - FIXO -->
+  <header class="d-flex align-items-center header-section flex-shrink-0"
+          [class.justify-content-center]="store.isSidenavCollapsed()"
+          [class.justify-content-between]="!store.isSidenavCollapsed()">
+    @if (store.isSidenavCollapsed()) {
+      <!-- Recolhido: Mostrar apenas ícone de menu hambúrguer -->
+      <button (click)="toggleSidenav()"
+              aria-expanded="false"
+              aria-label="Expandir sidenav"
+              class="sidenav-toggle">
+        <i class="bi bi-list"></i>
+      </button>
+    } @else {
+      <!-- Expandido: Mostrar logo e botão de fechar -->
+      <a aria-label="Ir para dashboard"
+         class="sidenav-logo"
+         routerLink="/dashboard">
+        <i class="bi bi-boxes sidenav-logo__icon"></i>
+        <span class="sidenav-logo__text">Core</span>
+        <span class="sidenav-status" aria-hidden="true"></span>
+      </a>
+
+      <button (click)="toggleSidenav()"
+              aria-label="Recolher sidenav"
+              class="sidenav-toggle">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    }
+  </header>
+
+  <!-- Filtro de Pesquisa - Visível apenas quando expandido -->
+  @if (!store.isSidenavCollapsed()) {
+    <div class="sidenav-search"
+         [class.sidenav-search--active]="searchQuery() || isSearchFocused()">
+      <div class="sidenav-search__wrapper">
+        <i class="bi bi-search sidenav-search__icon" aria-hidden="true"></i>
+        <input #searchInput
+               type="text"
+               class="sidenav-search__input"
+               placeholder="Filtrar menu..."
+               [value]="searchQuery()"
+               (input)="onSearchInput($event)"
+               (focus)="isSearchFocused.set(true)"
+               (blur)="isSearchFocused.set(false)"
+               (keydown)="onSearchKeydown($event)"
+               aria-label="Filtrar menu de navegação">
+        @if (searchQuery()) {
+          <button class="sidenav-search__clear"
+                  type="button"
+                  (click)="clearSearch()"
+                  aria-label="Limpar pesquisa">
+            <i class="bi bi-x" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+      @if (searchQuery() && !hasSearchResults()) {
+        <div class="sidenav-search__no-results">
+          <i class="bi bi-inbox" aria-hidden="true"></i>
+          <span>Nenhuma correspondência</span>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Menu de Navegação - ROLÁVEL -->
+  <nav #navElement
+       class="sidenav-scroll-container flex-grow-1"
+       aria-label="Navegação principal"
+       role="navigation">
+    <ul class="nav nav-pills flex-column sidenav-nav" role="menubar" aria-label="Menu principal">
+    @for (item of filteredMenuItems(); track item.label; let i = $index) {
+      <!-- Divisor de seção antes de Razão -->
+      @if (item.label === 'Ledger') {
+        <li>
+          <div class="sidenav-section"
+               [class.sidenav-section--collapsed]="store.isSidenavCollapsed()">
+            <span class="sidenav-section__label">
+              <span>Razão</span>
+            </span>
+          </div>
+        </li>
+      }
+
+      @if (item.children) {
+        <!-- Item de menu com submenu -->
+        <li class="nav-item nav-item--parent" role="none">
+          @if (store.isSidenavCollapsed()) {
+            <!-- Estado recolhido: Gatilho para menu flutuante -->
+            <a class="nav-link nav-link--parent nav-flyout-trigger d-flex align-items-center justify-content-center"
+               [class.parent-active]="isParentActive(item)"
+               role="menuitem"
+               tabindex="0"
+               [attr.aria-label]="item.label + ' menu, ' + item.children.length + ' itens'"
+               aria-haspopup="true"
+               [attr.aria-expanded]="activeFlyoutItem()?.label === item.label"
+               (mouseenter)="showFlyout($event, item)"
+               (mouseleave)="hideFlyout()"
+               (focus)="onMenuItemFocus(i)"
+               (keydown.enter)="showFlyoutFromKeyboard(item, $event)"
+               (keydown.space)="showFlyoutFromKeyboard(item, $event)">
+              <i class="bi {{ item.icon }}" aria-hidden="true"></i>
+              <!-- Indicador de contagem de itens filhos -->
+              <span class="nav-child-indicator" aria-hidden="true">{{ item.children.length }}</span>
+            </a>
+          } @else {
+            <!-- Estado expandido: Submenu normal recolhível -->
+            <a (click)="store.toggleMenuItem(item.label)"
+               [attr.aria-controls]="item.label + 'Submenu'"
+               [attr.aria-expanded]="shouldShowExpanded(item.label)"
+               [class.parent-active]="isParentActive(item)"
+               class="nav-link nav-link--parent d-flex align-items-center"
+               role="menuitem"
+               tabindex="0"
+               aria-haspopup="true"
+               (focus)="onMenuItemFocus(i)"
+               (keydown.enter)="store.toggleMenuItem(item.label)"
+               (keydown.space)="store.toggleMenuItem(item.label); $event.preventDefault()">
+              <i class="bi {{ item.icon }} me-2" aria-hidden="true"></i>
+              <span class="flex-grow-1">{{ item.label }}</span>
+              <i [class.bi-chevron-down]="shouldShowExpanded(item.label)"
+                 [class.bi-chevron-right]="!shouldShowExpanded(item.label)"
+                 class="bi"
+                 aria-hidden="true"></i>
+            </a>
+            <div [attr.id]="item.label + 'Submenu'"
+                 [ngbCollapse]="!shouldShowExpanded(item.label)"
+                 role="menu"
+                 [attr.aria-label]="item.label + ' submenu'">
+              <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small" role="none">
+                @for (child of item.children; track child.label; let j = $index) {
+                  <li class="nav-item" role="none">
+                    <a [routerLinkActiveOptions]="child.exactMatch ? { exact: true } : { exact: false }"
+                       [routerLink]="child.route"
+                       class="nav-link d-flex align-items-center"
+                       role="menuitem"
+                       tabindex="0"
+                       routerLinkActive="active">
+                      <span>{{ child.label }}</span>
+                    </a>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        </li>
+      } @else {
+        <!-- Item de menu simples sem submenu -->
+        <li class="nav-item" role="none">
+          <a [class.justify-content-center]="store.isSidenavCollapsed()"
+             [ngbTooltip]="store.isSidenavCollapsed() ? item.label : ''"
+             [routerLinkActiveOptions]="item.exactMatch ? { exact: true } : { exact: false }"
+             [routerLink]="item.route"
+             class="nav-link d-flex align-items-center"
+             role="menuitem"
+             tabindex="0"
+             placement="end"
+             routerLinkActive="active"
+             (focus)="onMenuItemFocus(i)">
+            <i [class.me-2]="!store.isSidenavCollapsed()" class="bi {{ item.icon }}" aria-hidden="true"></i>
+            @if (!store.isSidenavCollapsed()) {
+              <span>{{ item.label }}</span>
+            }
+          </a>
+        </li>
+      }
+    }
+    </ul>
+  </nav>
+
+  <!-- Rodapé - FIXO -->
+  <footer class="sidenav-footer flex-shrink-0">
+    <div class="sidenav-footer__inner"
+         [class.sidenav-footer__inner--collapsed]="store.isSidenavCollapsed()">
+      <!-- Deadline Ticker -->
+      <app-deadline-ticker [isCollapsed]="store.isSidenavCollapsed()" />
+
+      <!-- User Profile -->
+      <app-user-profile [isCollapsed]="store.isSidenavCollapsed()" />
+    </div>
+  </footer>
+
+  <!-- Painel Flutuante - Renderizado FORA do contêiner de rolagem para evitar corte -->
+  @if (activeFlyoutItem(); as item) {
+    <div class="nav-flyout"
+         [style.top.px]="flyoutTop()"
+         role="menu"
+         [attr.aria-label]="item.label + ' submenu'"
+         (mouseenter)="keepFlyoutVisible()"
+         (mouseleave)="hideFlyout()"
+         (keydown.escape)="hideFlyout()">
+      <div class="nav-flyout__header">
+        <i class="bi {{ item.icon }} nav-flyout__icon" aria-hidden="true"></i>
+        <span class="nav-flyout__title">{{ item.label }}</span>
+      </div>
+      <ul class="nav-flyout__list" role="none">
+        @for (child of item.children; track child.label; let k = $index) {
+          <li role="none">
+            <a [routerLinkActiveOptions]="child.exactMatch ? { exact: true } : { exact: false }"
+               [routerLink]="child.route"
+               class="nav-flyout__link"
+               role="menuitem"
+               tabindex="0"
+               routerLinkActive="active"
+               (click)="hideFlyout()"
+               (keydown.enter)="hideFlyout()"
+               (keydown.escape)="hideFlyout()">
+              <span class="nav-flyout__dot" aria-hidden="true"></span>
+              <span>{{ child.label }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</div>

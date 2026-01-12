@@ -1,0 +1,391 @@
+<app-page-header title="Calendário">
+  <button type="button" class="btn btn-secondary btn-sm" (click)="onRefresh()">
+    <i class="bi bi-arrow-clockwise"></i>
+  </button>
+  <button
+    type="button"
+    aria-label="Criar novo calendário"
+    class="btn btn-primary"
+    routerLink="/cadastro/calendario/new"
+  >
+    <i class="bi bi-plus-lg"></i>
+    <span>Novo</span>
+  </button>
+</app-page-header>
+
+<main class="container-data">
+  <div class="card-data">
+    <div class="card-body p-0">
+      <!-- Preset Quick Filters -->
+      <div class="preset-bar">
+        <span class="preset-bar__label">PRESETS</span>
+        <div class="preset-bar__chips">
+          @for (preset of presets; track preset.id) {
+            <button
+              type="button"
+              class="preset-chip"
+              [class.preset-chip--active]="isPresetActive(preset.id)"
+              [title]="preset.description"
+              (click)="onPresetClick(preset.id)"
+            >
+              <i class="bi {{ preset.icon }} preset-chip__icon"></i>
+              <span class="preset-chip__label">{{ preset.shortLabel }}</span>
+            </button>
+          }
+        </div>
+        @if (activePreset()) {
+          <button
+            type="button"
+            class="preset-bar__clear"
+            title="Limpar preset"
+            (click)="onPresetClick(null)"
+          >
+            <i class="bi bi-x-lg"></i>
+          </button>
+        }
+      </div>
+
+      <!-- Quick Filter Bar -->
+      <div class="filter-bar">
+        <!-- Search Input -->
+        <div class="filter-bar__search">
+          <i class="bi bi-search filter-bar__search-icon"></i>
+          <input
+            type="text"
+            class="filter-bar__search-input"
+            placeholder="Buscar..."
+            [(ngModel)]="searchTerm"
+            (keydown.enter)="onSearch()"
+            aria-label="Buscar calendários"
+          />
+          @if (searchTerm()) {
+            <button
+              class="filter-bar__search-clear"
+              type="button"
+              (click)="onClearSearch()"
+              aria-label="Limpar busca"
+            >
+              <i class="bi bi-x"></i>
+            </button>
+          }
+        </div>
+
+        <div class="filter-bar__divider"></div>
+
+        <!-- Filter Dropdowns -->
+        <div class="filter-bar__filters">
+          <!-- Praça Filter -->
+          <div class="filter-dropdown" ngbDropdown>
+            <button
+              class="filter-dropdown__trigger"
+              [class.filter-dropdown__trigger--active]="filters().praca !== null"
+              ngbDropdownToggle
+            >
+              <span class="filter-dropdown__label">Praça</span>
+              @if (selectedPracaLabel()) {
+                <span class="filter-dropdown__value">{{ selectedPracaLabel() }}</span>
+              }
+              <i class="bi bi-chevron-down filter-dropdown__chevron"></i>
+            </button>
+            <div ngbDropdownMenu class="filter-dropdown__menu">
+              <button ngbDropdownItem (click)="onPracaChange(null)" [class.active]="filters().praca === null">
+                <span>Todos</span>
+              </button>
+              <div class="dropdown-divider"></div>
+              @for (option of pracaOptions; track option.value) {
+                <button
+                  ngbDropdownItem
+                  (click)="onPracaChange(option.value)"
+                  [class.active]="filters().praca === option.value"
+                >
+                  <span>{{ option.name }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Tipo de Dia Filter -->
+          <div class="filter-dropdown" ngbDropdown>
+            <button
+              class="filter-dropdown__trigger"
+              [class.filter-dropdown__trigger--active]="filters().tipoDia !== null"
+              ngbDropdownToggle
+            >
+              <span class="filter-dropdown__label">Tipo</span>
+              @if (selectedTipoDiaLabel()) {
+                <span class="filter-dropdown__value">{{ selectedTipoDiaLabel() }}</span>
+              }
+              <i class="bi bi-chevron-down filter-dropdown__chevron"></i>
+            </button>
+            <div ngbDropdownMenu class="filter-dropdown__menu">
+              <button ngbDropdownItem (click)="onTipoDiaChange(null)" [class.active]="filters().tipoDia === null">
+                <span>Todos</span>
+              </button>
+              <div class="dropdown-divider"></div>
+              @for (option of tipoDiaOptions; track option.value) {
+                <button
+                  ngbDropdownItem
+                  (click)="onTipoDiaChange(option.value)"
+                  [class.active]="filters().tipoDia === option.value"
+                >
+                  <span>{{ option.name }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Dia Útil Filter -->
+          <div class="filter-dropdown" ngbDropdown>
+            <button
+              class="filter-dropdown__trigger"
+              [class.filter-dropdown__trigger--active]="filters().diaUtil !== null"
+              ngbDropdownToggle
+            >
+              <span class="filter-dropdown__label">Dia Útil</span>
+              @if (selectedDiaUtilLabel()) {
+                <span class="filter-dropdown__value">{{ selectedDiaUtilLabel() }}</span>
+              }
+              <i class="bi bi-chevron-down filter-dropdown__chevron"></i>
+            </button>
+            <div ngbDropdownMenu class="filter-dropdown__menu">
+              <button ngbDropdownItem (click)="onDiaUtilChange(null)" [class.active]="filters().diaUtil === null">
+                <span>Todos</span>
+              </button>
+              <div class="dropdown-divider"></div>
+              @for (option of diaUtilOptions; track option.value) {
+                <button
+                  ngbDropdownItem
+                  (click)="onDiaUtilChange(option.value)"
+                  [class.active]="filters().diaUtil === option.value"
+                >
+                  <span>{{ option.name }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Date Range Filter -->
+          <div class="filter-dropdown" ngbDropdown #dateDropdown="ngbDropdown">
+            <button
+              class="filter-dropdown__trigger"
+              [class.filter-dropdown__trigger--active]="filters().dataInicio || filters().dataFim"
+              ngbDropdownToggle
+            >
+              <span class="filter-dropdown__label">Período</span>
+              @if (selectedDateRangeLabel()) {
+                <span class="filter-dropdown__value">{{ selectedDateRangeLabel() }}</span>
+              }
+              <i class="bi bi-chevron-down filter-dropdown__chevron"></i>
+            </button>
+            <div ngbDropdownMenu class="filter-dropdown__menu filter-dropdown__menu--datepicker">
+              <div class="date-range-picker">
+                <!-- NgbDatepicker with custom day template for range highlighting -->
+                <ngb-datepicker
+                  #dp
+                  (dateSelect)="onDateSelection($event)"
+                  [displayMonths]="2"
+                  [dayTemplate]="dayTemplate"
+                  [showWeekNumbers]="false"
+                  outsideDays="hidden"
+                  navigation="arrows"
+                />
+
+                <ng-template
+                  #dayTemplate
+                  let-date
+                  let-focused="focused"
+                >
+                  <span
+                    class="dp-custom-day"
+                    [class.focused]="focused"
+                    [class.range]="isFrom(date) || isTo(date) || isInside(date) || isHovered(date)"
+                    [class.faded]="isHovered(date) || isInside(date)"
+                    [class.from]="isFrom(date)"
+                    [class.to]="isTo(date)"
+                    (mouseenter)="hoveredDate.set(date)"
+                    (mouseleave)="hoveredDate.set(null)"
+                  >
+                    {{ date.day }}
+                  </span>
+                </ng-template>
+
+                <!-- Selected range display -->
+                @if (fromDate() || toDate()) {
+                  <div class="date-range-picker__selection">
+                    <span class="date-range-picker__selection-label">Selecionado:</span>
+                    <span class="date-range-picker__selection-value">
+                      @if (fromDate()) {
+                        {{ fromDate()!.day | number: '2.0-0' }}/{{ fromDate()!.month | number: '2.0-0' }}/{{ fromDate()!.year }}
+                      }
+                      @if (fromDate() && toDate()) {
+                        <span class="date-range-picker__selection-separator">—</span>
+                      }
+                      @if (toDate()) {
+                        {{ toDate()!.day | number: '2.0-0' }}/{{ toDate()!.month | number: '2.0-0' }}/{{ toDate()!.year }}
+                      }
+                    </span>
+                  </div>
+                }
+
+                <div class="date-range-picker__actions">
+                  <button
+                    type="button"
+                    class="date-range-picker__btn date-range-picker__btn--clear"
+                    (click)="onClearDateRange(); dateDropdown.close()"
+                  >
+                    Limpar
+                  </button>
+                  <button
+                    type="button"
+                    class="date-range-picker__btn date-range-picker__btn--apply"
+                    [disabled]="!fromDate()"
+                    (click)="onDateRangeApply(); dateDropdown.close()"
+                  >
+                    Aplicar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clear All Filters -->
+        @if (hasActiveFilters()) {
+          <div class="filter-bar__divider"></div>
+          <button
+            type="button"
+            class="filter-bar__clear-all"
+            (click)="clearAllFilters()"
+            title="Limpar todos os filtros"
+          >
+            <i class="bi bi-x-circle"></i>
+            <span>Limpar</span>
+          </button>
+        }
+
+        <!-- Filter Count Badge -->
+        @if (activeFilterCount() > 0) {
+          <span class="filter-bar__count">{{ activeFilterCount() }}</span>
+        }
+      </div>
+
+      <!-- Active Filter Pills -->
+      @if (hasActiveFilters()) {
+        <div class="filter-pills">
+          @if (searchTerm()) {
+            <span class="filter-pill">
+              <span class="filter-pill__label">Busca:</span>
+              <span class="filter-pill__value">{{ searchTerm() }}</span>
+              <button class="filter-pill__remove" (click)="onClearSearch()">
+                <i class="bi bi-x"></i>
+              </button>
+            </span>
+          }
+          @if (selectedPracaLabel()) {
+            <span class="filter-pill">
+              <span class="filter-pill__label">Praça:</span>
+              <span class="filter-pill__value">{{ selectedPracaLabel() }}</span>
+              <button class="filter-pill__remove" (click)="clearFilter('praca')">
+                <i class="bi bi-x"></i>
+              </button>
+            </span>
+          }
+          @if (selectedTipoDiaLabel()) {
+            <span class="filter-pill">
+              <span class="filter-pill__label">Tipo:</span>
+              <span class="filter-pill__value">{{ selectedTipoDiaLabel() }}</span>
+              <button class="filter-pill__remove" (click)="clearFilter('tipoDia')">
+                <i class="bi bi-x"></i>
+              </button>
+            </span>
+          }
+          @if (selectedDiaUtilLabel()) {
+            <span class="filter-pill">
+              <span class="filter-pill__label">Dia Útil:</span>
+              <span class="filter-pill__value">{{ selectedDiaUtilLabel() }}</span>
+              <button class="filter-pill__remove" (click)="clearFilter('diaUtil')">
+                <i class="bi bi-x"></i>
+              </button>
+            </span>
+          }
+          @if (selectedDateRangeLabel()) {
+            <span class="filter-pill">
+              <span class="filter-pill__label">Período:</span>
+              <span class="filter-pill__value">{{ selectedDateRangeLabel() }}</span>
+              <button class="filter-pill__remove" (click)="clearFilter('dateRange')">
+                <i class="bi bi-x"></i>
+              </button>
+            </span>
+          }
+        </div>
+      }
+
+      <!-- AG Grid -->
+      <ag-grid-angular
+        style="width: 100%; height: 500px"
+        [theme]="gridTheme()"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        [getRowId]="getRowId"
+        [rowModelType]="'infinite'"
+        [cacheBlockSize]="50"
+        [maxBlocksInCache]="10"
+        [blockLoadDebounceMillis]="200"
+        [pagination]="false"
+        [animateRows]="false"
+        (gridReady)="onGridReady($event)"
+        (sortChanged)="onSortChanged($event)"
+        (cellClicked)="onCellClicked($event)"
+      />
+
+      <!-- Status Bar -->
+      <div class="grid-status-bar">
+        <div class="status-bar__section status-bar__records">
+          <span class="status-bar__label">REGISTROS</span>
+          <span class="status-bar__value status-bar__value--primary">
+            {{ paginationStats().totalCount | number }}
+          </span>
+        </div>
+
+        <div class="status-bar__divider"></div>
+
+        <div class="status-bar__section status-bar__loaded">
+          <span class="status-bar__label">CARREGADOS</span>
+          <span class="status-bar__value">
+            {{ paginationStats().loadedCount | number }}
+          </span>
+          @if (paginationStats().totalCount > 0) {
+            <span class="status-bar__percentage">
+              {{ (paginationStats().loadedCount / paginationStats().totalCount * 100) | number: '1.0-0' }}%
+            </span>
+          }
+        </div>
+
+        <div class="status-bar__divider"></div>
+
+        <div class="status-bar__section status-bar__range">
+          <span class="status-bar__label">VISUALIZANDO</span>
+          <span class="status-bar__value">
+            @if (paginationStats().totalCount > 0) {
+              {{ paginationStats().currentRangeStart | number }}–{{ paginationStats().currentRangeEnd | number }}
+            } @else {
+              —
+            }
+          </span>
+        </div>
+
+        <div class="status-bar__spacer"></div>
+
+        <div class="status-bar__section status-bar__status">
+          @if (isLoading()) {
+            <span class="status-bar__indicator status-bar__indicator--loading"></span>
+            <span class="status-bar__label">CARREGANDO</span>
+          } @else {
+            <span class="status-bar__indicator status-bar__indicator--ready"></span>
+            <span class="status-bar__label">PRONTO</span>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

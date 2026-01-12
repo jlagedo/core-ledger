@@ -1,0 +1,24 @@
+{
+  "name": "core-ledger-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/core-ledger-e2e",
+  "tags": ["type:e2e", "scope:testing"],
+  "implicitDependencies": ["core-ledger-ui", "core-ledger-api"],
+  "targets": {
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "options": {
+        "config": "apps/core-ledger-e2e/playwright.config.ts"
+      },
+      "outputs": ["{workspaceRoot}/playwright-report", "{workspaceRoot}/test-results"]
+    },
+    "e2e:ui": {
+      "executor": "@nx/playwright:playwright",
+      "options": {
+        "config": "apps/core-ledger-e2e/playwright.config.ts",
+        "ui": true
+      }
+    }
+  }
+}

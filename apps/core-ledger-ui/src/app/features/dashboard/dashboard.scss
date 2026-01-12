@@ -1,0 +1,693 @@
+// ============================================================
+// DASHBOARD — Bloomberg Terminal Command Center
+//
+// A data-dense, professional trading floor aesthetic.
+// Uses theme tokens from _variables.scss and _theme-tokens.scss
+// ============================================================
+
+// ============================================================
+// ANIMATIONS
+// ============================================================
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+// ============================================================
+// DASHBOARD CONTAINER
+// ============================================================
+
+.dashboard {
+  --grid-line: var(--bs-border-color);
+  --terminal-glow: var(--terminal-glow);
+
+  display: grid;
+  gap: 1rem;
+  padding: 0;
+  min-height: calc(100vh - 120px);
+
+  // Subtle scanline overlay for terminal effect (dark mode only)
+  [data-bs-theme="dark"] & {
+    position: relative;
+
+    &::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+      );
+      pointer-events: none;
+      z-index: 1000;
+    }
+  }
+}
+
+// ============================================================
+// HERO METRICS BAR
+// ============================================================
+
+.hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1px;
+  background: var(--grid-line);
+  border: 1px solid var(--grid-line);
+  margin-bottom: 0.5rem;
+
+  &__item {
+    background: var(--bs-body-bg);
+    padding: 1rem 1.25rem;
+    position: relative;
+    animation: fade-in-up 0.4s ease-out backwards;
+
+    @for $i from 1 through 6 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{$i * 0.08}s;
+      }
+    }
+
+    // Left accent bar for emphasis
+    &--primary::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--terminal-glow);
+    }
+  }
+
+  &__label {
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--bs-secondary-color);
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--bs-emphasis-color);
+    line-height: 1.2;
+    animation: count-up 0.6s ease-out backwards;
+    animation-delay: 0.3s;
+
+    &--positive {
+      color: var(--status-positive);
+    }
+
+    &--negative {
+      color: var(--status-negative);
+    }
+  }
+
+  &__change {
+    font-size: 0.6875rem;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    &--up {
+      color: var(--status-positive);
+    }
+
+    &--down {
+      color: var(--status-negative);
+    }
+  }
+
+  &__sparkline {
+    height: 24px;
+    margin-top: 0.5rem;
+    opacity: 0.7;
+  }
+}
+
+// Live indicator dot
+.live-indicator {
+  width: 6px;
+  height: 6px;
+  background: var(--status-positive);
+  border-radius: 50%;
+  animation: pulse-glow 2s ease-in-out infinite;
+
+  &--stale {
+    background: var(--bs-secondary-color);
+    animation: none;
+  }
+}
+
+// ============================================================
+// MARKET PULSE TICKER
+// ============================================================
+
+.market-pulse {
+  background: var(--bs-tertiary-bg);
+  border: 1px solid var(--grid-line);
+  overflow: hidden;
+  position: relative;
+  height: 2.25rem;
+
+  // Fade edges
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 3rem;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  &::before {
+    left: 0;
+    background: linear-gradient(90deg, var(--bs-tertiary-bg), transparent);
+  }
+
+  &::after {
+    right: 0;
+    background: linear-gradient(-90deg, var(--bs-tertiary-bg), transparent);
+  }
+
+  &__track {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    animation: ticker-scroll 30s linear infinite;
+    width: max-content;
+
+    &:hover {
+      animation-play-state: paused;
+    }
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1.5rem;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    border-right: 1px solid var(--grid-line);
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+
+  &__symbol {
+    font-weight: 600;
+    color: var(--bs-emphasis-color);
+  }
+
+  &__value {
+    color: var(--bs-body-color);
+  }
+
+  &__change {
+    font-weight: 500;
+
+    &--up {
+      color: var(--status-positive);
+    }
+
+    &--down {
+      color: var(--status-negative);
+    }
+  }
+}
+
+// ============================================================
+// COMMAND CENTER GRID
+// ============================================================
+
+.command-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  grid-template-rows: auto 1fr;
+  gap: 1rem;
+  flex: 1;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+}
+
+// ============================================================
+// TERMINAL PANEL (reusable card style)
+// ============================================================
+
+.terminal-panel {
+  background: var(--bs-body-bg);
+  border: 1px solid var(--grid-line);
+  display: flex;
+  flex-direction: column;
+  animation: fade-in-up 0.5s ease-out backwards;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.625rem 1rem;
+    border-bottom: 1px solid var(--grid-line);
+    background: var(--bs-tertiary-bg);
+    min-height: 2.5rem;
+  }
+
+  &__title {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--bs-emphasis-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    // Function key style badge
+    .fn-key {
+      font-size: 0.5625rem;
+      padding: 0.125rem 0.375rem;
+      background: var(--terminal-glow);
+      color: var(--surface-base);
+      font-weight: 700;
+      border-radius: 2px;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  &__body {
+    padding: 1rem;
+    flex: 1;
+    overflow: auto;
+  }
+
+  &--chart {
+    grid-row: span 2;
+
+    @media (max-width: 1200px) {
+      grid-row: span 1;
+      min-height: 400px;
+    }
+  }
+
+  &--tall {
+    min-height: 300px;
+  }
+}
+
+// ============================================================
+// ACTIVITY FEED
+// ============================================================
+
+.activity-feed {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.75rem;
+
+  &__item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.75rem;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid var(--grid-line);
+    align-items: start;
+    animation: fade-in-up 0.3s ease-out backwards;
+
+    @for $i from 1 through 10 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{0.4 + ($i * 0.05)}s;
+      }
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background: var(--bs-tertiary-bg);
+      margin: 0 -1rem;
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+
+  &__time {
+    font-size: 0.625rem;
+    color: var(--bs-tertiary-color);
+    font-variant-numeric: tabular-nums;
+    min-width: 3.5rem;
+  }
+
+  &__content {
+    color: var(--bs-body-color);
+
+    // Terminal-style formatting
+    .entity {
+      color: var(--terminal-glow);
+      font-weight: 500;
+    }
+
+    .amount {
+      color: var(--bs-emphasis-color);
+      font-weight: 600;
+    }
+
+    .pipe {
+      color: var(--bs-tertiary-color);
+      margin: 0 0.25rem;
+    }
+  }
+
+  &__status {
+    font-size: 0.625rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 2px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    &--posted {
+      background: var(--status-positive-bg);
+      color: var(--status-positive);
+    }
+
+    &--pending {
+      background: var(--status-pending-bg);
+      color: var(--status-pending);
+    }
+
+    &--failed {
+      background: var(--status-negative-bg);
+      color: var(--status-negative);
+    }
+  }
+}
+
+// ============================================================
+// QUICK ACTIONS (Bloomberg function key style)
+// ============================================================
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.75rem 1rem;
+    background: var(--bs-tertiary-bg);
+    border: 1px solid var(--grid-line);
+    color: var(--bs-body-color);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+
+    &:hover {
+      background: var(--bs-secondary-bg);
+      border-color: var(--terminal-glow);
+      color: var(--bs-emphasis-color);
+      transform: translateY(-1px);
+
+      .quick-actions__key {
+        background: var(--terminal-glow);
+        color: var(--surface-base);
+      }
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  &__key {
+    font-size: 0.5625rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    background: var(--bs-secondary-bg);
+    color: var(--bs-secondary-color);
+    border-radius: 2px;
+    min-width: 2rem;
+    text-align: center;
+    transition: all 0.2s ease;
+  }
+
+  &__label {
+    flex: 1;
+  }
+
+  &__icon {
+    color: var(--bs-tertiary-color);
+    font-size: 1rem;
+  }
+}
+
+// ============================================================
+// PERIOD STATUS TIMELINE
+// ============================================================
+
+.period-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  &__item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.625rem 0.75rem;
+    background: var(--bs-tertiary-bg);
+    border-left: 3px solid transparent;
+    font-size: 0.75rem;
+    animation: fade-in-up 0.4s ease-out backwards;
+
+    @for $i from 1 through 6 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{0.5 + ($i * 0.08)}s;
+      }
+    }
+
+    &--open {
+      border-left-color: var(--status-positive);
+    }
+
+    &--closed {
+      border-left-color: var(--bs-secondary-color);
+      opacity: 0.7;
+    }
+
+    &--current {
+      border-left-color: var(--terminal-glow);
+      background: var(--terminal-glow-bg);
+    }
+  }
+
+  &__period {
+    font-weight: 600;
+    color: var(--bs-emphasis-color);
+  }
+
+  &__dates {
+    font-size: 0.6875rem;
+    color: var(--bs-secondary-color);
+  }
+
+  &__status {
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.125rem 0.5rem;
+    border-radius: 2px;
+
+    &--open {
+      color: var(--status-positive);
+      background: var(--status-positive-bg);
+    }
+
+    &--closed {
+      color: var(--bs-secondary-color);
+      background: var(--bs-secondary-bg);
+    }
+  }
+}
+
+// ============================================================
+// ALLOCATION CHART CONTAINER
+// Styles moved to component - only host-level styles remain
+// ============================================================
+
+// ============================================================
+// STATS GRID (for compact metrics)
+// ============================================================
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--grid-line);
+  border: 1px solid var(--grid-line);
+
+  &__item {
+    background: var(--bs-body-bg);
+    padding: 0.875rem 1rem;
+    text-align: center;
+  }
+
+  &__label {
+    font-size: 0.5625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--bs-tertiary-color);
+    margin-bottom: 0.25rem;
+  }
+
+  &__value {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--bs-emphasis-color);
+  }
+}
+
+// ============================================================
+// DARK MODE ENHANCEMENTS
+// ============================================================
+
+[data-bs-theme="dark"] {
+  .terminal-panel {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  .hero-metrics__item--primary::before {
+    box-shadow: 0 0 12px var(--terminal-glow);
+  }
+
+  .quick-actions__btn:hover {
+    box-shadow: 0 0 20px var(--terminal-glow-subtle);
+  }
+}
+
+// ============================================================
+// LIGHT MODE ADJUSTMENTS
+// ============================================================
+
+[data-bs-theme="light"] {
+  .terminal-panel {
+    background: var(--surface-base);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+
+    &__header {
+      background: var(--bs-tertiary-bg);
+    }
+  }
+
+  .hero-metrics {
+    border-color: var(--bs-border-color);
+
+    &__item {
+      background: var(--surface-base);
+    }
+  }
+
+  .market-pulse {
+    background: var(--surface-base);
+
+    &::before {
+      background: linear-gradient(90deg, var(--surface-base), transparent);
+    }
+
+    &::after {
+      background: linear-gradient(-90deg, var(--surface-base), transparent);
+    }
+  }
+
+  .stats-grid {
+    border-color: var(--bs-border-color);
+
+    &__item {
+      background: var(--surface-base);
+    }
+  }
+
+  .quick-actions__btn {
+    background: var(--surface-base);
+    border-color: var(--bs-border-color);
+
+    &:hover {
+      background: var(--bs-tertiary-bg);
+    }
+  }
+
+  .period-timeline__item {
+    background: var(--surface-base);
+
+    &--current {
+      background: var(--terminal-glow-bg);
+    }
+  }
+}

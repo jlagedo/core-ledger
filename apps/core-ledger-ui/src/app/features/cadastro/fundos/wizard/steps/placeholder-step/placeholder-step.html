@@ -1,0 +1,91 @@
+<div class="placeholder-step">
+  <!-- Development Notice -->
+  <div class="placeholder-notice">
+    <div class="placeholder-notice__icon">
+      <i class="bi bi-code-square" aria-hidden="true"></i>
+    </div>
+    <div class="placeholder-notice__content">
+      <div class="placeholder-notice__title font-monospace">// PLACEHOLDER_COMPONENT</div>
+      <div class="placeholder-notice__text">
+        Este é um componente temporário para teste da infraestrutura.
+        O formulário real de <strong>{{ stepConfig().label }}</strong> será implementado em slices futuros.
+      </div>
+    </div>
+  </div>
+
+  <!-- Test Form -->
+  <form [formGroup]="form" class="placeholder-form" novalidate>
+    <!-- Form Header -->
+    <div class="placeholder-form__header">
+      <h6 class="form-section-title">
+        {{ stepConfig().label }}
+      </h6>
+      <p class="placeholder-form__description">{{ stepConfig().descricao }}</p>
+    </div>
+
+    <!-- Form Fields Grid -->
+    <div class="placeholder-form__grid">
+      <!-- Campo 1 (Required) -->
+      <div class="placeholder-field">
+        <label
+          for="campo1-{{ stepConfig().id }}"
+          class="placeholder-field__label"
+        >
+          <span class="placeholder-field__label-text">Campo 1</span>
+          <span class="placeholder-field__required" aria-label="obrigatório">*</span>
+        </label>
+        <input
+          type="text"
+          class="form-control placeholder-field__input"
+          [class.is-invalid]="form.get('campo1')?.invalid && form.get('campo1')?.touched"
+          [class.is-valid]="form.get('campo1')?.valid && form.get('campo1')?.touched"
+          id="campo1-{{ stepConfig().id }}"
+          formControlName="campo1"
+          placeholder="Digite algo aqui..."
+          autocomplete="off"
+        >
+        @if (form.get('campo1')?.invalid && form.get('campo1')?.touched) {
+          <div class="placeholder-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Este campo é obrigatório
+          </div>
+        }
+        @if (form.get('campo1')?.valid && form.get('campo1')?.touched) {
+          <div class="placeholder-field__success">
+            <i class="bi bi-check-circle" aria-hidden="true"></i>
+            Campo válido
+          </div>
+        }
+      </div>
+
+      <!-- Campo 2 (Optional) -->
+      <div class="placeholder-field">
+        <label
+          for="campo2-{{ stepConfig().id }}"
+          class="placeholder-field__label"
+        >
+          <span class="placeholder-field__label-text">Campo 2</span>
+          <span class="placeholder-field__optional">(opcional)</span>
+        </label>
+        <input
+          type="text"
+          class="form-control placeholder-field__input"
+          id="campo2-{{ stepConfig().id }}"
+          formControlName="campo2"
+          placeholder="Campo opcional..."
+          autocomplete="off"
+        >
+      </div>
+    </div>
+
+    <!-- Form Footer: Help Text -->
+    <div class="placeholder-form__footer">
+      <div class="placeholder-hint">
+        <span class="placeholder-hint__icon">▸</span>
+        <span class="placeholder-hint__text">
+          Preencha o <strong>Campo 1</strong> para habilitar o botão "Próximo"
+        </span>
+      </div>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,142 @@
+@if (indexador(); as idx) {
+  <div class="modal-header">
+    <h5 class="modal-title" id="modal-title">
+      <i class="bi bi-plus-lg me-2"></i>
+      Adicionar Valor
+    </h5>
+    <button
+      type="button"
+      class="btn-close"
+      (click)="cancel()"
+      [disabled]="isSubmitting()"
+      aria-label="Fechar"
+    ></button>
+  </div>
+
+  <div class="modal-body">
+    <!-- Indexador Info -->
+    <div class="indexador-info mb-4">
+      <span class="indexador-codigo font-monospace">{{ idx.codigo }}</span>
+      <span class="indexador-nome text-muted ms-2">{{ idx.nome }}</span>
+    </div>
+
+    @if (errorMessage(); as error) {
+      <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ error }}
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <!-- Data Referencia -->
+      <div class="mb-3">
+        <label for="dataReferencia" class="form-label">Data Referencia <span class="text-danger">*</span></label>
+        <div class="input-group">
+          <input
+            type="text"
+            class="form-control font-monospace"
+            id="dataReferencia"
+            placeholder="dd/mm/aaaa"
+            formControlName="dataReferencia"
+            ngbDatepicker
+            #dp="ngbDatepicker"
+            [class.is-invalid]="isInvalid('dataReferencia')"
+            (click)="dp.toggle()"
+          />
+          <button class="btn btn-outline-secondary" type="button" (click)="dp.toggle()">
+            <i class="bi bi-calendar"></i>
+          </button>
+        </div>
+        @if (isInvalid('dataReferencia')) {
+          <div class="invalid-feedback d-block">Data de referencia e obrigatoria</div>
+        }
+      </div>
+
+      <!-- Valor -->
+      <div class="mb-3">
+        <label for="valor" class="form-label">Valor <span class="text-danger">*</span></label>
+        <input
+          type="number"
+          class="form-control font-monospace"
+          id="valor"
+          formControlName="valor"
+          [class.is-invalid]="isInvalid('valor')"
+          step="any"
+          placeholder="0.00"
+        />
+        @if (isInvalid('valor')) {
+          <div class="invalid-feedback">Valor e obrigatorio</div>
+        }
+      </div>
+
+      <div class="row">
+        <!-- Fator Diario -->
+        <div class="col-md-6 mb-3">
+          <label for="fatorDiario" class="form-label">Fator Diario</label>
+          <input
+            type="number"
+            class="form-control font-monospace"
+            id="fatorDiario"
+            formControlName="fatorDiario"
+            step="any"
+            placeholder="1.000000000000"
+          />
+          <div class="form-text">Fator de atualizacao diaria (12 decimais)</div>
+        </div>
+
+        <!-- Variacao Percentual -->
+        <div class="col-md-6 mb-3">
+          <label for="variacaoPercentual" class="form-label">Variacao %</label>
+          <div class="input-group">
+            <input
+              type="number"
+              class="form-control font-monospace"
+              id="variacaoPercentual"
+              formControlName="variacaoPercentual"
+              step="any"
+              placeholder="0.00"
+            />
+            <span class="input-group-text">%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fonte -->
+      <div class="mb-3">
+        <label for="fonte" class="form-label">Fonte</label>
+        <select class="form-select" id="fonte" formControlName="fonte">
+          <option [ngValue]="null">Selecione uma fonte</option>
+          @for (option of fonteOptions; track option.value) {
+            <option [value]="option.value">{{ option.name }}</option>
+          }
+        </select>
+        <div class="form-text">Origem do dado (opcional)</div>
+      </div>
+    </form>
+  </div>
+
+  <div class="modal-footer">
+    <button
+      type="button"
+      class="btn btn-secondary"
+      (click)="cancel()"
+      [disabled]="isSubmitting()"
+    >
+      Cancelar
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="submit()"
+      [disabled]="form.invalid || isSubmitting()"
+    >
+      @if (isSubmitting()) {
+        <span class="spinner-border spinner-border-sm me-1"></span>
+        Salvando...
+      } @else {
+        <i class="bi bi-check-lg me-1"></i>
+        Adicionar
+      }
+    </button>
+  </div>
+}

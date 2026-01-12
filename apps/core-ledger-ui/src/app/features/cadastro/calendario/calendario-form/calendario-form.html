@@ -1,0 +1,199 @@
+<app-page-header [title]="calendarioId() ? 'Editar Calendário' : 'Novo Calendário'">
+  <button class="btn btn-sm btn-secondary" aria-label="Obter ajuda para esta página">
+    <i class="bi bi-question-circle"></i> Ajuda
+  </button>
+</app-page-header>
+
+<main class="container-form-wide">
+  <div class="card-form">
+    <div class="card-header">
+      <h5 class="card-title">{{ calendarioId() ? 'Editar Calendário' : 'Novo Calendário' }}</h5>
+    </div>
+    <div class="card-body">
+
+      <form (ngSubmit)="onSubmit()" [formGroup]="calendarioForm" class="row g-3" novalidate>
+        <!-- Data e Praça -->
+        <div class="col-12">
+          <div class="row">
+            <div class="col-md-6">
+              <label class="form-label" for="data">Data <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input
+                  #dataPicker="ngbDatepicker"
+                  [class.is-invalid]="isInvalid('data')"
+                  class="form-control font-monospace text-nowrap"
+                  formControlName="data"
+                  id="data"
+                  ngbDatepicker
+                  placeholder="dd/mm/aaaa"
+                  type="text"
+                  autofocus
+                >
+                <button
+                  (click)="dataPicker.toggle()"
+                  [attr.aria-label]="'Abrir calendário'"
+                  class="btn btn-outline-secondary"
+                  type="button"
+                >
+                  <i aria-hidden="true" class="bi bi-calendar3"></i>
+                </button>
+              </div>
+              @if (isInvalid('data')) {
+                <div class="invalid-feedback d-block">
+                  @if (hasError('data', 'required')) {
+                    Data é obrigatória
+                  }
+                </div>
+              }
+              @if (calendarioId()) {
+                <div class="form-text">A data não pode ser alterada em edições</div>
+              }
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="praca">Praça <span class="text-danger">*</span></label>
+              <select
+                [class.is-invalid]="isInvalid('praca')"
+                class="form-select"
+                formControlName="praca"
+                id="praca"
+              >
+                <option [ngValue]="null">Selecione a praça</option>
+                @for (praca of calendarioService.pracaOptions; track praca.value) {
+                  <option [ngValue]="praca.value">{{ praca.name }}</option>
+                }
+              </select>
+              @if (isInvalid('praca')) {
+                <div class="invalid-feedback">
+                  @if (hasError('praca', 'required')) {
+                    Praça é obrigatória
+                  }
+                </div>
+              }
+              @if (calendarioId()) {
+                <div class="form-text">A praça não pode ser alterada em edições</div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Tipo de Dia e Descrição -->
+        <div class="col-12">
+          <div class="row">
+            <div class="col-md-6">
+              <label class="form-label" for="tipoDia">Tipo de Dia <span class="text-danger">*</span></label>
+              <select
+                [class.is-invalid]="isInvalid('tipoDia')"
+                class="form-select"
+                formControlName="tipoDia"
+                id="tipoDia"
+              >
+                <option [ngValue]="null">Selecione o tipo de dia</option>
+                @for (tipo of calendarioService.tipoDiaOptions; track tipo.value) {
+                  <option [ngValue]="tipo.value">{{ tipo.name }}</option>
+                }
+              </select>
+              @if (isInvalid('tipoDia')) {
+                <div class="invalid-feedback">
+                  @if (hasError('tipoDia', 'required')) {
+                    Tipo de Dia é obrigatório
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label" for="descricao">Descrição (Opcional)</label>
+              <input
+                [class.is-invalid]="isInvalid('descricao')"
+                class="form-control"
+                formControlName="descricao"
+                id="descricao"
+                maxlength="100"
+                placeholder="Ex: Confraternização Universal"
+                type="text"
+              >
+              @if (isInvalid('descricao')) {
+                <div class="invalid-feedback">
+                  @if (hasError('descricao', 'maxlength')) {
+                    Descrição deve ter no máximo 100 caracteres
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading Status Message -->
+        <div class="col-12">
+          @if (submitStatus() === 'loading') {
+            <div class="alert alert-info d-flex align-items-center" role="status">
+              <div aria-hidden="true" class="spinner-border spinner-border-sm me-2 text-primary"></div>
+              <div>
+                {{ calendarioId() ? 'Atualizando' : 'Criando' }} calendário...
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="col-12">
+          <div class="d-flex gap-2 align-items-center">
+            <button [disabled]="isSubmitting()" class="btn btn-primary position-relative" type="submit">
+              @if (isSubmitting()) {
+                <span aria-hidden="true" class="spinner-border spinner-border-sm me-1"></span>
+              }
+              Salvar
+            </button>
+            <button (click)="onCancel()" class="btn btn-secondary" type="button">
+              Cancelar
+            </button>
+            <button (click)="clearForm()" [disabled]="isSubmitting()" class="btn btn-outline-secondary" type="button">
+              Limpar
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- ARIA Live Region for Screen Reader Announcements -->
+      <div aria-atomic="true" aria-live="polite" class="visually-hidden" role="status">
+        @if (submitStatus() === 'loading') {
+          {{ calendarioId() ? 'Atualizando' : 'Criando' }} calendário, por favor aguarde...
+        }
+        @if (submitStatus() === 'success') {
+          Calendário {{ calendarioId() ? 'atualizado' : 'criado' }} com sucesso. Redirecionando para lista...
+        }
+        @if (submitStatus() === 'error') {
+          Erro: {{ errorMessage() }}
+        }
+      </div>
+
+      <!-- Success Message -->
+      @if (submitStatus() === 'success') {
+        <div class="alert alert-success d-flex align-items-center mb-3" role="alert">
+          <i aria-hidden="true" class="bi bi-check-circle-fill fs-4 me-2"></i>
+          <div>
+            <strong>Sucesso!</strong> Calendário {{ calendarioId() ? 'atualizado' : 'criado' }} com sucesso.
+            Redirecionando para lista...
+          </div>
+        </div>
+      }
+
+      <!-- Error Message -->
+      @if (submitStatus() === 'error') {
+        <div class="alert alert-danger d-flex align-items-start mb-3" role="alert">
+          <i aria-hidden="true" class="bi bi-exclamation-triangle-fill fs-4 me-2 flex-shrink-0"></i>
+          <div class="flex-grow-1">
+            <strong>Erro!</strong> {{ errorMessage() }}
+            <div class="mt-2">
+              <button (click)="retrySubmit()" class="btn btn-sm btn-outline-danger" type="button">
+                <i aria-hidden="true" class="bi bi-arrow-clockwise me-1"></i>
+                Tentar Novamente
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+</main>
