@@ -1,9 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
+import { from, Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { UserDto } from '../models/user.model';
-import { API_URL } from '../config/api.config';
+import { ApiClientService } from '../api/api-client.service';
 import { LoggerService } from './logger';
 import { ToastService } from './toast-service';
 
@@ -11,8 +11,7 @@ import { ToastService } from './toast-service';
   providedIn: 'root',
 })
 export class UserService {
-  private readonly apiUrl = inject(API_URL);
-  private readonly http = inject(HttpClient);
+  private readonly apiClient = inject(ApiClientService);
   private readonly logger = inject(LoggerService);
   private readonly toastService = inject(ToastService);
 
@@ -29,7 +28,8 @@ export class UserService {
    * @returns Observable<UserDto>
    */
   fetchCurrentUser(): Observable<UserDto> {
-    return this.http.get<UserDto>(`${this.apiUrl}/users/me`).pipe(
+    return from(this.apiClient.users.me.get()).pipe(
+      map((response) => response as unknown as UserDto),
       catchError((error: HttpErrorResponse) => {
         // Tratamento especial para 503 Serviço Indisponível
         if (error.status === 503) {

@@ -11,8 +11,7 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { HttpClient } from '@angular/common/http';
-import { API_URL } from '../../../../../../config/api.config';
+import { ParametrosService } from '../../../../../../services/parametros';
 import { WizardStepConfig, WizardStepId } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
 import { IdentificacaoFormData } from '../../models/identificacao.model';
@@ -48,8 +47,7 @@ export class ClassificacaoStep {
   private readonly formBuilder = inject(FormBuilder);
   private readonly wizardStore = inject(WizardStore);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly http = inject(HttpClient);
-  private readonly apiUrl = inject(API_URL);
+  private readonly parametrosService = inject(ParametrosService);
 
   // Enum options for template (static)
   readonly classificacaoCvmOptions = CLASSIFICACAO_CVM_OPTIONS;
@@ -196,11 +194,8 @@ export class ClassificacaoStep {
     this.loadingAnbima.set(true);
     this.anbimaDisabled.set(true);
 
-    this.http
-      .get<ClassificacaoAnbimaResponse>(
-        `${this.apiUrl}/v1/parametros/classificacoes-anbima`,
-        { params: { classificacaoCvm: cvmValue } }
-      )
+    this.parametrosService
+      .getClassificacoesAnbima(cvmValue)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {

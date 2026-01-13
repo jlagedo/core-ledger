@@ -1,7 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { API_URL } from '../config/api.config';
+import { ApiClientService } from '../api/api-client.service';
 import {
   Indexador,
   CreateIndexador,
@@ -19,8 +21,11 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class IndexadorService {
-  private readonly apiUrl = inject(API_URL);
+  private readonly apiClient = inject(ApiClientService);
+
+  // HttpClient retained for file operations (export/import)
   private readonly http = inject(HttpClient);
+  private readonly apiUrl = inject(API_URL);
 
   // Static enum options for dropdowns with Bloomberg-inspired colors
   readonly tipoIndexadorOptions: TipoIndexadorOption[] = [
@@ -82,7 +87,11 @@ export class IndexadorService {
   ];
 
   readonly fonteOptions: FonteOption[] = [
-    { value: 'ANBIMA', name: 'ANBIMA', description: 'Associacao Brasileira das Entidades dos Mercados Financeiro e de Capitais' },
+    {
+      value: 'ANBIMA',
+      name: 'ANBIMA',
+      description: 'Associacao Brasileira das Entidades dos Mercados Financeiro e de Capitais',
+    },
     { value: 'B3', name: 'B3', description: 'B3 - Brasil, Bolsa, Balcao' },
     { value: 'BACEN', name: 'BACEN', description: 'Banco Central do Brasil' },
     { value: 'IBGE', name: 'IBGE', description: 'Instituto Brasileiro de Geografia e Estatistica' },
@@ -101,39 +110,55 @@ export class IndexadorService {
     sortDirection: 'asc' | 'desc' = 'asc',
     filterParams?: Record<string, string>
   ): Observable<PaginatedResponse<Indexador>> {
-    const params: Record<string, string> = {
-      limit: limit.toString(),
-      offset: offset.toString(),
-      sortDirection,
-    };
-
-    if (sortBy) params['sortBy'] = sortBy;
-
-    // Add all filter params (filter, tipo, periodicidade, fonte, ativo, importacaoAutomatica)
-    if (filterParams) {
-      Object.entries(filterParams).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          params[key] = value;
-        }
-      });
-    }
-
-    const queryString = new URLSearchParams(params).toString();
-    return this.http.get<PaginatedResponse<Indexador>>(`${this.apiUrl}/indexadores?${queryString}`);
+    return from(
+      this.apiClient.indexadores.get({
+        queryParameters: {
+          limit,
+          offset,
+          sortBy,
+          sortDirection,
+          filter: filterParams?.['filter'],
+          tipo: filterParams?.['tipo'] ? parseInt(filterParams['tipo'], 10) : undefined,
+          periodicidade: filterParams?.['periodicidade']
+            ? parseInt(filterParams['periodicidade'], 10)
+            : undefined,
+          fonte: filterParams?.['fonte'],
+          ativo: filterParams?.['ativo'] ? filterParams['ativo'] === 'true' : undefined,
+          importacaoAutomatica: filterParams?.['importacaoAutomatica']
+            ? filterParams['importacaoAutomatica'] === 'true'
+            : undefined,
+        },
+      })
+    ).pipe(map((response) => response as unknown as PaginatedResponse<Indexador>));
   }
 
   /**
    * Gets a single indexador by ID
    */
   getIndexadorById(id: number): Observable<Indexador> {
-    return this.http.get<Indexador>(`${this.apiUrl}/indexadores/${id}`);
+    return from(this.apiClient.indexadores.byId(id).get()).pipe(
+      map((response) => response as unknown as Indexador)
+    );
   }
 
   /**
    * Creates a new indexador
    */
   createIndexador(indexador: CreateIndexador): Observable<Indexador> {
-    return this.http.post<Indexador>(`${this.apiUrl}/indexadores`, indexador);
+    return from(
+      this.apiClient.indexadores.post({
+        codigo: indexador.codigo,
+        nome: indexador.nome,
+        tipo: indexador.tipo,
+        fonte: indexador.fonte,
+        periodicidade: indexador.periodicidade,
+        fatorAcumulado: indexador.fatorAcumulado,
+        dataBase: indexador.dataBase ? new Date(indexador.dataBase) : null,
+        urlFonte: indexador.urlFonte,
+        importacaoAutomatica: indexador.importacaoAutomatica,
+        ativo: indexador.ativo,
+      })
+    ).pipe(map((response) => response as unknown as Indexador));
   }
 
   /**
@@ -141,14 +166,24 @@ export class IndexadorService {
    * Note: Tipo and Periodicidade cannot be changed after creation
    */
   updateIndexador(id: number, indexador: UpdateIndexador): Observable<Indexador> {
-    return this.http.put<Indexador>(`${this.apiUrl}/indexadores/${id}`, indexador);
+    return from(
+      this.apiClient.indexadores.byId(id).put({
+        nome: indexador.nome,
+        fonte: indexador.fonte,
+        fatorAcumulado: indexador.fatorAcumulado,
+        dataBase: indexador.dataBase ? new Date(indexador.dataBase) : null,
+        urlFonte: indexador.urlFonte,
+        importacaoAutomatica: indexador.importacaoAutomatica,
+        ativo: indexador.ativo,
+      })
+    ).pipe(map((response) => response as unknown as Indexador));
   }
 
   /**
    * Deletes an indexador
    */
   deleteIndexador(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/indexadores/${id}`);
+    return from(this.apiClient.indexadores.byId(id).delete()).pipe(map(() => void 0));
   }
 
   /**
@@ -163,44 +198,51 @@ export class IndexadorService {
     dataInicio?: string,
     dataFim?: string
   ): Observable<PaginatedResponse<HistoricoIndexador>> {
-    const params: Record<string, string> = {
-      limit: limit.toString(),
-      offset: offset.toString(),
-      sortBy,
-      sortDirection,
-    };
-
-    if (dataInicio) params['dataInicio'] = dataInicio;
-    if (dataFim) params['dataFim'] = dataFim;
-
-    const queryString = new URLSearchParams(params).toString();
-    return this.http.get<PaginatedResponse<HistoricoIndexador>>(
-      `${this.apiUrl}/indexadores/${indexadorId}/historico?${queryString}`
-    );
+    return from(
+      this.apiClient.indexadores.byId(indexadorId).historico.get({
+        queryParameters: {
+          limit,
+          offset,
+          sortBy,
+          sortDirection,
+          dataInicio: dataInicio as any,
+          dataFim: dataFim as any,
+        },
+      })
+    ).pipe(map((response) => response as unknown as PaginatedResponse<HistoricoIndexador>));
   }
 
   /**
    * Creates a new history entry
    */
   createHistorico(historico: CreateHistoricoIndexador): Observable<HistoricoIndexador> {
-    return this.http.post<HistoricoIndexador>(`${this.apiUrl}/historicos-indexadores`, historico);
+    return from(
+      this.apiClient.client.api.historicosIndexadores.post({
+        indexadorId: historico.indexadorId,
+        dataReferencia: historico.dataReferencia ? new Date(historico.dataReferencia) : null,
+        valor: historico.valor,
+        fatorDiario: historico.fatorDiario,
+        variacaoPercentual: historico.variacaoPercentual,
+        fonte: historico.fonte,
+        importacaoId: historico.importacaoId as any,
+      })
+    ).pipe(map((response) => response as unknown as HistoricoIndexador));
   }
 
   /**
    * Deletes a history entry
    */
   deleteHistorico(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/historicos-indexadores/${id}`);
+    return from(this.apiClient.client.api.historicosIndexadores.byId(id).delete()).pipe(
+      map(() => void 0)
+    );
   }
 
   /**
    * Exports history to CSV
+   * NOTE: Kept using HttpClient due to blob response type requirement
    */
-  exportHistorico(
-    indexadorId: number,
-    dataInicio?: string,
-    dataFim?: string
-  ): Observable<Blob> {
+  exportHistorico(indexadorId: number, dataInicio?: string, dataFim?: string): Observable<Blob> {
     const params: Record<string, string> = {};
     if (dataInicio) params['dataInicio'] = dataInicio;
     if (dataFim) params['dataFim'] = dataFim;
@@ -217,6 +259,7 @@ export class IndexadorService {
 
   /**
    * Imports history from CSV file
+   * NOTE: Kept using HttpClient due to FormData/multipart requirement
    */
   importHistorico(
     indexadorId: number,
@@ -237,9 +280,8 @@ export class IndexadorService {
    * Triggers automatic import for an indexador
    */
   triggerImport(indexadorId: number): Observable<{ id: number; correlationId: string }> {
-    return this.http.post<{ id: number; correlationId: string }>(
-      `${this.apiUrl}/indexadores/${indexadorId}/importar`,
-      {}
+    return from(this.apiClient.indexadores.byId(indexadorId).importar.post({})).pipe(
+      map((response) => response as unknown as { id: number; correlationId: string })
     );
   }
 

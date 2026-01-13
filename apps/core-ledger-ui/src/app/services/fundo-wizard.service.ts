@@ -1,17 +1,16 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { API_URL } from '../config/api.config';
+import { from, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { ApiClientService } from '../api/api-client.service';
 import { CnpjVerificationResponse } from '../features/cadastro/fundos/wizard/models/identificacao.model';
 
 /**
  * Service for fund wizard operations.
- * Handles CNPJ verification and wizard-related API calls.
+ * Handles CNPJ verification and wizard-related API calls using the generated API client.
  */
 @Injectable({ providedIn: 'root' })
 export class FundoWizardService {
-  private readonly apiUrl = inject(API_URL);
-  private readonly http = inject(HttpClient);
+  private readonly apiClient = inject(ApiClientService);
 
   /**
    * Verifies if a CNPJ is already registered in the system.
@@ -20,6 +19,18 @@ export class FundoWizardService {
    * @returns Observable with verification result
    */
   verificarCnpj(cnpj: string): Observable<CnpjVerificationResponse> {
-    return this.http.get<CnpjVerificationResponse>(`${this.apiUrl}/fundos/verificar-cnpj/${cnpj}`);
+    // Use the generated API client
+    return from(
+      this.apiClient.fundos.verificarCnpj.byCnpj(cnpj).get()
+    ).pipe(
+      map((response) => {
+        // Map the generated DTO to the local model
+        return {
+          disponivel: response?.disponivel ?? false,
+          fundoId: undefined, // Not provided by current API response
+          nomeFantasia: undefined, // Not provided by current API response
+        } as CnpjVerificationResponse;
+      })
+    );
   }
 }

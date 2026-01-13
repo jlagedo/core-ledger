@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { API_URL } from '../config/api.config';
+import { from, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { ApiClientService } from '../api/api-client.service';
 import {
   Calendario,
   CreateCalendario,
@@ -15,8 +15,7 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class CalendarioService {
-  private readonly apiUrl = inject(API_URL);
-  private readonly http = inject(HttpClient);
+  private readonly apiClient = inject(ApiClientService);
 
   // Opções de enum estáticas para menus suspensos
   readonly tipoDiaOptions: TipoDiaOption[] = [
@@ -67,52 +66,62 @@ export class CalendarioService {
     sortDirection: 'asc' | 'desc' = 'desc',
     filters?: Record<string, string>
   ): Observable<PaginatedResponse<Calendario>> {
-    const params: Record<string, string> = {
-      limit: limit.toString(),
-      offset: offset.toString(),
-      sortDirection,
-    };
-
-    if (sortBy) params['sortBy'] = sortBy;
-
-    // Adicionar parâmetros de filtro
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        params[key] = value;
-      });
-    }
-
-    const queryString = new URLSearchParams(params).toString();
-    return this.http.get<PaginatedResponse<Calendario>>(
-      `${this.apiUrl}/v1/calendario?${queryString}`
-    );
+    return from(
+      this.apiClient.calendario.get({
+        queryParameters: {
+          limit,
+          offset,
+          sortBy,
+          sortDirection,
+          tipoDia: filters?.['tipoDia'] ? parseInt(filters['tipoDia'], 10) : undefined,
+          praca: filters?.['praca'] ? parseInt(filters['praca'], 10) : undefined,
+          diaUtil: filters?.['diaUtil'] ? filters['diaUtil'] === 'true' : undefined,
+          dataInicio: filters?.['dataInicio'],
+          dataFim: filters?.['dataFim'],
+        },
+      })
+    ).pipe(map((response) => response as unknown as PaginatedResponse<Calendario>));
   }
 
   /**
    * Obtém um único calendário por ID
    */
   getCalendarioById(id: number): Observable<Calendario> {
-    return this.http.get<Calendario>(`${this.apiUrl}/v1/calendario/${id}`);
+    return from(this.apiClient.calendario.byId(id).get()).pipe(
+      map((response) => response as unknown as Calendario)
+    );
   }
 
   /**
    * Cria uma nova entrada de calendário
    */
   createCalendario(calendario: CreateCalendario): Observable<Calendario> {
-    return this.http.post<Calendario>(`${this.apiUrl}/v1/calendario`, calendario);
+    return from(
+      this.apiClient.calendario.post({
+        data: calendario.data as any,
+        tipoDia: calendario.tipoDia,
+        praca: calendario.praca,
+        descricao: calendario.descricao,
+      })
+    ).pipe(map((response) => response as unknown as Calendario));
   }
 
   /**
    * Atualiza uma entrada de calendário existente
    */
   updateCalendario(id: number, calendario: UpdateCalendario): Observable<void> {
-    return this.http.put<void>(`${this.apiUrl}/v1/calendario/${id}`, calendario);
+    return from(
+      this.apiClient.calendario.byId(id).put({
+        tipoDia: calendario.tipoDia,
+        descricao: calendario.descricao,
+      })
+    ).pipe(map(() => void 0));
   }
 
   /**
    * Deleta uma entrada de calendário
    */
   deleteCalendario(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/v1/calendario/${id}`);
+    return from(this.apiClient.calendario.byId(id).delete()).pipe(map(() => void 0));
   }
 }
