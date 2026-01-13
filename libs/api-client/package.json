@@ -1,0 +1,15 @@
+{
+  "name": "@core-ledger/api-client",
+  "version": "0.0.1",
+  "description": "Generated TypeScript client for Core Ledger API",
+  "type": "module",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@microsoft/kiota-abstractions": "^1.0.0",
+    "@microsoft/kiota-http-fetchlibrary": "^1.0.0",
+    "@microsoft/kiota-serialization-form": "^1.0.0",
+    "@microsoft/kiota-serialization-json": "^1.0.0",
+    "@microsoft/kiota-serialization-text": "^1.0.0",
+    "@microsoft/kiota-serialization-multipart": "^1.0.0"
+  }
+}

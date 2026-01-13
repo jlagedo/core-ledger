@@ -14,6 +14,8 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@core-ledger/api-client": ["libs/api-client/src/index.ts"]
+    }
   }
 }

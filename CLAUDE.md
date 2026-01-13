@@ -18,6 +18,7 @@ core-ledger/
 │   ├── core-ledger-worker/    # .NET 10 Background Worker
 │   └── core-ledger-e2e/       # Playwright E2E tests
 ├── libs/
+│   ├── api-client/            # Generated TypeScript API client (Kiota)
 │   └── core-ledger-dotnet/    # Shared .NET libraries
 │       ├── CoreLedger.Domain/
 │       ├── CoreLedger.Application/
@@ -42,6 +43,7 @@ core-ledger/
 | `core-ledger-ui` | Angular 21, Bootstrap 5 | Web frontend with signals |
 | `core-ledger-api` | .NET 10 | REST API (Clean Architecture) |
 | `core-ledger-worker` | .NET 10 | RabbitMQ background worker |
+| `api-client` | TypeScript, Kiota | Generated API client with DTOs |
 | `core-ledger-dotnet` | .NET 10 | Shared Domain/Application/Infrastructure |
 | `core-ledger-e2e` | Playwright | E2E tests (baseURL: http://localhost:5071) |
 | `tools/etl` | Meltano, DBT, Python | ETL for B3 financial instruments |
@@ -73,6 +75,10 @@ nx e2e core-ledger-e2e               # Playwright E2E tests
 nx graph                             # Visualize dependency graph
 nx affected -t test                  # Test only affected projects
 nx run core-ledger-api:migrate       # Run EF Core migrations
+
+# API Client Generation
+nx run core-ledger-api:export-openapi  # Export OpenAPI spec from running API
+nx run api-client:generate           # Generate TypeScript client with Kiota
 ```
 
 ### npm Scripts
@@ -87,6 +93,8 @@ npm run e2e                  # Run E2E tests
 npm run db:migrate           # Run database migrations
 npm run docker:up            # Start infrastructure services
 npm run docker:down          # Stop infrastructure services
+npm run api:export-spec      # Export OpenAPI spec from running API
+npm run api:generate-client  # Generate TypeScript API client
 ```
 
 ### Direct .NET Commands (from workspace root)
@@ -119,10 +127,12 @@ bash extract/preprocess_b3_instruments.sh && meltano run b3_instruments_pipeline
 
 ### Dependency Graph
 ```
-core-ledger-e2e → core-ledger-ui
+core-ledger-e2e → core-ledger-ui → api-client
                 → core-ledger-api → core-ledger-dotnet
 
 core-ledger-worker → core-ledger-dotnet
+
+api-client → core-ledger-api (for OpenAPI spec generation)
 ```
 
 ### .NET Architecture (Clean Architecture)
@@ -158,6 +168,15 @@ Each project has its own `CLAUDE.md` with detailed architecture and commands:
 - `apps/core-ledger-ui/CLAUDE.md` - Angular UI patterns and conventions
 - `tools/etl/CLAUDE.md` - Meltano ETL guidance
 
+### API Client Generation (Kiota)
+TypeScript DTOs and API clients are auto-generated from the .NET API using Microsoft Kiota:
+1. Start API: `nx serve core-ledger-api`
+2. Export spec: `npm run api:export-spec`
+3. Generate client: `npm run api:generate-client`
+4. Import: `import { CoreLedgerApiClient } from '@core-ledger/api-client'`
+
+See `docs/api-client-generation.md` for complete guide.
+
 ### Documentation
 All documentation is centralized in `/docs/`:
 - `docs/specs/api/` - API specifications (.NET)
@@ -165,3 +184,4 @@ All documentation is centralized in `/docs/`:
 - `docs/testing/` - E2E test coverage and Brazilian test data
 - `docs/etl/` - B3 instruments ETL pipeline
 - `docs/compliance/` - Angular compliance review guides
+- `docs/api-client-generation.md` - TypeScript client generation with Kiota

@@ -1,7 +1,31 @@
 using System.Reflection;
 using Microsoft.OpenApi;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace CoreLedger.API.Extensions;
+
+/// <summary>
+/// Document filter to add server URLs to the OpenAPI document
+/// </summary>
+public class AddServersDocumentFilter : IDocumentFilter
+{
+    public void Apply(Microsoft.OpenApi.OpenApiDocument swaggerDoc, DocumentFilterContext context)
+    {
+        swaggerDoc.Servers = new List<Microsoft.OpenApi.OpenApiServer>
+        {
+            new Microsoft.OpenApi.OpenApiServer
+            {
+                Url = "https://localhost:7109",
+                Description = "Local development (HTTPS)"
+            },
+            new Microsoft.OpenApi.OpenApiServer
+            {
+                Url = "http://localhost:5071",
+                Description = "Local development (HTTP)"
+            }
+        };
+    }
+}
 
 public static class SwaggerExtensions
 {
@@ -22,6 +46,9 @@ public static class SwaggerExtensions
                     Email = "support@coreledger.com"
                 }
             });
+
+            // Add server URLs for API client generation
+            options.DocumentFilter<AddServersDocumentFilter>();
 
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {

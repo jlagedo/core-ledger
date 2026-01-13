@@ -1,0 +1,21 @@
+{
+  "name": "api-client",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/api-client/src",
+  "tags": ["type:lib", "scope:frontend"],
+  "targets": {
+    "generate": {
+      "command": "kiota generate -l typescript -o generated -d ../../apps/core-ledger-api/openapi.json -c CoreLedgerApiClient -n CoreLedger.ApiClient --clean-output",
+      "options": { "cwd": "libs/api-client" },
+      "dependsOn": [
+        {
+          "target": "export-openapi",
+          "projects": ["core-ledger-api"]
+        }
+      ],
+      "inputs": ["{workspaceRoot}/apps/core-ledger-api/openapi.json"],
+      "outputs": ["{projectRoot}/generated"]
+    }
+  }
+}

@@ -20,6 +20,11 @@
     "migrate": {
       "command": "dotnet ef database update --project ../../../libs/core-ledger-dotnet/CoreLedger.Infrastructure --startup-project CoreLedger.API",
       "options": { "cwd": "apps/core-ledger-api/CoreLedger.API" }
+    },
+    "export-openapi": {
+      "command": "curl -o openapi.json http://localhost:5071/swagger/v1/swagger.json --insecure",
+      "options": { "cwd": "apps/core-ledger-api" },
+      "outputs": ["{projectRoot}/openapi.json"]
     }
   }
 }

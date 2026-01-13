@@ -1,0 +1,5 @@
+# Uncomment the line below if you prefer to generate the client on-demand
+# and don't want to commit generated code to version control.
+# However, committing generated code is recommended for easier CI/CD and teammate onboarding.
+
+# generated/

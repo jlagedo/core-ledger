@@ -1,0 +1,4796 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Core Ledger API",
+    "description": "Financial Ledger REST API for institutional financial clients",
+    "contact": {
+      "name": "Core Ledger Team",
+      "email": "support@coreledger.com"
+    },
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "https://localhost:7109",
+      "description": "Local development (HTTPS)"
+    },
+    {
+      "url": "http://localhost:5071",
+      "description": "Local development (HTTP)"
+    }
+  ],
+  "paths": {
+    "/api/accounttypes": {
+      "get": {
+        "tags": [
+          "Account Types"
+        ],
+        "operationId": "GetAllAccountTypes",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Account Types"
+        ],
+        "operationId": "CreateAccountType",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.CreateAccountTypeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/accounttypes/{id}": {
+      "get": {
+        "tags": [
+          "Account Types"
+        ],
+        "operationId": "GetAccountTypeById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Account Types"
+        ],
+        "operationId": "UpdateAccountType",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.UpdateAccountTypeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Account Types"
+        ],
+        "operationId": "DeleteAccountType",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/accounts": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "GetAllAccounts",
+        "parameters": [
+          {
+            "name": "Limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "SortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SortDirection",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Filter",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "CreateAccount",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.CreateAccountDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/accounts/{id}": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "GetAccountsById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "UpdateAccount",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.UpdateAccountDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/accounts/reports/by-type": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "GetAccountsByTypeReport",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/accounts/{id}/deactivate": {
+      "patch": {
+        "tags": [
+          "Accounts"
+        ],
+        "operationId": "DeactivateAccount",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/parametros/classificacoes-anbima": {
+      "get": {
+        "tags": [
+          "ANBIMA Classifications"
+        ],
+        "summary": "List ANBIMA classifications with optional filters.",
+        "description": "Get all ANBIMA classifications with optional filters",
+        "operationId": "ListarClassificacoesAnbima",
+        "parameters": [
+          {
+            "name": "classificacao_cvm",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "nivel1",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ativo",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/parametros/classificacoes-anbima/{codigo}": {
+      "get": {
+        "tags": [
+          "ANBIMA Classifications"
+        ],
+        "summary": "Get ANBIMA classification by codigo.",
+        "description": "Get a specific ANBIMA classification by its codigo",
+        "operationId": "ObterClassificacaoAnbimaPorCodigo",
+        "parameters": [
+          {
+            "name": "codigo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/parametros/classificacoes-anbima/niveis": {
+      "get": {
+        "tags": [
+          "ANBIMA Classifications"
+        ],
+        "summary": "Get hierarchical levels for ANBIMA classifications.",
+        "description": "Get hierarchical levels (Nivel1, Nivel2) for ANBIMA classifications",
+        "operationId": "ListarNiveisAnbima",
+        "parameters": [
+          {
+            "name": "classificacao_cvm",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/parametros/classificacoes-anbima/verificar": {
+      "get": {
+        "tags": [
+          "ANBIMA Classifications"
+        ],
+        "summary": "Verify compatibility between ANBIMA classification and CVM classification.",
+        "description": "Verify compatibility between ANBIMA classification and CVM classification",
+        "operationId": "VerificarCompatibilidadeAnbima",
+        "parameters": [
+          {
+            "name": "codigo_anbima",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "classificacao_cvm",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auditlogs": {
+      "get": {
+        "tags": [
+          "Audit Logs"
+        ],
+        "operationId": "GetAllAuditLogs",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/calendario": {
+      "get": {
+        "tags": [
+          "Calendário"
+        ],
+        "operationId": "GetAllCalendarios",
+        "parameters": [
+          {
+            "name": "Limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "SortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SortDirection",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Praca",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "TipoDia",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "DiaUtil",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "DataInicio",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DataFim",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Calendário"
+        ],
+        "operationId": "CreateCalendario",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.CreateCalendarioDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/calendario/{id}": {
+      "get": {
+        "tags": [
+          "Calendário"
+        ],
+        "operationId": "GetCalendarioById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Calendário"
+        ],
+        "operationId": "UpdateCalendario",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.UpdateCalendarioDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Calendário"
+        ],
+        "operationId": "DeleteCalendario",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/calendario/dia-util/{data}": {
+      "get": {
+        "tags": [
+          "Calendário"
+        ],
+        "operationId": "CheckDiaUtil",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "praca",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/CoreLedger.Domain.Enums.Praca"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/calendario/proximo-dia-util/{data}": {
+      "get": {
+        "tags": [
+          "Calendário"
+        ],
+        "operationId": "GetProximoDiaUtil",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "praca",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/CoreLedger.Domain.Enums.Praca"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/calendario/calcular-d-mais/{data}/{dias}": {
+      "get": {
+        "tags": [
+          "Calendário"
+        ],
+        "operationId": "CalcularDMais",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dias",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "praca",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/CoreLedger.Domain.Enums.Praca"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/calendario/importar/{ano}": {
+      "post": {
+        "tags": [
+          "Calendário"
+        ],
+        "operationId": "ImportarCalendario",
+        "parameters": [
+          {
+            "name": "ano",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "praca",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/CoreLedger.Domain.Enums.Praca"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/calendario/health": {
+      "get": {
+        "tags": [
+          "Calendário"
+        ],
+        "operationId": "CheckCalendarioHealth",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/fundos/{fundoId}/classes": {
+      "get": {
+        "tags": [
+          "Classes"
+        ],
+        "operationId": "GetClassesByFundo",
+        "parameters": [
+          {
+            "name": "fundoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Classes"
+        ],
+        "operationId": "CreateClasse",
+        "parameters": [
+          {
+            "name": "fundoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoClasse.FundoClasseCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/classes/{id}": {
+      "get": {
+        "tags": [
+          "Classes"
+        ],
+        "operationId": "GetClasseById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Classes"
+        ],
+        "operationId": "UpdateClasse",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoClasse.FundoClasseUpdateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Classes"
+        ],
+        "operationId": "DeleteClasse",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/corejobs": {
+      "get": {
+        "tags": [
+          "Core Jobs"
+        ],
+        "operationId": "GetAllCoreJobs",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/fundos": {
+      "get": {
+        "tags": [
+          "Fundos"
+        ],
+        "operationId": "GetAllFundos",
+        "parameters": [
+          {
+            "name": "Limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "SortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SortDirection",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Filter",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Fundos"
+        ],
+        "operationId": "CreateFundo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Fundo.FundoCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/fundos/{id}": {
+      "get": {
+        "tags": [
+          "Fundos"
+        ],
+        "operationId": "GetFundoById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Fundos"
+        ],
+        "operationId": "UpdateFundo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Fundo.FundoUpdateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Fundos"
+        ],
+        "operationId": "DeleteFundo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/fundos/cnpj/{cnpj}": {
+      "get": {
+        "tags": [
+          "Fundos"
+        ],
+        "operationId": "GetFundoByCnpj",
+        "parameters": [
+          {
+            "name": "cnpj",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/fundos/busca": {
+      "get": {
+        "tags": [
+          "Fundos"
+        ],
+        "operationId": "SearchFundos",
+        "parameters": [
+          {
+            "name": "termo",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/fundos/verificar-cnpj/{cnpj}": {
+      "get": {
+        "tags": [
+          "Fundos"
+        ],
+        "summary": "Verifica se um CNPJ está disponível para cadastro de novo fundo.",
+        "operationId": "VerificarCnpjDisponivel",
+        "parameters": [
+          {
+            "name": "cnpj",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Fundo.CnpjDisponibilidadeResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/fundos/wizard": {
+      "post": {
+        "tags": [
+          "Fundos"
+        ],
+        "summary": "Cria um novo fundo via wizard com todas as entidades relacionadas.",
+        "operationId": "CreateFundoWizard",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Wizard.FundoWizardRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Wizard.FundoWizardResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        }
+      }
+    },
+    "/api/funds": {
+      "get": {
+        "tags": [
+          "Funds"
+        ],
+        "operationId": "GetAllFunds",
+        "parameters": [
+          {
+            "name": "Limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "SortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SortDirection",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Filter",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Funds"
+        ],
+        "operationId": "CreateFund",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.CreateFundDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/funds/{id}": {
+      "get": {
+        "tags": [
+          "Funds"
+        ],
+        "operationId": "GetFundById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Funds"
+        ],
+        "operationId": "UpdateFund",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.UpdateFundDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/funds/autocomplete": {
+      "get": {
+        "tags": [
+          "Funds"
+        ],
+        "operationId": "AutocompleteFunds",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/historicos-indexadores": {
+      "post": {
+        "tags": [
+          "HistoricosIndexadores"
+        ],
+        "operationId": "CreateHistoricoIndexador",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.CreateHistoricoIndexadorDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/historicos-indexadores/{id}": {
+      "delete": {
+        "tags": [
+          "HistoricosIndexadores"
+        ],
+        "operationId": "DeleteHistoricoIndexador",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/indexadores": {
+      "get": {
+        "tags": [
+          "Indexadores"
+        ],
+        "operationId": "GetAllIndexadores",
+        "parameters": [
+          {
+            "name": "Limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "SortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SortDirection",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Filter",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Tipo",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Periodicidade",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Fonte",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Ativo",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ImportacaoAutomatica",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Indexadores"
+        ],
+        "operationId": "CreateIndexador",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.CreateIndexadorDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/indexadores/{id}": {
+      "get": {
+        "tags": [
+          "Indexadores"
+        ],
+        "operationId": "GetIndexadorById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Indexadores"
+        ],
+        "operationId": "UpdateIndexador",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.UpdateIndexadorDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Indexadores"
+        ],
+        "operationId": "DeleteIndexador",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/indexadores/{id}/historico": {
+      "get": {
+        "tags": [
+          "Indexadores"
+        ],
+        "operationId": "GetIndexadorHistorico",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "SortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SortDirection",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Filter",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dataInicio",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "dataFim",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/indexadores/{id}/historico/exportar": {
+      "get": {
+        "tags": [
+          "Indexadores"
+        ],
+        "operationId": "ExportIndexadorHistorico",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "dataInicio",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "dataFim",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/indexadores/{id}/historico/importar": {
+      "post": {
+        "tags": [
+          "Indexadores"
+        ],
+        "operationId": "ImportIndexadorHistorico",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sobrescrever",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "file"
+                ],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "file": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/indexadores/{id}/importar": {
+      "post": {
+        "tags": [
+          "Indexadores"
+        ],
+        "operationId": "ImportarIndexador",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/instituicoes": {
+      "get": {
+        "tags": [
+          "Instituicoes"
+        ],
+        "operationId": "GetAllInstituicoes",
+        "parameters": [
+          {
+            "name": "Limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "SortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SortDirection",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Filter",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ativo",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Instituicoes"
+        ],
+        "operationId": "CreateInstituicao",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.CreateInstituicaoDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/jobs-ingestion/import-b3-instruction-file": {
+      "post": {
+        "tags": [
+          "Jobs Ingestion"
+        ],
+        "operationId": "ImportB3InstructionFile",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/jobs-ingestion/test-connection": {
+      "post": {
+        "tags": [
+          "Jobs Ingestion"
+        ],
+        "operationId": "TestConnection",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.TestConnectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/fundos/{fundoId}/prazos": {
+      "get": {
+        "tags": [
+          "Prazos"
+        ],
+        "operationId": "GetPrazosByFundo",
+        "parameters": [
+          {
+            "name": "fundoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "incluirInativos",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Prazos"
+        ],
+        "operationId": "CreatePrazo",
+        "parameters": [
+          {
+            "name": "fundoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoPrazo.FundoPrazoCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/prazos/{id}": {
+      "put": {
+        "tags": [
+          "Prazos"
+        ],
+        "operationId": "UpdatePrazo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoPrazo.FundoPrazoUpdateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/securities": {
+      "get": {
+        "tags": [
+          "Securities"
+        ],
+        "operationId": "GetAllSecurities",
+        "parameters": [
+          {
+            "name": "Limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "SortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SortDirection",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Filter",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Securities"
+        ],
+        "operationId": "CreateSecurity",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.CreateSecurityDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/securities/{id}": {
+      "get": {
+        "tags": [
+          "Securities"
+        ],
+        "operationId": "GetSecuritiesById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Securities"
+        ],
+        "operationId": "UpdateSecurity",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.UpdateSecurityDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/securities/autocomplete": {
+      "get": {
+        "tags": [
+          "Securities"
+        ],
+        "operationId": "AutocompleteSecurities",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/securities/{id}/deactivate": {
+      "patch": {
+        "tags": [
+          "Securities"
+        ],
+        "operationId": "DeactivateSecurity",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/securitytypes": {
+      "get": {
+        "tags": [
+          "Security Types"
+        ],
+        "operationId": "GetAllSecurityTypes",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/fundos/{fundoId}/taxas": {
+      "get": {
+        "tags": [
+          "Taxas"
+        ],
+        "operationId": "GetTaxasByFundo",
+        "parameters": [
+          {
+            "name": "fundoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "incluirInativas",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Taxas"
+        ],
+        "operationId": "CreateTaxa",
+        "parameters": [
+          {
+            "name": "fundoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoTaxa.FundoTaxaCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/taxas/{id}": {
+      "put": {
+        "tags": [
+          "Taxas"
+        ],
+        "operationId": "UpdateTaxa",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoTaxa.FundoTaxaUpdateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Taxas"
+        ],
+        "operationId": "DeleteTaxa",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/transactions/status": {
+      "get": {
+        "tags": [
+          "Transaction Statuses"
+        ],
+        "operationId": "GetAllTransactionStatuses",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/transactions/status/{id}": {
+      "get": {
+        "tags": [
+          "Transaction Statuses"
+        ],
+        "operationId": "GetTransactionStatusById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/transactions/subtypes": {
+      "get": {
+        "tags": [
+          "Transaction SubTypes"
+        ],
+        "operationId": "GetAllTransactionSubTypes",
+        "parameters": [
+          {
+            "name": "typeId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/transactions/subtypes/{id}": {
+      "get": {
+        "tags": [
+          "Transaction SubTypes"
+        ],
+        "operationId": "GetTransactionSubTypeById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/transactions/types": {
+      "get": {
+        "tags": [
+          "Transaction Types"
+        ],
+        "operationId": "GetAllTransactionTypes",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/transactions/types/{id}": {
+      "get": {
+        "tags": [
+          "Transaction Types"
+        ],
+        "operationId": "GetTransactionTypeById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/transactions": {
+      "get": {
+        "tags": [
+          "Transactions"
+        ],
+        "operationId": "GetAllTransactions",
+        "parameters": [
+          {
+            "name": "Limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "SortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SortDirection",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Filter",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "operationId": "CreateTransaction",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.CreateTransactionDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/transactions/{id}": {
+      "get": {
+        "tags": [
+          "Transactions"
+        ],
+        "operationId": "GetTransactionById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Transactions"
+        ],
+        "operationId": "UpdateTransaction",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.UpdateTransactionDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "GetCurrentUser",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/fundos/{fundoId}/vinculos": {
+      "get": {
+        "tags": [
+          "Vinculos"
+        ],
+        "operationId": "GetVinculosByFundo",
+        "parameters": [
+          {
+            "name": "fundoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "incluirEncerrados",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Vinculos"
+        ],
+        "operationId": "CreateVinculo",
+        "parameters": [
+          {
+            "name": "fundoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.CreateFundoVinculoDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/vinculos/{id}/encerrar": {
+      "patch": {
+        "tags": [
+          "Vinculos"
+        ],
+        "operationId": "EncerrarVinculo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.EncerrarVinculoDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/worker-notifications/transaction-processed": {
+      "post": {
+        "tags": [
+          "Worker Notifications"
+        ],
+        "summary": "Receives notification from Worker that a transaction has been processed.\nBroadcasts to the user who created the transaction via SignalR.",
+        "description": "Receives transaction processing completion notifications from the Worker service",
+        "operationId": "TransactionProcessed",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoreLedger.API.Endpoints.TransactionProcessedNotification"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CoreLedger.API.Endpoints.TransactionProcessedNotification": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "integer",
+            "description": "The ID of the processed transaction.",
+            "format": "int32"
+          },
+          "success": {
+            "type": "boolean",
+            "description": "Whether the processing succeeded."
+          },
+          "finalStatusId": {
+            "type": "integer",
+            "description": "The final status ID (2=Executed, 8=Failed).",
+            "format": "int32"
+          },
+          "errorMessage": {
+            "type": "string",
+            "description": "Error message if processing failed.",
+            "nullable": true
+          },
+          "processedAt": {
+            "type": "string",
+            "description": "UTC timestamp when processing completed.",
+            "format": "date-time"
+          },
+          "correlationId": {
+            "type": "string",
+            "description": "Correlation ID for distributed tracing.",
+            "nullable": true
+          },
+          "createdByUserId": {
+            "type": "string",
+            "description": "User ID of the person who created the transaction (may be null for batch operations).",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Notification payload sent by Worker after processing a transaction."
+      },
+      "CoreLedger.Application.DTOs.CreateAccountDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "typeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.AccountStatus"
+          },
+          "normalBalance": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.NormalBalance"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.CreateAccountTypeDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.CreateCalendarioDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "format": "date"
+          },
+          "tipoDia": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.TipoDia"
+          },
+          "praca": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.Praca"
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.CreateFundDto": {
+        "required": [
+          "baseCurrency",
+          "code",
+          "inceptionDate",
+          "name",
+          "valuationFrequency"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "maxLength": 10,
+            "minLength": 1,
+            "pattern": "^[A-Z0-9]+$",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "baseCurrency": {
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string"
+          },
+          "inceptionDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "valuationFrequency": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.ValuationFrequency"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.CreateFundoVinculoDto": {
+        "required": [
+          "dataInicio",
+          "fundoId",
+          "instituicaoId",
+          "tipoVinculo"
+        ],
+        "type": "object",
+        "properties": {
+          "fundoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "instituicaoId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tipoVinculo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoVinculoInstitucional"
+          },
+          "dataInicio": {
+            "type": "string",
+            "format": "date"
+          },
+          "contratoNumero": {
+            "maxLength": 50,
+            "type": "string",
+            "nullable": true
+          },
+          "observacao": {
+            "maxLength": 500,
+            "type": "string",
+            "nullable": true
+          },
+          "principal": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.CreateHistoricoIndexadorDto": {
+        "required": [
+          "dataReferencia",
+          "indexadorId",
+          "valor"
+        ],
+        "type": "object",
+        "properties": {
+          "indexadorId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dataReferencia": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "valor": {
+            "type": "number",
+            "format": "double"
+          },
+          "fatorDiario": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "variacaoPercentual": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "fonte": {
+            "maxLength": 50,
+            "type": "string",
+            "nullable": true
+          },
+          "importacaoId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.CreateIndexadorDto": {
+        "required": [
+          "codigo",
+          "nome",
+          "periodicidade",
+          "tipo"
+        ],
+        "type": "object",
+        "properties": {
+          "codigo": {
+            "maxLength": 20,
+            "minLength": 1,
+            "pattern": "^[A-Z0-9]+$",
+            "type": "string"
+          },
+          "nome": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "tipo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.IndexadorTipo"
+          },
+          "fonte": {
+            "maxLength": 100,
+            "type": "string",
+            "nullable": true
+          },
+          "periodicidade": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.Periodicidade"
+          },
+          "fatorAcumulado": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "dataBase": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "urlFonte": {
+            "maxLength": 500,
+            "type": "string",
+            "nullable": true
+          },
+          "importacaoAutomatica": {
+            "type": "boolean"
+          },
+          "ativo": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.CreateInstituicaoDto": {
+        "required": [
+          "cnpj",
+          "razaoSocial"
+        ],
+        "type": "object",
+        "properties": {
+          "cnpj": {
+            "maxLength": 14,
+            "minLength": 1,
+            "pattern": "^[0-9]{14}$",
+            "type": "string"
+          },
+          "razaoSocial": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "nomeFantasia": {
+            "maxLength": 100,
+            "type": "string",
+            "nullable": true
+          },
+          "ativo": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.CreateSecurityDto": {
+        "required": [
+          "currency",
+          "name",
+          "ticker",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "ticker": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string"
+          },
+          "isin": {
+            "maxLength": 12,
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.SecurityType"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.CreateTransactionDto": {
+        "type": "object",
+        "properties": {
+          "fundId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "securityId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "transactionSubTypeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tradeDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "settleDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "quantity": {
+            "type": "number",
+            "format": "double"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.EncerrarVinculoDto": {
+        "required": [
+          "dataFim"
+        ],
+        "type": "object",
+        "properties": {
+          "dataFim": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.Fundo.CnpjDisponibilidadeResponseDto": {
+        "type": "object",
+        "properties": {
+          "cnpj": {
+            "type": "string",
+            "nullable": true
+          },
+          "disponivel": {
+            "type": "boolean"
+          },
+          "cnpjValido": {
+            "type": "boolean"
+          },
+          "mensagem": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.Fundo.FundoCreateDto": {
+        "type": "object",
+        "properties": {
+          "cnpj": {
+            "type": "string",
+            "nullable": true
+          },
+          "razaoSocial": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoFundo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoFundo"
+          },
+          "classificacaoCVM": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.ClassificacaoCVM"
+          },
+          "prazo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.PrazoFundo"
+          },
+          "publicoAlvo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.PublicoAlvo"
+          },
+          "tributacao": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TributacaoFundo"
+          },
+          "condominio": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoCondominio"
+          },
+          "nomeFantasia": {
+            "type": "string",
+            "nullable": true
+          },
+          "nomeCurto": {
+            "type": "string",
+            "nullable": true
+          },
+          "dataConstituicao": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "dataInicioAtividade": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "classificacaoAnbima": {
+            "type": "string",
+            "nullable": true
+          },
+          "codigoAnbima": {
+            "type": "string",
+            "nullable": true
+          },
+          "exclusivo": {
+            "type": "boolean"
+          },
+          "reservado": {
+            "type": "boolean"
+          },
+          "permiteAlavancagem": {
+            "type": "boolean"
+          },
+          "aceitaCripto": {
+            "type": "boolean"
+          },
+          "percentualExterior": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.Fundo.FundoUpdateDto": {
+        "type": "object",
+        "properties": {
+          "razaoSocial": {
+            "type": "string",
+            "nullable": true
+          },
+          "nomeFantasia": {
+            "type": "string",
+            "nullable": true
+          },
+          "nomeCurto": {
+            "type": "string",
+            "nullable": true
+          },
+          "dataConstituicao": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "dataInicioAtividade": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "classificacaoCVM": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.ClassificacaoCVM"
+          },
+          "classificacaoAnbima": {
+            "type": "string",
+            "nullable": true
+          },
+          "codigoAnbima": {
+            "type": "string",
+            "nullable": true
+          },
+          "prazo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.PrazoFundo"
+          },
+          "publicoAlvo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.PublicoAlvo"
+          },
+          "tributacao": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TributacaoFundo"
+          },
+          "condominio": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoCondominio"
+          },
+          "exclusivo": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "reservado": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "permiteAlavancagem": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "aceitaCripto": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "percentualExterior": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.FundoClasse.FundoClasseCreateDto": {
+        "type": "object",
+        "properties": {
+          "codigoClasse": {
+            "type": "string",
+            "nullable": true
+          },
+          "nomeClasse": {
+            "type": "string",
+            "nullable": true
+          },
+          "cnpjClasse": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoClasseFidc": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoClasseFIDC"
+          },
+          "ordemSubordinacao": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "rentabilidadeAlvo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "responsabilidadeLimitada": {
+            "type": "boolean"
+          },
+          "segregacaoPatrimonial": {
+            "type": "boolean"
+          },
+          "valorMinimoAplicacao": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.FundoClasse.FundoClasseUpdateDto": {
+        "type": "object",
+        "properties": {
+          "nomeClasse": {
+            "type": "string",
+            "nullable": true
+          },
+          "cnpjClasse": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoClasseFidc": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoClasseFIDC"
+          },
+          "ordemSubordinacao": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "rentabilidadeAlvo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "responsabilidadeLimitada": {
+            "type": "boolean"
+          },
+          "segregacaoPatrimonial": {
+            "type": "boolean"
+          },
+          "valorMinimoAplicacao": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.FundoPrazo.FundoPrazoCreateDto": {
+        "type": "object",
+        "properties": {
+          "tipoPrazo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoPrazoOperacional"
+          },
+          "diasCotizacao": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "diasLiquidacao": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "horarioLimite": {
+            "type": "string",
+            "format": "time"
+          },
+          "diasUteis": {
+            "type": "boolean"
+          },
+          "classeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "diasCarencia": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "calendarioId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "permiteParcial": {
+            "type": "boolean"
+          },
+          "percentualMinimo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "valorMinimo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.FundoPrazo.FundoPrazoUpdateDto": {
+        "type": "object",
+        "properties": {
+          "diasCotizacao": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "diasLiquidacao": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "horarioLimite": {
+            "type": "string",
+            "format": "time"
+          },
+          "diasUteis": {
+            "type": "boolean"
+          },
+          "diasCarencia": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "calendarioId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "permiteParcial": {
+            "type": "boolean"
+          },
+          "percentualMinimo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "valorMinimo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.FundoTaxa.FundoTaxaCreateDto": {
+        "type": "object",
+        "properties": {
+          "tipoTaxa": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoTaxa"
+          },
+          "percentual": {
+            "type": "number",
+            "format": "double"
+          },
+          "baseCalculo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.BaseCalculoTaxa"
+          },
+          "periodicidadeProvisao": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.PeriodicidadeProvisao"
+          },
+          "periodicidadePagamento": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.PeriodicidadePagamento"
+          },
+          "dataInicioVigencia": {
+            "type": "string",
+            "format": "date"
+          },
+          "classeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "diaPagamento": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "valorMinimo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "valorMaximo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "parametrosPerformance": {
+            "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoTaxa.FundoTaxaPerformanceCreateDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.FundoTaxa.FundoTaxaPerformanceCreateDto": {
+        "type": "object",
+        "properties": {
+          "indexadorId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "percentualBenchmark": {
+            "type": "number",
+            "format": "double"
+          },
+          "metodoCalculo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.MetodoCalculoPerformance"
+          },
+          "linhaDagua": {
+            "type": "boolean"
+          },
+          "periodicidadeCristalizacao": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.PeriodicidadeCristalizacao"
+          },
+          "mesCristalizacao": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.FundoTaxa.FundoTaxaUpdateDto": {
+        "type": "object",
+        "properties": {
+          "percentual": {
+            "type": "number",
+            "format": "double"
+          },
+          "baseCalculo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.BaseCalculoTaxa"
+          },
+          "periodicidadeProvisao": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.PeriodicidadeProvisao"
+          },
+          "periodicidadePagamento": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.PeriodicidadePagamento"
+          },
+          "diaPagamento": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "valorMinimo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "valorMaximo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.TestConnectionRequest": {
+        "type": "object",
+        "properties": {
+          "referenceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "jobDescription": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.UpdateAccountDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "typeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.AccountStatus"
+          },
+          "normalBalance": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.NormalBalance"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.UpdateAccountTypeDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.UpdateCalendarioDto": {
+        "type": "object",
+        "properties": {
+          "tipoDia": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.TipoDia"
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.UpdateFundDto": {
+        "required": [
+          "baseCurrency",
+          "code",
+          "inceptionDate",
+          "name",
+          "valuationFrequency"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "maxLength": 10,
+            "minLength": 1,
+            "pattern": "^[A-Z0-9]+$",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "baseCurrency": {
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string"
+          },
+          "inceptionDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "valuationFrequency": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.ValuationFrequency"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.UpdateIndexadorDto": {
+        "required": [
+          "nome"
+        ],
+        "type": "object",
+        "properties": {
+          "nome": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "fonte": {
+            "maxLength": 100,
+            "type": "string",
+            "nullable": true
+          },
+          "fatorAcumulado": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "dataBase": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "urlFonte": {
+            "maxLength": 500,
+            "type": "string",
+            "nullable": true
+          },
+          "importacaoAutomatica": {
+            "type": "boolean"
+          },
+          "ativo": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.UpdateSecurityDto": {
+        "required": [
+          "currency",
+          "name",
+          "ticker",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "ticker": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string"
+          },
+          "isin": {
+            "maxLength": 12,
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.SecurityType"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.UpdateTransactionDto": {
+        "type": "object",
+        "properties": {
+          "fundId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "securityId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "transactionSubTypeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tradeDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "settleDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "quantity": {
+            "type": "number",
+            "format": "double"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.Wizard.FundoWizardRequestDto": {
+        "type": "object",
+        "properties": {
+          "identificacao": {
+            "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Wizard.WizardIdentificacaoDto"
+          },
+          "classificacao": {
+            "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Wizard.WizardClassificacaoDto"
+          },
+          "caracteristicas": {
+            "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Wizard.WizardCaracteristicasDto"
+          },
+          "parametrosCota": {
+            "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Wizard.WizardParametrosCotaDto"
+          },
+          "taxas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Wizard.WizardTaxaDto"
+            },
+            "nullable": true
+          },
+          "prazos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Wizard.WizardPrazoDto"
+            },
+            "nullable": true
+          },
+          "vinculos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Wizard.WizardVinculoDto"
+            },
+            "nullable": true
+          },
+          "classes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Wizard.WizardClasseDto"
+            },
+            "nullable": true
+          },
+          "parametrosFidc": {
+            "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Wizard.WizardParametrosFidcDto"
+          },
+          "rascunhoId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "documentosTempIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.Wizard.FundoWizardResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cnpj": {
+            "type": "string",
+            "nullable": true
+          },
+          "razaoSocial": {
+            "type": "string",
+            "nullable": true
+          },
+          "nomeFantasia": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoFundo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoFundo"
+          },
+          "situacao": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.SituacaoFundo"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.Wizard.WizardCaracteristicasDto": {
+        "type": "object",
+        "properties": {
+          "condominio": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoCondominio"
+          },
+          "prazo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.PrazoFundo"
+          },
+          "dataEncerramento": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "exclusivo": {
+            "type": "boolean"
+          },
+          "reservado": {
+            "type": "boolean"
+          },
+          "permiteAlavancagem": {
+            "type": "boolean"
+          },
+          "limiteAlavancagem": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "aceitaCripto": {
+            "type": "boolean"
+          },
+          "percentualExterior": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.Wizard.WizardClasseDto": {
+        "type": "object",
+        "properties": {
+          "codigoClasse": {
+            "type": "string",
+            "nullable": true
+          },
+          "nomeClasse": {
+            "type": "string",
+            "nullable": true
+          },
+          "publicoAlvo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.PublicoAlvo"
+          },
+          "dataInicio": {
+            "type": "string",
+            "format": "date"
+          },
+          "cnpjClasse": {
+            "type": "string",
+            "nullable": true
+          },
+          "classePaiId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "nivel": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tipoClasseFidc": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoClasseFIDC"
+          },
+          "ordemSubordinacao": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "rentabilidadeAlvo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "indiceSubordinacaoMinimo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "valorMinimoAplicacao": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "valorMinimoPermanencia": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "responsabilidadeLimitada": {
+            "type": "boolean"
+          },
+          "segregacaoPatrimonial": {
+            "type": "boolean"
+          },
+          "taxaAdministracao": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "taxaGestao": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "taxaPerformance": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "benchmarkId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "permiteResgateAntecipado": {
+            "type": "boolean"
+          },
+          "dataEncerramento": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.Wizard.WizardClassificacaoDto": {
+        "type": "object",
+        "properties": {
+          "classificacaoCvm": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.ClassificacaoCVM"
+          },
+          "publicoAlvo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.PublicoAlvo"
+          },
+          "tributacao": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TributacaoFundo"
+          },
+          "classificacaoAnbima": {
+            "type": "string",
+            "nullable": true
+          },
+          "codigoAnbima": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.Wizard.WizardIdentificacaoDto": {
+        "type": "object",
+        "properties": {
+          "cnpj": {
+            "type": "string",
+            "nullable": true
+          },
+          "razaoSocial": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoFundo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoFundo"
+          },
+          "dataConstituicao": {
+            "type": "string",
+            "format": "date"
+          },
+          "dataInicioAtividade": {
+            "type": "string",
+            "format": "date"
+          },
+          "nomeFantasia": {
+            "type": "string",
+            "nullable": true
+          },
+          "nomeCurto": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.Wizard.WizardParametrosCotaDto": {
+        "type": "object",
+        "properties": {
+          "tipoCota": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoCota"
+          },
+          "horarioCorte": {
+            "type": "string",
+            "format": "time"
+          },
+          "cotaInicial": {
+            "type": "number",
+            "format": "double"
+          },
+          "dataCotaInicial": {
+            "type": "string",
+            "format": "date"
+          },
+          "casasDecimaisCota": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "casasDecimaisQuantidade": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "casasDecimaisPl": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fusoHorario": {
+            "type": "string",
+            "nullable": true
+          },
+          "permiteCotaEstimada": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.Wizard.WizardParametrosFidcDto": {
+        "type": "object",
+        "properties": {
+          "tipoFidc": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoFIDC"
+          },
+          "tiposRecebiveis": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoRecebiveis"
+            },
+            "nullable": true
+          },
+          "prazoMedioCarteira": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "indiceSubordinacaoAlvo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "provisaoDevedoresDuvidosos": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "limiteConcentracaoCedente": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "limiteConcentracaoSacado": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "possuiCoobrigacao": {
+            "type": "boolean"
+          },
+          "percentualCoobrigacao": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "permiteCessaoParcial": {
+            "type": "boolean"
+          },
+          "ratingMinimo": {
+            "type": "string",
+            "nullable": true
+          },
+          "agenciaRating": {
+            "type": "string",
+            "nullable": true
+          },
+          "registradoraRecebiveis": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.Registradora"
+          },
+          "contaRegistradora": {
+            "type": "string",
+            "nullable": true
+          },
+          "integracaoRegistradora": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.Wizard.WizardPrazoDto": {
+        "type": "object",
+        "properties": {
+          "tipoOperacao": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoPrazoOperacional"
+          },
+          "prazoCotizacao": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "prazoLiquidacao": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tipoCalendario": {
+            "type": "string",
+            "nullable": true
+          },
+          "valorMinimoInicial": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "valorMinimoAdicional": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "valorMinimoResgate": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "valorMinimoPermanencia": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "prazoCarenciaDias": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "permiteResgateTotal": {
+            "type": "boolean"
+          },
+          "permiteResgateProgramado": {
+            "type": "boolean"
+          },
+          "prazoMaximoProgramacao": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "classeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.Wizard.WizardTaxaDto": {
+        "type": "object",
+        "properties": {
+          "tipoTaxa": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoTaxa"
+          },
+          "percentual": {
+            "type": "number",
+            "format": "double"
+          },
+          "baseCalculo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.BaseCalculoTaxa"
+          },
+          "formaCobranca": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.PeriodicidadePagamento"
+          },
+          "dataInicioVigencia": {
+            "type": "string",
+            "format": "date"
+          },
+          "percentualMinimo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "percentualMaximo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "dataFimVigencia": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "benchmarkId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "percentualBenchmark": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "possuiHurdle": {
+            "type": "boolean"
+          },
+          "possuiHighWaterMark": {
+            "type": "boolean"
+          },
+          "linhaDaguaGlobal": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "classeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.Wizard.WizardVinculoDto": {
+        "type": "object",
+        "properties": {
+          "tipoVinculo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoVinculoInstitucional"
+          },
+          "cnpjInstituicao": {
+            "type": "string",
+            "nullable": true
+          },
+          "nomeInstituicao": {
+            "type": "string",
+            "nullable": true
+          },
+          "dataInicio": {
+            "type": "string",
+            "format": "date"
+          },
+          "codigoCvm": {
+            "type": "string",
+            "nullable": true
+          },
+          "dataFim": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "motivoFim": {
+            "type": "string",
+            "nullable": true
+          },
+          "responsavelNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "responsavelEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "responsavelTelefone": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Domain.Cadastros.Enums.BaseCalculoTaxa": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.ClassificacaoCVM": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.MetodoCalculoPerformance": {
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.PeriodicidadeCristalizacao": {
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.PeriodicidadePagamento": {
+        "enum": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.PeriodicidadeProvisao": {
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.PrazoFundo": {
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.PublicoAlvo": {
+        "enum": [
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.Registradora": {
+        "enum": [
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.SituacaoFundo": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.TipoClasseFIDC": {
+        "enum": [
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.TipoCondominio": {
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.TipoCota": {
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.TipoFIDC": {
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.TipoFundo": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.TipoPrazoOperacional": {
+        "enum": [
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.TipoRecebiveis": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          99
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.TipoTaxa": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.TipoVinculoInstitucional": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Cadastros.Enums.TributacaoFundo": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Enums.AccountStatus": {
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Enums.IndexadorTipo": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Enums.NormalBalance": {
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Enums.Periodicidade": {
+        "enum": [
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Enums.Praca": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Enums.SecurityType": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Enums.TipoDia": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Enums.ValuationFrequency": {
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "description": "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.\n\nExample: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ],
+  "tags": [
+    {
+      "name": "Account Types"
+    },
+    {
+      "name": "Accounts"
+    },
+    {
+      "name": "ANBIMA Classifications"
+    },
+    {
+      "name": "Audit Logs"
+    },
+    {
+      "name": "Calendário"
+    },
+    {
+      "name": "Classes"
+    },
+    {
+      "name": "Core Jobs"
+    },
+    {
+      "name": "Fundos"
+    },
+    {
+      "name": "Funds"
+    },
+    {
+      "name": "HistoricosIndexadores"
+    },
+    {
+      "name": "Indexadores"
+    },
+    {
+      "name": "Instituicoes"
+    },
+    {
+      "name": "Jobs Ingestion"
+    },
+    {
+      "name": "Prazos"
+    },
+    {
+      "name": "Securities"
+    },
+    {
+      "name": "Security Types"
+    },
+    {
+      "name": "Taxas"
+    },
+    {
+      "name": "Transaction Statuses"
+    },
+    {
+      "name": "Transaction SubTypes"
+    },
+    {
+      "name": "Transaction Types"
+    },
+    {
+      "name": "Transactions"
+    },
+    {
+      "name": "Users"
+    },
+    {
+      "name": "Vinculos"
+    },
+    {
+      "name": "Worker Notifications"
+    }
+  ]
+}

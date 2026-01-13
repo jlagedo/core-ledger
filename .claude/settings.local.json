@@ -7,7 +7,33 @@
       "Bash(nx build:*)",
       "Bash(npm run build:*)",
       "Bash(npx ng build:*)",
-      "Bash(npx nx build:*)"
+      "Bash(npx nx build:*)",
+      "Bash(dotnet tool install:*)",
+      "Bash(npm install:*)",
+      "Bash(curl:*)",
+      "Bash(lsof:*)",
+      "Bash(npm run api:export-spec:*)",
+      "Bash(npm run api:generate-client:*)",
+      "Bash(kill:*)",
+      "Bash(nx serve:*)",
+      "Bash(npm run start:api:*)",
+      "Bash(for:*)",
+      "Bash(do)",
+      "Bash(if curl -s http://localhost:5071/health)",
+      "Bash(then)",
+      "Bash(exit 0)",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(exit 1)",
+      "Bash(dotnet list:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet add package:*)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "angular-cli",
+    "nuget",
+    "postgres",
+    "microsoft-docs"
+  ]
 }
