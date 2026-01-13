@@ -1,6 +1,6 @@
 ---
 description: Fast commit with sanity checks (build, naming conventions, lint)
-allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git add:*), Bash(git commit:*), Bash(git log:*), Bash(nx affected:*), Bash(nx build:*), Bash(npx nx build:*), Bash(dotnet build:*), Read, Glob, Grep
+allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git add:*), Bash(git commit:*), Bash(git log:*), Bash(nx affected:*), Bash(nx build:*), Bash(nx lint:*), Bash(npx nx build:*), Bash(npx nx lint:*), Bash(dotnet build:*), Read, Glob, Grep
 argument-hint: [commit message]
 ---
 
@@ -43,7 +43,20 @@ For any NEW or RENAMED files in Angular (apps/core-ledger-ui/src/), verify:
 
 Report any violations. Do NOT auto-fix - inform the user and stop if there are violations.
 
-### Step 3: Build Affected Projects
+### Step 3: Lint Affected Projects
+
+Run lint only for affected projects:
+
+```bash
+nx affected -t lint --base=HEAD~1
+```
+
+If lint fails:
+1. Report the errors clearly (warnings are OK, errors are NOT)
+2. Do NOT proceed with the commit
+3. Suggest fixes if obvious
+
+### Step 4: Build Affected Projects
 
 Run builds only for affected projects:
 
@@ -56,7 +69,7 @@ If the build fails:
 2. Do NOT proceed with the commit
 3. Suggest fixes if obvious
 
-### Step 4: Create Commit
+### Step 5: Create Commit
 
 If all checks pass:
 1. Stage all changes: `git add -A`
@@ -72,7 +85,7 @@ EOF
 )"
 ```
 
-### Step 5: Summary
+### Step 6: Summary
 
 After committing, show:
 1. The commit hash

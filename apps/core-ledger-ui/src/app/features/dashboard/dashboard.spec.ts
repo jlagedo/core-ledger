@@ -6,9 +6,9 @@ import { provideTestDependencies } from '../../testing/test-helpers';
 
 // Mock ResizeObserver for ngx-echarts
 class ResizeObserverMock {
-  observe() { }
-  unobserve() { }
-  disconnect() { }
+  observe() { /* noop */ }
+  unobserve() { /* noop */ }
+  disconnect() { /* noop */ }
 }
 
 describe('Dashboard', () => {

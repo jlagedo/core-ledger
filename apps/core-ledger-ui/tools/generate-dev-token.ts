@@ -196,7 +196,7 @@ async function main(): Promise<void> {
   }
 
   // If generating for a specific user, read existing tokens and merge
-  let allTokens = tokens;
+  const allTokens = tokens;
   if (targetRole) {
     try {
       const existingContent = fs.readFileSync(mockTokensPath, 'utf-8');

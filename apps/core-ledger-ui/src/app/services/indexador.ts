@@ -103,8 +103,8 @@ export class IndexadorService {
    * Supports both search term (filter) and structured filters (tipo, ativo, etc.)
    */
   getIndexadores(
-    limit: number = 100,
-    offset: number = 0,
+    limit = 100,
+    offset = 0,
     sortBy?: string,
     sortDirection: 'asc' | 'desc' = 'asc',
     filterParams?: Record<string, string>
@@ -190,9 +190,9 @@ export class IndexadorService {
    */
   getHistorico(
     indexadorId: number,
-    limit: number = 100,
-    offset: number = 0,
-    sortBy: string = 'dataReferencia',
+    limit = 100,
+    offset = 0,
+    sortBy = 'dataReferencia',
     sortDirection: 'asc' | 'desc' = 'desc',
     dataInicio?: string,
     dataFim?: string
@@ -258,7 +258,7 @@ export class IndexadorService {
   importHistorico(
     indexadorId: number,
     file: File,
-    sobrescrever: boolean = false
+    sobrescrever = false
   ): Observable<ImportHistoricoResult> {
     return this.apiClient.indexadores
       .importIndexadorHistorico(indexadorId, sobrescrever, { data: file, fileName: file.name })

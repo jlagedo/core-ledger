@@ -50,7 +50,7 @@ export class CrudHelper {
     /**
      * Test 404 not found for non-existent resource
      */
-    async testNotFoundOperation(path: string, id: number = 99999): Promise<void> {
+    async testNotFoundOperation(path: string, id = 99999): Promise<void> {
         const result = await this.api.get(`${path}/${id}`);
         expect(result.status).toBe(404);
     }
@@ -78,7 +78,7 @@ export class CrudHelper {
     /**
      * Test deactivate operation (PATCH endpoint)
      */
-    async testDeactivateOperation(path: string, id: number, deactivateEndpoint: string = 'deactivate'): Promise<void> {
+    async testDeactivateOperation(path: string, id: number, deactivateEndpoint = 'deactivate'): Promise<void> {
         const result = await this.api.patch(`${path}/${id}/${deactivateEndpoint}`);
         expect(result.status).toBe(204);
 
@@ -94,7 +94,7 @@ export class CrudHelper {
         path: string,
         createData: any,
         updateData: any,
-        includeDelete: boolean = false
+        includeDelete = false
     ): Promise<number> {
         // CREATE
         const createResult = await this.api.post(path, createData);
@@ -130,7 +130,7 @@ export class CrudHelper {
     /**
      * Test pagination with different limits and offsets
      */
-    async testPaginationOperation(path: string, limit: number = 5): Promise<void> {
+    async testPaginationOperation(path: string, limit = 5): Promise<void> {
         const firstPage = await this.api.getPaginated(path, { limit, offset: 0 });
         expect(firstPage.status).toBe(200);
         expect(firstPage.data.limit).toBe(limit);
@@ -154,7 +154,7 @@ export class CrudHelper {
     /**
      * Test sorting operation
      */
-    async testSortOperation(path: string, sortBy: string, sortDirection: string = 'asc'): Promise<any> {
+    async testSortOperation(path: string, sortBy: string, sortDirection = 'asc'): Promise<any> {
         const result = await this.api.getPaginated(path, { sortBy, sortDirection });
         expect(result.status).toBe(200);
         expect(result.data).toHaveProperty('items');

@@ -31,7 +31,7 @@ export class BreadCrumbService {
 
   private createBreadcrumbs(
     route: ActivatedRoute,
-    url: string = '',
+    url = '',
     breadcrumbs: Breadcrumb[] = []
   ): Breadcrumb[] {
     const children: ActivatedRoute[] = route.children;

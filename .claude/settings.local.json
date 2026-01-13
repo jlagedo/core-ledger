@@ -46,7 +46,19 @@
       "mcp__plugin_context7_context7__query-docs",
       "mcp__microsoft-docs__microsoft_docs_search",
       "Bash(netstat:*)",
-      "Bash(ss:*)"
+      "Bash(ss:*)",
+      "Bash(nx list:*)",
+      "mcp__angular-cli__get_best_practices",
+      "Bash(nx version:*)",
+      "Bash(nx show:*)",
+      "Bash(ls:*)",
+      "mcp__angular-cli__search_documentation",
+      "mcp__angular-cli__find_examples",
+      "Bash(npx nx lint core-ledger-ui)",
+      "Bash(echo:*)",
+      "Bash(npx nx show:*)",
+      "Bash(npx nx lint:*)",
+      "Bash(nx lint:*)"
     ]
   },
   "enabledMcpjsonServers": [

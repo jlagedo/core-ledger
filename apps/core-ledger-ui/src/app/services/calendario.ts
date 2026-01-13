@@ -64,8 +64,8 @@ export class CalendarioService {
    * Obtém lista paginada de calendários com filtro e ordenação opcionais
    */
   getCalendarios(
-    limit: number = 100,
-    offset: number = 0,
+    limit = 100,
+    offset = 0,
     sortBy?: string,
     sortDirection: 'asc' | 'desc' = 'desc',
     filters?: Record<string, string>

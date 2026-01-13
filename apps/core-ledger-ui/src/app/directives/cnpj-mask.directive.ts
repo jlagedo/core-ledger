@@ -29,8 +29,8 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 export class CnpjMaskDirective implements ControlValueAccessor {
   private readonly el = inject(ElementRef<HTMLInputElement>);
 
-  private onChange: (value: string) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (value: string) => void = () => { /* noop */ };
+  private onTouched: () => void = () => { /* noop */ };
 
   /**
    * Write a new value to the input (called by form control)
