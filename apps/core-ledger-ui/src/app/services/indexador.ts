@@ -1,8 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { API_URL } from '../config/api.config';
 import { ApiClientService } from '../api/api-client.service';
 import {
   CreateIndexadorDto,
@@ -27,10 +25,6 @@ import {
 @Injectable({ providedIn: 'root' })
 export class IndexadorService {
   private readonly apiClient = inject(ApiClientService);
-
-  // HttpClient retained for file operations (export/import)
-  private readonly http = inject(HttpClient);
-  private readonly apiUrl = inject(API_URL);
 
   // Static enum options for dropdowns with Bloomberg-inspired colors
   readonly tipoIndexadorOptions: TipoIndexadorOption[] = [
@@ -247,40 +241,28 @@ export class IndexadorService {
 
   /**
    * Exports history to CSV
-   * NOTE: Kept using HttpClient due to blob response type requirement
    */
   exportHistorico(indexadorId: number, dataInicio?: string, dataFim?: string): Observable<Blob> {
-    const params: Record<string, string> = {};
-    if (dataInicio) params['dataInicio'] = dataInicio;
-    if (dataFim) params['dataFim'] = dataFim;
-
-    const queryString = new URLSearchParams(params).toString();
-    const url = queryString
-      ? `${this.apiUrl}/indexadores/${indexadorId}/historico/exportar?${queryString}`
-      : `${this.apiUrl}/indexadores/${indexadorId}/historico/exportar`;
-
-    return this.http.get(url, {
-      responseType: 'blob',
-    });
+    return this.apiClient.indexadores
+      .exportIndexadorHistorico(
+        indexadorId,
+        dataInicio ? new Date(dataInicio) : undefined,
+        dataFim ? new Date(dataFim) : undefined
+      )
+      .pipe(map((response) => response.data));
   }
 
   /**
    * Imports history from CSV file
-   * NOTE: Kept using HttpClient due to FormData/multipart requirement
    */
   importHistorico(
     indexadorId: number,
     file: File,
     sobrescrever: boolean = false
   ): Observable<ImportHistoricoResult> {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const params = new URLSearchParams({ sobrescrever: sobrescrever.toString() }).toString();
-    return this.http.post<ImportHistoricoResult>(
-      `${this.apiUrl}/indexadores/${indexadorId}/historico/importar?${params}`,
-      formData
-    );
+    return this.apiClient.indexadores
+      .importIndexadorHistorico(indexadorId, sobrescrever, { data: file, fileName: file.name })
+      .pipe(map((response) => response as unknown as ImportHistoricoResult));
   }
 
   /**

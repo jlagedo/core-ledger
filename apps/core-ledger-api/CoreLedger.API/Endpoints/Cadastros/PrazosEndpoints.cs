@@ -21,10 +21,13 @@ public static class PrazosEndpoints
             .RequireAuthorization();
 
         fundoGroup.MapGet("/", GetByFundo)
-            .WithName("GetPrazosByFundo");
+            .WithName("GetPrazosByFundo")
+            .Produces<IReadOnlyList<FundoPrazoListDto>>(StatusCodes.Status200OK);
 
         fundoGroup.MapPost("/", Create)
-            .WithName("CreatePrazo");
+            .WithName("CreatePrazo")
+            .Produces<FundoPrazoResponseDto>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest);
 
         // Direct routes for prazo operations
         var prazoGroup = routes.MapGroup("/api/v1/prazos")
@@ -32,7 +35,10 @@ public static class PrazosEndpoints
             .RequireAuthorization();
 
         prazoGroup.MapPut("/{id:long}", Update)
-            .WithName("UpdatePrazo");
+            .WithName("UpdatePrazo")
+            .Produces<FundoPrazoResponseDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound);
 
         return routes;
     }

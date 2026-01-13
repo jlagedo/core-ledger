@@ -2,6 +2,7 @@ using CoreLedger.API.Extensions;
 using CoreLedger.API.Models;
 using CoreLedger.Application.DTOs.Fundo;
 using CoreLedger.Application.DTOs.Wizard;
+using CoreLedger.Application.Models;
 using CoreLedger.Application.UseCases.Cadastros.Fundos.Commands;
 using CoreLedger.Application.UseCases.Cadastros.Fundos.Queries;
 using MediatR;
@@ -22,23 +23,32 @@ public static class FundosEndpoints
             .RequireAuthorization();
 
         group.MapGet("/", GetAll)
-            .WithName("GetAllFundos");
+            .WithName("GetAllFundos")
+            .Produces<PagedResult<FundoListDto>>(StatusCodes.Status200OK);
 
         group.MapGet("/{id:guid}", GetById)
-            .WithName("GetFundoById");
+            .WithName("GetFundoById")
+            .Produces<FundoResponseDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapGet("/cnpj/{cnpj}", GetByCnpj)
-            .WithName("GetFundoByCnpj");
+            .WithName("GetFundoByCnpj")
+            .Produces<FundoResponseDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapGet("/busca", Search)
-            .WithName("SearchFundos");
+            .WithName("SearchFundos")
+            .Produces<IReadOnlyList<FundoListDto>>(StatusCodes.Status200OK);
 
         group.MapGet("/verificar-cnpj/{cnpj}", VerificarCnpjDisponivel)
             .WithName("VerificarCnpjDisponivel")
             .Produces<CnpjDisponibilidadeResponseDto>(StatusCodes.Status200OK);
 
         group.MapPost("/", Create)
-            .WithName("CreateFundo");
+            .WithName("CreateFundo")
+            .Produces<FundoResponseDto>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized);
 
         group.MapPost("/wizard", CreateWizard)
             .WithName("CreateFundoWizard")
@@ -47,10 +57,15 @@ public static class FundosEndpoints
             .Produces(StatusCodes.Status409Conflict);
 
         group.MapPut("/{id:guid}", Update)
-            .WithName("UpdateFundo");
+            .WithName("UpdateFundo")
+            .Produces<FundoResponseDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapDelete("/{id:guid}", Delete)
-            .WithName("DeleteFundo");
+            .WithName("DeleteFundo")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
 
         return routes;
     }

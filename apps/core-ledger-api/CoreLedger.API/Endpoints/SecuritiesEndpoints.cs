@@ -22,22 +22,34 @@ public static class SecuritiesEndpoints
             .RequireAuthorization();
 
         group.MapGet("/", GetAll)
-            .WithName("GetAllSecurities");
+            .WithName("GetAllSecurities")
+            .Produces<PagedResult<SecurityDto>>(StatusCodes.Status200OK);
 
         group.MapGet("/{id:int}", GetById)
-            .WithName("GetSecuritiesById");
+            .WithName("GetSecuritiesById")
+            .Produces<SecurityDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapGet("/autocomplete", Autocomplete)
-            .WithName("AutocompleteSecurities");
+            .WithName("AutocompleteSecurities")
+            .Produces<IReadOnlyList<SecurityAutocompleteDto>>(StatusCodes.Status200OK);
 
         group.MapPost("/", Create)
-            .WithName("CreateSecurity");
+            .WithName("CreateSecurity")
+            .Produces<SecurityDto>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized);
 
         group.MapPut("/{id:int}", Update)
-            .WithName("UpdateSecurity");
+            .WithName("UpdateSecurity")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapPatch("/{id:int}/deactivate", Deactivate)
-            .WithName("DeactivateSecurity");
+            .WithName("DeactivateSecurity")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
 
         return group;
     }

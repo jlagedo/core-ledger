@@ -17,19 +17,29 @@ public static class AccountTypesEndpoints
             .RequireAuthorization();
 
         group.MapGet("/", GetAll)
-            .WithName("GetAllAccountTypes");
+            .WithName("GetAllAccountTypes")
+            .Produces<IReadOnlyList<AccountTypeDto>>(StatusCodes.Status200OK);
 
         group.MapGet("/{id:int}", GetById)
-            .WithName("GetAccountTypeById");
+            .WithName("GetAccountTypeById")
+            .Produces<AccountTypeDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("/", Create)
-            .WithName("CreateAccountType");
+            .WithName("CreateAccountType")
+            .Produces<AccountTypeDto>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest);
 
         group.MapPut("/{id:int}", Update)
-            .WithName("UpdateAccountType");
+            .WithName("UpdateAccountType")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapDelete("/{id:int}", Delete)
-            .WithName("DeleteAccountType");
+            .WithName("DeleteAccountType")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
 
         return group;
     }

@@ -1,6 +1,7 @@
 using CoreLedger.API.Extensions;
 using CoreLedger.API.Models;
 using CoreLedger.Application.DTOs;
+using CoreLedger.Application.Models;
 using CoreLedger.Application.UseCases.Cadastros.Instituicoes.Commands;
 using CoreLedger.Application.UseCases.Cadastros.Instituicoes.Queries;
 using MediatR;
@@ -21,10 +22,13 @@ public static class InstituicoesEndpoints
             .RequireAuthorization();
 
         group.MapGet("/", GetAll)
-            .WithName("GetAllInstituicoes");
+            .WithName("GetAllInstituicoes")
+            .Produces<PagedResult<InstituicaoDto>>(StatusCodes.Status200OK);
 
         group.MapPost("/", Create)
-            .WithName("CreateInstituicao");
+            .WithName("CreateInstituicao")
+            .Produces<InstituicaoDto>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest);
 
         return routes;
     }

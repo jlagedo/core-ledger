@@ -20,19 +20,24 @@ public static class ClassificacoesAnbimaEndpoints
 
         group.MapGet("/", Listar)
             .WithName("ListarClassificacoesAnbima")
-            .WithDescription("Get all ANBIMA classifications with optional filters");
+            .WithDescription("Get all ANBIMA classifications with optional filters")
+            .Produces<ListarClassificacoesAnbimaResponse>(StatusCodes.Status200OK);
 
         group.MapGet("/{codigo}", ObterPorCodigo)
             .WithName("ObterClassificacaoAnbimaPorCodigo")
-            .WithDescription("Get a specific ANBIMA classification by its codigo");
+            .WithDescription("Get a specific ANBIMA classification by its codigo")
+            .Produces<ClassificacaoAnbimaDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapGet("/niveis", ListarNiveis)
             .WithName("ListarNiveisAnbima")
-            .WithDescription("Get hierarchical levels (Nivel1, Nivel2) for ANBIMA classifications");
+            .WithDescription("Get hierarchical levels (Nivel1, Nivel2) for ANBIMA classifications")
+            .Produces<NiveisClassificacaoAnbimaResponse>(StatusCodes.Status200OK);
 
         group.MapGet("/verificar", VerificarCompatibilidade)
             .WithName("VerificarCompatibilidadeAnbima")
-            .WithDescription("Verify compatibility between ANBIMA classification and CVM classification");
+            .WithDescription("Verify compatibility between ANBIMA classification and CVM classification")
+            .Produces<VerificarCompatibilidadeResponse>(StatusCodes.Status200OK);
 
         return routes;
     }

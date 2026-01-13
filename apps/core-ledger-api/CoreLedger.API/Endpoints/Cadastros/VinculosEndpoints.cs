@@ -21,10 +21,13 @@ public static class VinculosEndpoints
             .RequireAuthorization();
 
         fundoGroup.MapGet("/", GetByFundo)
-            .WithName("GetVinculosByFundo");
+            .WithName("GetVinculosByFundo")
+            .Produces<IReadOnlyList<FundoVinculoDto>>(StatusCodes.Status200OK);
 
         fundoGroup.MapPost("/", Create)
-            .WithName("CreateVinculo");
+            .WithName("CreateVinculo")
+            .Produces<FundoVinculoDto>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest);
 
         // Direct routes for vinculo operations
         var vinculoGroup = routes.MapGroup("/api/v1/vinculos")
@@ -32,7 +35,9 @@ public static class VinculosEndpoints
             .RequireAuthorization();
 
         vinculoGroup.MapPatch("/{id:long}/encerrar", Encerrar)
-            .WithName("EncerrarVinculo");
+            .WithName("EncerrarVinculo")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
 
         return routes;
     }

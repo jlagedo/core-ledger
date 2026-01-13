@@ -21,10 +21,13 @@ public static class ClassesEndpoints
             .RequireAuthorization();
 
         fundoGroup.MapGet("/", GetByFundo)
-            .WithName("GetClassesByFundo");
+            .WithName("GetClassesByFundo")
+            .Produces<IReadOnlyList<FundoClasseListDto>>(StatusCodes.Status200OK);
 
         fundoGroup.MapPost("/", Create)
-            .WithName("CreateClasse");
+            .WithName("CreateClasse")
+            .Produces<FundoClasseResponseDto>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest);
 
         // Direct routes for classe operations
         var classeGroup = routes.MapGroup("/api/v1/classes")
@@ -32,13 +35,20 @@ public static class ClassesEndpoints
             .RequireAuthorization();
 
         classeGroup.MapGet("/{id:guid}", GetById)
-            .WithName("GetClasseById");
+            .WithName("GetClasseById")
+            .Produces<FundoClasseResponseDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
 
         classeGroup.MapPut("/{id:guid}", Update)
-            .WithName("UpdateClasse");
+            .WithName("UpdateClasse")
+            .Produces<FundoClasseResponseDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound);
 
         classeGroup.MapDelete("/{id:guid}", Delete)
-            .WithName("DeleteClasse");
+            .WithName("DeleteClasse")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
 
         return routes;
     }

@@ -16,7 +16,8 @@ public static class SecurityTypesEndpoints
             .RequireAuthorization();
 
         group.MapGet("/", GetAll)
-            .WithName("GetAllSecurityTypes");
+            .WithName("GetAllSecurityTypes")
+            .Produces<IReadOnlyList<SecurityTypeDto>>(StatusCodes.Status200OK);
 
         return group;
     }

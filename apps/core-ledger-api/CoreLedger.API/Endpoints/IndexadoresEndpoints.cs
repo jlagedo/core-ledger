@@ -1,6 +1,7 @@
 using CoreLedger.API.Extensions;
 using CoreLedger.API.Models;
 using CoreLedger.Application.DTOs;
+using CoreLedger.Application.Models;
 using CoreLedger.Application.UseCases.Indexadores.Commands;
 using CoreLedger.Application.UseCases.Indexadores.Queries;
 using CoreLedger.Application.UseCases.HistoricosIndexadores.Commands;
@@ -24,33 +25,52 @@ public static class IndexadoresEndpoints
             .RequireAuthorization();
 
         group.MapGet("/", GetAll)
-            .WithName("GetAllIndexadores");
+            .WithName("GetAllIndexadores")
+            .Produces<Application.Models.PagedResult<IndexadorDto>>(StatusCodes.Status200OK);
 
         group.MapGet("/{id:int}", GetById)
-            .WithName("GetIndexadorById");
+            .WithName("GetIndexadorById")
+            .Produces<IndexadorDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapGet("/{id:int}/historico", GetHistorico)
-            .WithName("GetIndexadorHistorico");
+            .WithName("GetIndexadorHistorico")
+            .Produces<Application.Models.PagedResult<HistoricoIndexadorDto>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapGet("/{id:int}/historico/exportar", ExportHistorico)
             .WithName("ExportIndexadorHistorico")
-            .Produces(StatusCodes.Status200OK, contentType: "text/csv");
+            .Produces<byte[]>(StatusCodes.Status200OK, contentType: "text/csv")
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("/{id:int}/historico/importar", ImportHistorico)
             .WithName("ImportIndexadorHistorico")
-            .DisableAntiforgery();
+            .DisableAntiforgery()
+            .Produces<ImportHistoricoIndexadorResult>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("/", Create)
-            .WithName("CreateIndexador");
+            .WithName("CreateIndexador")
+            .Produces<IndexadorDto>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized);
 
         group.MapPut("/{id:int}", Update)
-            .WithName("UpdateIndexador");
+            .WithName("UpdateIndexador")
+            .Produces<IndexadorDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapDelete("/{id:int}", Delete)
-            .WithName("DeleteIndexador");
+            .WithName("DeleteIndexador")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("/{id:int}/importar", Importar)
-            .WithName("ImportarIndexador");
+            .WithName("ImportarIndexador")
+            .Produces(StatusCodes.Status202Accepted)
+            .Produces(StatusCodes.Status404NotFound);
 
         return group;
     }
@@ -129,7 +149,7 @@ public static class IndexadoresEndpoints
             "Retrieving historical data for indexador {IndexadorId} - Limit: {Limit}, Offset: {Offset}, DataInicio: {DataInicio}, DataFim: {DataFim}, User: {UserId}",
             id, pagination.Limit, pagination.Offset, dataInicio?.ToString() ?? "none", dataFim?.ToString() ?? "none", userId);
 
-        var parameters = new QueryParameters
+        var parameters = new Domain.Models.QueryParameters
         {
             Limit = pagination.Limit,
             Offset = pagination.Offset,

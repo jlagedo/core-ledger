@@ -28,7 +28,17 @@
         "operationId": "GetAllAccountTypes",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CoreLedger.Application.DTOs.AccountTypeDto"
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -48,8 +58,18 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.AccountTypeDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
           }
         }
       }
@@ -73,7 +93,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.AccountTypeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       },
@@ -104,8 +134,14 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       },
@@ -126,8 +162,11 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -179,7 +218,14 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.AccountDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                }
+              }
+            }
           }
         }
       },
@@ -199,8 +245,21 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.AccountDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
       }
@@ -224,7 +283,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.AccountDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       },
@@ -255,8 +324,14 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -269,7 +344,17 @@
         "operationId": "GetAccountsByTypeReport",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CoreLedger.Application.DTOs.AccountsByTypeReportDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -292,8 +377,11 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -332,7 +420,14 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.ListarClassificacoesAnbimaResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -357,7 +452,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.ClassificacaoAnbimaDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -381,7 +486,14 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.NiveisClassificacaoAnbimaResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -414,7 +526,14 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.VerificarCompatibilidadeResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -469,7 +588,14 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.AuditLogDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                }
+              }
+            }
           }
         }
       }
@@ -558,7 +684,14 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.CalendarioDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                }
+              }
+            }
           }
         }
       },
@@ -578,8 +711,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.CalendarioDto"
+                }
+              }
+            }
           }
         }
       }
@@ -603,7 +743,14 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.CalendarioDto"
+                }
+              }
+            }
           }
         }
       },
@@ -824,7 +971,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoClasse.FundoClasseListDto"
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -855,8 +1012,18 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoClasse.FundoClasseResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
           }
         }
       }
@@ -880,7 +1047,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoClasse.FundoClasseResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       },
@@ -912,7 +1089,20 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoClasse.FundoClasseResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       },
@@ -933,8 +1123,11 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -989,7 +1182,14 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.CoreJobDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                }
+              }
+            }
           }
         }
       }
@@ -1041,7 +1241,14 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.Fundo.FundoListDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                }
+              }
+            }
           }
         }
       },
@@ -1061,8 +1268,21 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Fundo.FundoResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
       }
@@ -1086,7 +1306,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Fundo.FundoResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       },
@@ -1118,7 +1348,20 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Fundo.FundoResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       },
@@ -1139,8 +1382,11 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -1163,7 +1409,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Fundo.FundoResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -1195,7 +1451,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Fundo.FundoListDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1315,7 +1581,14 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.FundDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                }
+              }
+            }
           }
         }
       },
@@ -1335,8 +1608,21 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
       }
@@ -1360,7 +1646,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       },
@@ -1391,8 +1687,14 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -1414,7 +1716,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundAutocompleteDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1436,8 +1748,21 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.HistoricoIndexadorDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
       }
@@ -1460,8 +1785,11 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -1550,7 +1878,14 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.IndexadorDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                }
+              }
+            }
           }
         }
       },
@@ -1570,8 +1905,21 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.IndexadorDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
       }
@@ -1595,7 +1943,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.IndexadorDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       },
@@ -1627,7 +1985,20 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.IndexadorDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       },
@@ -1648,8 +2019,11 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -1726,7 +2100,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.HistoricoIndexadorDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -1766,7 +2150,18 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -1821,7 +2216,20 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.UseCases.HistoricosIndexadores.Commands.ImportHistoricoIndexadorResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -1844,8 +2252,11 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "202": {
+            "description": "Accepted"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -1911,7 +2322,14 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.InstituicaoDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                }
+              }
+            }
           }
         }
       },
@@ -1931,8 +2349,18 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.InstituicaoDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
           }
         }
       }
@@ -1944,8 +2372,15 @@
         ],
         "operationId": "ImportB3InstructionFile",
         "responses": {
-          "200": {
-            "description": "OK"
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.ImportB3InstructionFileResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -1967,8 +2402,15 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.TestConnectionResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -2000,7 +2442,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoPrazo.FundoPrazoListDto"
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -2031,8 +2483,18 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoPrazo.FundoPrazoResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
           }
         }
       }
@@ -2066,7 +2528,20 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoPrazo.FundoPrazoResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -2118,7 +2593,14 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.SecurityDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                }
+              }
+            }
           }
         }
       },
@@ -2138,8 +2620,21 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.SecurityDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
       }
@@ -2163,7 +2658,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.SecurityDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       },
@@ -2194,8 +2699,14 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -2217,7 +2728,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CoreLedger.Application.DTOs.SecurityAutocompleteDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -2240,8 +2761,11 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -2254,7 +2778,17 @@
         "operationId": "GetAllSecurityTypes",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CoreLedger.Application.DTOs.SecurityTypeDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -2286,7 +2820,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoTaxa.FundoTaxaListDto"
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -2317,8 +2861,18 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoTaxa.FundoTaxaResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
           }
         }
       }
@@ -2352,7 +2906,20 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoTaxa.FundoTaxaResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       },
@@ -2373,8 +2940,11 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -2387,7 +2957,17 @@
         "operationId": "GetAllTransactionStatuses",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CoreLedger.Application.DTOs.TransactionStatusDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -2411,7 +2991,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.TransactionStatusDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -2434,7 +3024,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CoreLedger.Application.DTOs.TransactionSubTypeDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -2458,7 +3058,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.TransactionSubTypeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -2471,7 +3081,17 @@
         "operationId": "GetAllTransactionTypes",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CoreLedger.Application.DTOs.TransactionTypeDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -2495,7 +3115,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.TransactionTypeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -2547,7 +3177,14 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.TransactionDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                }
+              }
+            }
           }
         }
       },
@@ -2567,8 +3204,24 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.TransactionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "409": {
+            "description": "Conflict"
           }
         }
       }
@@ -2592,7 +3245,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.TransactionDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       },
@@ -2623,8 +3286,14 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -2637,7 +3306,17 @@
         "operationId": "GetCurrentUser",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.UserDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
       }
@@ -2669,7 +3348,17 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoVinculoDto"
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -2700,8 +3389,18 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoVinculoDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
           }
         }
       }
@@ -2734,8 +3433,11 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK"
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -2808,6 +3510,283 @@
         },
         "additionalProperties": false,
         "description": "Notification payload sent by Worker after processing a transaction."
+      },
+      "CoreLedger.Application.DTOs.AccountDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "code": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "typeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "typeDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.AccountStatus"
+          },
+          "statusDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "normalBalance": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.NormalBalance"
+          },
+          "normalBalanceDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deactivatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.AccountTypeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.AccountsByTypeReportDto": {
+        "type": "object",
+        "properties": {
+          "typeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "typeDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "activeAccountCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.AuditLogDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "entityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "entityId": {
+            "type": "string",
+            "nullable": true
+          },
+          "eventType": {
+            "type": "string",
+            "nullable": true
+          },
+          "performedByUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "performedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dataBefore": {
+            "nullable": true
+          },
+          "dataAfter": {
+            "nullable": true
+          },
+          "correlationId": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestId": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.CalendarioDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "data": {
+            "type": "string",
+            "format": "date"
+          },
+          "diaUtil": {
+            "type": "boolean"
+          },
+          "tipoDia": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.TipoDia"
+          },
+          "tipoDiaDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "praca": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.Praca"
+          },
+          "pracaDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.ClassificacaoAnbimaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "codigo": {
+            "type": "string",
+            "nullable": true
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "nivel1": {
+            "type": "string",
+            "nullable": true
+          },
+          "nivel2": {
+            "type": "string",
+            "nullable": true
+          },
+          "nivel3": {
+            "type": "string",
+            "nullable": true
+          },
+          "classificacaoCvm": {
+            "type": "string",
+            "nullable": true
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "nomeCompleto": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.CoreJobDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "referenceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.JobStatus"
+          },
+          "statusDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "jobDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "creationDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "runningDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "finishedDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "CoreLedger.Application.DTOs.CreateAccountDto": {
         "type": "object",
@@ -3162,6 +4141,66 @@
         },
         "additionalProperties": false
       },
+      "CoreLedger.Application.DTOs.FundAutocompleteDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.FundDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "baseCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "inceptionDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "valuationFrequency": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.ValuationFrequency"
+          },
+          "valuationFrequencyDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "CoreLedger.Application.DTOs.Fundo.CnpjDisponibilidadeResponseDto": {
         "type": "object",
         "properties": {
@@ -3252,6 +4291,179 @@
           "percentualExterior": {
             "type": "number",
             "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.Fundo.FundoListDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cnpj": {
+            "type": "string",
+            "nullable": true
+          },
+          "cnpjFormatado": {
+            "type": "string",
+            "nullable": true
+          },
+          "razaoSocial": {
+            "type": "string",
+            "nullable": true
+          },
+          "nomeCurto": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoFundo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoFundo"
+          },
+          "tipoFundoDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "situacao": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.SituacaoFundo"
+          },
+          "situacaoDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "progressoCadastro": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.Fundo.FundoResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cnpj": {
+            "type": "string",
+            "nullable": true
+          },
+          "cnpjFormatado": {
+            "type": "string",
+            "nullable": true
+          },
+          "razaoSocial": {
+            "type": "string",
+            "nullable": true
+          },
+          "nomeFantasia": {
+            "type": "string",
+            "nullable": true
+          },
+          "nomeCurto": {
+            "type": "string",
+            "nullable": true
+          },
+          "dataConstituicao": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "dataInicioAtividade": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "tipoFundo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoFundo"
+          },
+          "tipoFundoDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "classificacaoCVM": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.ClassificacaoCVM"
+          },
+          "classificacaoCVMDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "classificacaoAnbima": {
+            "type": "string",
+            "nullable": true
+          },
+          "codigoAnbima": {
+            "type": "string",
+            "nullable": true
+          },
+          "situacao": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.SituacaoFundo"
+          },
+          "situacaoDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "prazo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.PrazoFundo"
+          },
+          "prazoDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "publicoAlvo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.PublicoAlvo"
+          },
+          "publicoAlvoDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "tributacao": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TributacaoFundo"
+          },
+          "tributacaoDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "condominio": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoCondominio"
+          },
+          "condominioDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "exclusivo": {
+            "type": "boolean"
+          },
+          "reservado": {
+            "type": "boolean"
+          },
+          "permiteAlavancagem": {
+            "type": "boolean"
+          },
+          "aceitaCripto": {
+            "type": "boolean"
+          },
+          "percentualExterior": {
+            "type": "number",
+            "format": "double"
+          },
+          "wizardCompleto": {
+            "type": "boolean"
+          },
+          "progressoCadastro": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -3370,6 +4582,104 @@
         },
         "additionalProperties": false
       },
+      "CoreLedger.Application.DTOs.FundoClasse.FundoClasseListDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fundoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "codigoClasse": {
+            "type": "string",
+            "nullable": true
+          },
+          "nomeClasse": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoClasseFidc": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoClasseFIDC"
+          },
+          "tipoClasseFidcDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "ativa": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.FundoClasse.FundoClasseResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fundoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "codigoClasse": {
+            "type": "string",
+            "nullable": true
+          },
+          "nomeClasse": {
+            "type": "string",
+            "nullable": true
+          },
+          "cnpjClasse": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoClasseFidc": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoClasseFIDC"
+          },
+          "tipoClasseFidcDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "ordemSubordinacao": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "rentabilidadeAlvo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "responsabilidadeLimitada": {
+            "type": "boolean"
+          },
+          "segregacaoPatrimonial": {
+            "type": "boolean"
+          },
+          "valorMinimoAplicacao": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "ativa": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "CoreLedger.Application.DTOs.FundoClasse.FundoClasseUpdateDto": {
         "type": "object",
         "properties": {
@@ -3455,6 +4765,123 @@
           "valorMinimo": {
             "type": "number",
             "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.FundoPrazo.FundoPrazoListDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fundoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "classeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "tipoPrazo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoPrazoOperacional"
+          },
+          "tipoPrazoDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "diasCotizacao": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "diasLiquidacao": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "horarioLimite": {
+            "type": "string",
+            "format": "time"
+          },
+          "ativo": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.FundoPrazo.FundoPrazoResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fundoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "classeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "tipoPrazo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoPrazoOperacional"
+          },
+          "tipoPrazoDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "diasCotizacao": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "diasLiquidacao": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "diasCarencia": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "horarioLimite": {
+            "type": "string",
+            "format": "time"
+          },
+          "diasUteis": {
+            "type": "boolean"
+          },
+          "calendarioId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "permiteParcial": {
+            "type": "boolean"
+          },
+          "percentualMinimo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "valorMinimo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "ativo": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
             "nullable": true
           }
         },
@@ -3553,6 +4980,43 @@
         },
         "additionalProperties": false
       },
+      "CoreLedger.Application.DTOs.FundoTaxa.FundoTaxaListDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fundoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "classeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "tipoTaxa": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoTaxa"
+          },
+          "tipoTaxaDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "percentual": {
+            "type": "number",
+            "format": "double"
+          },
+          "dataInicioVigencia": {
+            "type": "string",
+            "format": "date"
+          },
+          "ativa": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "CoreLedger.Application.DTOs.FundoTaxa.FundoTaxaPerformanceCreateDto": {
         "type": "object",
         "properties": {
@@ -3576,6 +5040,140 @@
           "mesCristalizacao": {
             "type": "integer",
             "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.FundoTaxa.FundoTaxaPerformanceResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "indexadorId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "indexadorNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "percentualBenchmark": {
+            "type": "number",
+            "format": "double"
+          },
+          "metodoCalculo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.MetodoCalculoPerformance"
+          },
+          "metodoCalculoDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "linhaDagua": {
+            "type": "boolean"
+          },
+          "periodicidadeCristalizacao": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.PeriodicidadeCristalizacao"
+          },
+          "periodicidadeCristalizacaoDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "mesCristalizacao": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.FundoTaxa.FundoTaxaResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fundoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "classeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "tipoTaxa": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoTaxa"
+          },
+          "tipoTaxaDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "percentual": {
+            "type": "number",
+            "format": "double"
+          },
+          "baseCalculo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.BaseCalculoTaxa"
+          },
+          "baseCalculoDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "periodicidadeProvisao": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.PeriodicidadeProvisao"
+          },
+          "periodicidadeProvisaoDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "periodicidadePagamento": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.PeriodicidadePagamento"
+          },
+          "periodicidadePagamentoDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "diaPagamento": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "valorMinimo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "valorMaximo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "dataInicioVigencia": {
+            "type": "string",
+            "format": "date"
+          },
+          "dataFimVigencia": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "ativa": {
+            "type": "boolean"
+          },
+          "parametrosPerformance": {
+            "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundoTaxa.FundoTaxaPerformanceResponseDto"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
             "nullable": true
           }
         },
@@ -3615,6 +5213,407 @@
         },
         "additionalProperties": false
       },
+      "CoreLedger.Application.DTOs.FundoVinculoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fundoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "instituicaoId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "instituicaoRazaoSocial": {
+            "type": "string",
+            "nullable": true
+          },
+          "instituicaoCnpj": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoVinculo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Cadastros.Enums.TipoVinculoInstitucional"
+          },
+          "tipoVinculoDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "dataInicio": {
+            "type": "string",
+            "format": "date"
+          },
+          "dataFim": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "contratoNumero": {
+            "type": "string",
+            "nullable": true
+          },
+          "observacao": {
+            "type": "string",
+            "nullable": true
+          },
+          "principal": {
+            "type": "boolean"
+          },
+          "estaVigente": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.HistoricoIndexadorDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "indexadorId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "indexadorCodigo": {
+            "type": "string",
+            "nullable": true
+          },
+          "dataReferencia": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "valor": {
+            "type": "number",
+            "format": "double"
+          },
+          "fatorDiario": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "variacaoPercentual": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "fonte": {
+            "type": "string",
+            "nullable": true
+          },
+          "importacaoId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.ImportB3InstructionFileResponse": {
+        "type": "object",
+        "properties": {
+          "coreJobId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "referenceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.IndexadorDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "codigo": {
+            "type": "string",
+            "nullable": true
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipo": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.IndexadorTipo"
+          },
+          "tipoDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "fonte": {
+            "type": "string",
+            "nullable": true
+          },
+          "periodicidade": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.Periodicidade"
+          },
+          "periodicidadeDescricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "fatorAcumulado": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "dataBase": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "urlFonte": {
+            "type": "string",
+            "nullable": true
+          },
+          "importacaoAutomatica": {
+            "type": "boolean"
+          },
+          "ativo": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ultimoValor": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "ultimaData": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "historicoCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.InstituicaoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cnpj": {
+            "type": "string",
+            "nullable": true
+          },
+          "razaoSocial": {
+            "type": "string",
+            "nullable": true
+          },
+          "nomeFantasia": {
+            "type": "string",
+            "nullable": true
+          },
+          "ativo": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.ListarClassificacoesAnbimaResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoreLedger.Application.DTOs.ClassificacaoAnbimaDto"
+            },
+            "nullable": true
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "classificacaoCvmFiltrada": {
+            "type": "string",
+            "nullable": true
+          },
+          "mensagem": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.NiveisClassificacaoAnbimaResponse": {
+        "type": "object",
+        "properties": {
+          "nivel1": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoreLedger.Application.DTOs.NivelContagem"
+            },
+            "nullable": true
+          },
+          "nivel2PorNivel1": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/CoreLedger.Application.DTOs.NivelContagem"
+              }
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.NivelContagem": {
+        "type": "object",
+        "properties": {
+          "valor": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantidade": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.SecurityAutocompleteDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ticker": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.SecurityDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "ticker": {
+            "type": "string",
+            "nullable": true
+          },
+          "isin": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.SecurityType"
+          },
+          "typeDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/CoreLedger.Domain.Enums.SecurityStatus"
+          },
+          "statusDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deactivatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.SecurityTypeDto": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "CoreLedger.Application.DTOs.TestConnectionRequest": {
         "type": "object",
         "properties": {
@@ -3624,6 +5623,213 @@
           },
           "jobDescription": {
             "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.TestConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "coreJobId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "referenceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "correlationId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.TransactionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fundId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fundCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "fundName": {
+            "type": "string",
+            "nullable": true
+          },
+          "securityId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "securityTicker": {
+            "type": "string",
+            "nullable": true
+          },
+          "securityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "transactionSubTypeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "transactionSubTypeDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "transactionTypeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "transactionTypeDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "tradeDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "settleDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "quantity": {
+            "type": "number",
+            "format": "double"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "statusDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.TransactionStatusDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "shortDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "longDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.TransactionSubTypeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "typeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "typeDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "shortDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "longDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.TransactionTypeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "shortDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "longDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
             "nullable": true
           }
         },
@@ -3830,6 +6036,66 @@
           "statusId": {
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.UserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "authProviderId": {
+            "type": "string",
+            "nullable": true
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastLoginAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.DTOs.VerificarCompatibilidadeResponse": {
+        "type": "object",
+        "properties": {
+          "compativel": {
+            "type": "boolean"
+          },
+          "codigoAnbima": {
+            "type": "string",
+            "nullable": true
+          },
+          "classificacaoCvm": {
+            "type": "string",
+            "nullable": true
+          },
+          "mensagem": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -4399,6 +6665,310 @@
         },
         "additionalProperties": false
       },
+      "CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.AccountDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoreLedger.Application.DTOs.AccountDto"
+            },
+            "nullable": true
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.AuditLogDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoreLedger.Application.DTOs.AuditLogDto"
+            },
+            "nullable": true
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.CalendarioDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoreLedger.Application.DTOs.CalendarioDto"
+            },
+            "nullable": true
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.CoreJobDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoreLedger.Application.DTOs.CoreJobDto"
+            },
+            "nullable": true
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.FundDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoreLedger.Application.DTOs.FundDto"
+            },
+            "nullable": true
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.Fundo.FundoListDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoreLedger.Application.DTOs.Fundo.FundoListDto"
+            },
+            "nullable": true
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.HistoricoIndexadorDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoreLedger.Application.DTOs.HistoricoIndexadorDto"
+            },
+            "nullable": true
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.IndexadorDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoreLedger.Application.DTOs.IndexadorDto"
+            },
+            "nullable": true
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.InstituicaoDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoreLedger.Application.DTOs.InstituicaoDto"
+            },
+            "nullable": true
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.SecurityDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoreLedger.Application.DTOs.SecurityDto"
+            },
+            "nullable": true
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.Models.PagedResult`1[[CoreLedger.Application.DTOs.TransactionDto, CoreLedger.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoreLedger.Application.DTOs.TransactionDto"
+            },
+            "nullable": true
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CoreLedger.Application.UseCases.HistoricosIndexadores.Commands.ImportHistoricoIndexadorResult": {
+        "type": "object",
+        "properties": {
+          "totalRows": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "importedRows": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedRows": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "overwrittenRows": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "CoreLedger.Domain.Cadastros.Enums.BaseCalculoTaxa": {
         "enum": [
           1,
@@ -4631,6 +7201,16 @@
         "type": "integer",
         "format": "int32"
       },
+      "CoreLedger.Domain.Enums.JobStatus": {
+        "enum": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
       "CoreLedger.Domain.Enums.NormalBalance": {
         "enum": [
           1,
@@ -4655,6 +7235,14 @@
           3,
           4,
           5
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CoreLedger.Domain.Enums.SecurityStatus": {
+        "enum": [
+          1,
+          2
         ],
         "type": "integer",
         "format": "int32"

@@ -16,10 +16,13 @@ public static class TransactionStatusesEndpoints
             .RequireAuthorization();
 
         group.MapGet("/", GetAll)
-            .WithName("GetAllTransactionStatuses");
+            .WithName("GetAllTransactionStatuses")
+            .Produces<IReadOnlyList<TransactionStatusDto>>(StatusCodes.Status200OK);
 
         group.MapGet("/{id:int}", GetById)
-            .WithName("GetTransactionStatusById");
+            .WithName("GetTransactionStatusById")
+            .Produces<TransactionStatusDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
 
         return group;
     }

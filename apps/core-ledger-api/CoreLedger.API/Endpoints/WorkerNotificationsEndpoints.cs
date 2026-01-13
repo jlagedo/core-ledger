@@ -20,7 +20,8 @@ public static class WorkerNotificationsEndpoints
 
         group.MapPost("/transaction-processed", TransactionProcessed)
             .WithName("TransactionProcessed")
-            .WithDescription("Receives transaction processing completion notifications from the Worker service");
+            .WithDescription("Receives transaction processing completion notifications from the Worker service")
+            .Produces(StatusCodes.Status200OK);
 
         return group;
     }

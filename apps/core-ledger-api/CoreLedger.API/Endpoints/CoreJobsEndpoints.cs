@@ -17,7 +17,8 @@ public static class CoreJobsEndpoints
             .RequireAuthorization();
 
         group.MapGet("/", GetAll)
-            .WithName("GetAllCoreJobs");
+            .WithName("GetAllCoreJobs")
+            .Produces<PagedResult<CoreJobDto>>(StatusCodes.Status200OK);
 
         return group;
     }

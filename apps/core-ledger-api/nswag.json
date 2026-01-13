@@ -10,7 +10,7 @@
       "className": "{controller}Client",
       "moduleName": "",
       "namespace": "",
-      "typeScriptVersion": 5.0,
+      "typeScriptVersion": 5.9,
       "template": "Angular",
       "promiseType": "Promise",
       "httpClass": "HttpClient",
@@ -58,7 +58,7 @@
       "useAbortSignal": false,
       "inlineNamedDictionaries": false,
       "inlineNamedAny": false,
-      "includeHttpContext": false,
+      "includeHttpContext": true,
       "output": "../../libs/api-client/generated/api-clients.ts"
     }
   }

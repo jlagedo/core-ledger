@@ -27,6 +27,45 @@ public class AddServersDocumentFilter : IDocumentFilter
     }
 }
 
+/// <summary>
+/// Operation filter to configure file download responses with proper binary schema.
+/// This enables NSwag to generate FileResponse types for file download endpoints.
+/// </summary>
+public class FileDownloadOperationFilter : IOperationFilter
+{
+    private static readonly HashSet<string> FileContentTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "text/csv",
+        "application/octet-stream",
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/zip"
+    };
+
+    public void Apply(OpenApiOperation operation, OperationFilterContext context)
+    {
+        if (operation.Responses == null) return;
+
+        foreach (var response in operation.Responses.Values)
+        {
+            if (response?.Content == null) continue;
+
+            foreach (var content in response.Content)
+            {
+                if (content.Value != null && FileContentTypes.Contains(content.Key))
+                {
+                    // Set binary schema for file responses
+                    content.Value.Schema = new OpenApiSchema
+                    {
+                        Type = JsonSchemaType.String,
+                        Format = "binary"
+                    };
+                }
+            }
+        }
+    }
+}
+
 public static class SwaggerExtensions
 {
     public static IServiceCollection AddSwaggerDocumentation(this IServiceCollection services)
@@ -49,6 +88,9 @@ public static class SwaggerExtensions
 
             // Add server URLs for API client generation
             options.DocumentFilter<AddServersDocumentFilter>();
+
+            // Configure file download responses with binary schema
+            options.OperationFilter<FileDownloadOperationFilter>();
 
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {

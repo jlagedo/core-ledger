@@ -19,10 +19,15 @@ public static class HistoricosIndexadoresEndpoints
             .RequireAuthorization();
 
         group.MapPost("/", Create)
-            .WithName("CreateHistoricoIndexador");
+            .WithName("CreateHistoricoIndexador")
+            .Produces<HistoricoIndexadorDto>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized);
 
         group.MapDelete("/{id:long}", Delete)
-            .WithName("DeleteHistoricoIndexador");
+            .WithName("DeleteHistoricoIndexador")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
 
         return group;
     }

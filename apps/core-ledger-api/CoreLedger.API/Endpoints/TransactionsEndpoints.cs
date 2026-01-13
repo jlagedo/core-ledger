@@ -21,16 +21,26 @@ public static class TransactionsEndpoints
             .RequireAuthorization();
 
         group.MapGet("/", GetAll)
-            .WithName("GetAllTransactions");
+            .WithName("GetAllTransactions")
+            .Produces<PagedResult<TransactionDto>>(StatusCodes.Status200OK);
 
         group.MapGet("/{id:int}", GetById)
-            .WithName("GetTransactionById");
+            .WithName("GetTransactionById")
+            .Produces<TransactionDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("/", Create)
-            .WithName("CreateTransaction");
+            .WithName("CreateTransaction")
+            .Produces<TransactionDto>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status409Conflict);
 
         group.MapPut("/{id:int}", Update)
-            .WithName("UpdateTransaction");
+            .WithName("UpdateTransaction")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound);
 
         return group;
     }

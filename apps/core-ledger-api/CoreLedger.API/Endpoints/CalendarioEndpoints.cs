@@ -1,6 +1,7 @@
 using CoreLedger.API.Extensions;
 using CoreLedger.API.Models;
 using CoreLedger.Application.DTOs;
+using CoreLedger.Application.Models;
 using CoreLedger.Application.UseCases.Calendario.Commands;
 using CoreLedger.Application.UseCases.Calendario.Queries;
 using CoreLedger.Domain.Enums;
@@ -24,13 +25,16 @@ public static class CalendarioEndpoints
 
         // CRUD operations
         group.MapGet("/", GetAll)
-            .WithName("GetAllCalendarios");
+            .WithName("GetAllCalendarios")
+            .Produces<PagedResult<CalendarioDto>>(StatusCodes.Status200OK);
 
         group.MapGet("/{id:int}", GetById)
-            .WithName("GetCalendarioById");
+            .WithName("GetCalendarioById")
+            .Produces<CalendarioDto>(StatusCodes.Status200OK);
 
         group.MapPost("/", Create)
-            .WithName("CreateCalendario");
+            .WithName("CreateCalendario")
+            .Produces<CalendarioDto>(StatusCodes.Status201Created);
 
         group.MapPut("/{id:int}", Update)
             .WithName("UpdateCalendario");

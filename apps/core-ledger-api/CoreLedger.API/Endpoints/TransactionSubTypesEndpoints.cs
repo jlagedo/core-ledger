@@ -16,10 +16,13 @@ public static class TransactionSubTypesEndpoints
             .RequireAuthorization();
 
         group.MapGet("/", GetAll)
-            .WithName("GetAllTransactionSubTypes");
+            .WithName("GetAllTransactionSubTypes")
+            .Produces<IReadOnlyList<TransactionSubTypeDto>>(StatusCodes.Status200OK);
 
         group.MapGet("/{id:int}", GetById)
-            .WithName("GetTransactionSubTypeById");
+            .WithName("GetTransactionSubTypeById")
+            .Produces<TransactionSubTypeDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
 
         return group;
     }

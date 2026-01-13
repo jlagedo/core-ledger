@@ -22,19 +22,29 @@ public static class FundsEndpoints
             .RequireAuthorization();
 
         group.MapGet("/", GetAll)
-            .WithName("GetAllFunds");
+            .WithName("GetAllFunds")
+            .Produces<PagedResult<FundDto>>(StatusCodes.Status200OK);
 
         group.MapGet("/{id:int}", GetById)
-            .WithName("GetFundById");
+            .WithName("GetFundById")
+            .Produces<FundDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapGet("/autocomplete", Autocomplete)
-            .WithName("AutocompleteFunds");
+            .WithName("AutocompleteFunds")
+            .Produces<IReadOnlyList<FundAutocompleteDto>>(StatusCodes.Status200OK);
 
         group.MapPost("/", Create)
-            .WithName("CreateFund");
+            .WithName("CreateFund")
+            .Produces<FundDto>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized);
 
         group.MapPut("/{id:int}", Update)
-            .WithName("UpdateFund");
+            .WithName("UpdateFund")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound);
 
         return group;
     }

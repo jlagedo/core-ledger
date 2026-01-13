@@ -21,10 +21,13 @@ public static class TaxasEndpoints
             .RequireAuthorization();
 
         fundoGroup.MapGet("/", GetByFundo)
-            .WithName("GetTaxasByFundo");
+            .WithName("GetTaxasByFundo")
+            .Produces<IReadOnlyList<FundoTaxaListDto>>(StatusCodes.Status200OK);
 
         fundoGroup.MapPost("/", Create)
-            .WithName("CreateTaxa");
+            .WithName("CreateTaxa")
+            .Produces<FundoTaxaResponseDto>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest);
 
         // Direct routes for taxa operations
         var taxaGroup = routes.MapGroup("/api/v1/taxas")
@@ -32,10 +35,15 @@ public static class TaxasEndpoints
             .RequireAuthorization();
 
         taxaGroup.MapPut("/{id:long}", Update)
-            .WithName("UpdateTaxa");
+            .WithName("UpdateTaxa")
+            .Produces<FundoTaxaResponseDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound);
 
         taxaGroup.MapDelete("/{id:long}", Delete)
-            .WithName("DeleteTaxa");
+            .WithName("DeleteTaxa")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
 
         return routes;
     }

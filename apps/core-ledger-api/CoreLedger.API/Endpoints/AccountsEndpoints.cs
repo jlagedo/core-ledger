@@ -21,22 +21,34 @@ public static class AccountsEndpoints
             .RequireAuthorization();
 
         group.MapGet("/", GetAll)
-            .WithName("GetAllAccounts");
+            .WithName("GetAllAccounts")
+            .Produces<PagedResult<AccountDto>>(StatusCodes.Status200OK);
 
         group.MapGet("/{id:int}", GetById)
-            .WithName("GetAccountsById");
+            .WithName("GetAccountsById")
+            .Produces<AccountDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapGet("/reports/by-type", GetAccountsByTypeReport)
-            .WithName("GetAccountsByTypeReport");
+            .WithName("GetAccountsByTypeReport")
+            .Produces<IReadOnlyList<AccountsByTypeReportDto>>(StatusCodes.Status200OK);
 
         group.MapPost("/", Create)
-            .WithName("CreateAccount");
+            .WithName("CreateAccount")
+            .Produces<AccountDto>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized);
 
         group.MapPut("/{id:int}", Update)
-            .WithName("UpdateAccount");
+            .WithName("UpdateAccount")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapPatch("/{id:int}/deactivate", Deactivate)
-            .WithName("DeactivateAccount");
+            .WithName("DeactivateAccount")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
 
         return group;
     }

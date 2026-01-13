@@ -19,10 +19,12 @@ public static class JobsIngestionEndpoints
             .RequireAuthorization();
 
         group.MapPost("/import-b3-instruction-file", ImportB3InstructionFile)
-            .WithName("ImportB3InstructionFile");
+            .WithName("ImportB3InstructionFile")
+            .Produces<ImportB3InstructionFileResponse>(StatusCodes.Status202Accepted);
 
         group.MapPost("/test-connection", TestConnection)
-            .WithName("TestConnection");
+            .WithName("TestConnection")
+            .Produces<TestConnectionResponse>(StatusCodes.Status202Accepted);
 
         return group;
     }

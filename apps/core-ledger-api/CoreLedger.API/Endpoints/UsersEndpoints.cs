@@ -17,7 +17,9 @@ public static class UsersEndpoints
             .RequireAuthorization();
 
         group.MapGet("/me", GetCurrentUser)
-            .WithName("GetCurrentUser");
+            .WithName("GetCurrentUser")
+            .Produces<UserDto>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status401Unauthorized);
 
         return group;
     }

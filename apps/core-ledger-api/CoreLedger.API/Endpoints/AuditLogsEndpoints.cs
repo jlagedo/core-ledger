@@ -17,7 +17,8 @@ public static class AuditLogsEndpoints
             .RequireAuthorization();
 
         group.MapGet("/", GetAll)
-            .WithName("GetAllAuditLogs");
+            .WithName("GetAllAuditLogs")
+            .Produces<PagedResult<AuditLogDto>>(StatusCodes.Status200OK);
 
         return group;
     }

@@ -10,7 +10,7 @@
 import { mergeMap as _observableMergeMap, catchError as _observableCatch } from 'rxjs/operators';
 import { Observable, throwError as _observableThrow, of as _observableOf } from 'rxjs';
 import { Injectable, Inject, Optional, InjectionToken } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpResponse, HttpResponseBase } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse, HttpResponseBase, HttpContext } from '@angular/common/http';
 
 export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 
@@ -18,21 +18,21 @@ export interface IAccount_TypesClient {
     /**
      * @return OK
      */
-    getAllAccountTypes(): Observable<void>;
+    getAllAccountTypes(): Observable<AccountTypeDto[]>;
+    /**
+     * @return Created
+     */
+    createAccountType(body: CreateAccountTypeDto): Observable<AccountTypeDto>;
     /**
      * @return OK
      */
-    createAccountType(body: CreateAccountTypeDto): Observable<void>;
+    getAccountTypeById(id: number): Observable<AccountTypeDto>;
     /**
-     * @return OK
-     */
-    getAccountTypeById(id: number): Observable<void>;
-    /**
-     * @return OK
+     * @return No Content
      */
     updateAccountType(id: number, body: UpdateAccountTypeDto): Observable<void>;
     /**
-     * @return OK
+     * @return No Content
      */
     deleteAccountType(id: number): Observable<void>;
 }
@@ -53,14 +53,16 @@ export class Account_TypesClient implements IAccount_TypesClient {
     /**
      * @return OK
      */
-    getAllAccountTypes(): Observable<void> {
+    getAllAccountTypes(httpContext?: HttpContext): Observable<AccountTypeDto[]> {
         let url_ = this.baseUrl + "/api/accounttypes";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -71,14 +73,14 @@ export class Account_TypesClient implements IAccount_TypesClient {
                 try {
                     return this.processGetAllAccountTypes(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<AccountTypeDto[]>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<AccountTypeDto[]>;
         }));
     }
 
-    protected processGetAllAccountTypes(response: HttpResponseBase): Observable<void> {
+    protected processGetAllAccountTypes(response: HttpResponseBase): Observable<AccountTypeDto[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -87,7 +89,9 @@ export class Account_TypesClient implements IAccount_TypesClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as AccountTypeDto[];
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -98,9 +102,9 @@ export class Account_TypesClient implements IAccount_TypesClient {
     }
 
     /**
-     * @return OK
+     * @return Created
      */
-    createAccountType(body: CreateAccountTypeDto): Observable<void> {
+    createAccountType(body: CreateAccountTypeDto, httpContext?: HttpContext): Observable<AccountTypeDto> {
         let url_ = this.baseUrl + "/api/accounttypes";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -110,8 +114,10 @@ export class Account_TypesClient implements IAccount_TypesClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -122,23 +128,29 @@ export class Account_TypesClient implements IAccount_TypesClient {
                 try {
                     return this.processCreateAccountType(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<AccountTypeDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<AccountTypeDto>;
         }));
     }
 
-    protected processCreateAccountType(response: HttpResponseBase): Observable<void> {
+    protected processCreateAccountType(response: HttpResponseBase): Observable<AccountTypeDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result201: any = null;
+            result201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as AccountTypeDto;
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -151,7 +163,7 @@ export class Account_TypesClient implements IAccount_TypesClient {
     /**
      * @return OK
      */
-    getAccountTypeById(id: number): Observable<void> {
+    getAccountTypeById(id: number, httpContext?: HttpContext): Observable<AccountTypeDto> {
         let url_ = this.baseUrl + "/api/accounttypes/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -161,7 +173,9 @@ export class Account_TypesClient implements IAccount_TypesClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -172,14 +186,14 @@ export class Account_TypesClient implements IAccount_TypesClient {
                 try {
                     return this.processGetAccountTypeById(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<AccountTypeDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<AccountTypeDto>;
         }));
     }
 
-    protected processGetAccountTypeById(response: HttpResponseBase): Observable<void> {
+    protected processGetAccountTypeById(response: HttpResponseBase): Observable<AccountTypeDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -188,7 +202,13 @@ export class Account_TypesClient implements IAccount_TypesClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as AccountTypeDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -199,9 +219,9 @@ export class Account_TypesClient implements IAccount_TypesClient {
     }
 
     /**
-     * @return OK
+     * @return No Content
      */
-    updateAccountType(id: number, body: UpdateAccountTypeDto): Observable<void> {
+    updateAccountType(id: number, body: UpdateAccountTypeDto, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/accounttypes/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -214,6 +234,7 @@ export class Account_TypesClient implements IAccount_TypesClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
             })
@@ -240,9 +261,17 @@ export class Account_TypesClient implements IAccount_TypesClient {
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return _observableOf(null as any);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -253,9 +282,9 @@ export class Account_TypesClient implements IAccount_TypesClient {
     }
 
     /**
-     * @return OK
+     * @return No Content
      */
-    deleteAccountType(id: number): Observable<void> {
+    deleteAccountType(id: number, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/accounttypes/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -265,6 +294,7 @@ export class Account_TypesClient implements IAccount_TypesClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
             })
         };
@@ -290,9 +320,13 @@ export class Account_TypesClient implements IAccount_TypesClient {
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return _observableOf(null as any);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -312,25 +346,25 @@ export interface IAccountsClient {
      * @param filter (optional) 
      * @return OK
      */
-    getAllAccounts(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined): Observable<void>;
+    getAllAccounts(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined): Observable<PagedResult_1OfOfAccountDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
+    /**
+     * @return Created
+     */
+    createAccount(body: CreateAccountDto): Observable<AccountDto>;
     /**
      * @return OK
      */
-    createAccount(body: CreateAccountDto): Observable<void>;
+    getAccountsById(id: number): Observable<AccountDto>;
     /**
-     * @return OK
-     */
-    getAccountsById(id: number): Observable<void>;
-    /**
-     * @return OK
+     * @return No Content
      */
     updateAccount(id: number, body: UpdateAccountDto): Observable<void>;
     /**
      * @return OK
      */
-    getAccountsByTypeReport(): Observable<void>;
+    getAccountsByTypeReport(): Observable<AccountsByTypeReportDto[]>;
     /**
-     * @return OK
+     * @return No Content
      */
     deactivateAccount(id: number): Observable<void>;
 }
@@ -356,7 +390,7 @@ export class AccountsClient implements IAccountsClient {
      * @param filter (optional) 
      * @return OK
      */
-    getAllAccounts(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined): Observable<void> {
+    getAllAccounts(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined, httpContext?: HttpContext): Observable<PagedResult_1OfOfAccountDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         let url_ = this.baseUrl + "/api/accounts?";
         if (limit === null)
             throw new globalThis.Error("The parameter 'limit' cannot be null.");
@@ -383,7 +417,9 @@ export class AccountsClient implements IAccountsClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -394,14 +430,14 @@ export class AccountsClient implements IAccountsClient {
                 try {
                     return this.processGetAllAccounts(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<PagedResult_1OfOfAccountDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<PagedResult_1OfOfAccountDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
         }));
     }
 
-    protected processGetAllAccounts(response: HttpResponseBase): Observable<void> {
+    protected processGetAllAccounts(response: HttpResponseBase): Observable<PagedResult_1OfOfAccountDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -410,7 +446,9 @@ export class AccountsClient implements IAccountsClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResult_1OfOfAccountDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null;
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -421,9 +459,9 @@ export class AccountsClient implements IAccountsClient {
     }
 
     /**
-     * @return OK
+     * @return Created
      */
-    createAccount(body: CreateAccountDto): Observable<void> {
+    createAccount(body: CreateAccountDto, httpContext?: HttpContext): Observable<AccountDto> {
         let url_ = this.baseUrl + "/api/accounts";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -433,8 +471,10 @@ export class AccountsClient implements IAccountsClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -445,23 +485,33 @@ export class AccountsClient implements IAccountsClient {
                 try {
                     return this.processCreateAccount(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<AccountDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<AccountDto>;
         }));
     }
 
-    protected processCreateAccount(response: HttpResponseBase): Observable<void> {
+    protected processCreateAccount(response: HttpResponseBase): Observable<AccountDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result201: any = null;
+            result201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as AccountDto;
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -474,7 +524,7 @@ export class AccountsClient implements IAccountsClient {
     /**
      * @return OK
      */
-    getAccountsById(id: number): Observable<void> {
+    getAccountsById(id: number, httpContext?: HttpContext): Observable<AccountDto> {
         let url_ = this.baseUrl + "/api/accounts/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -484,7 +534,9 @@ export class AccountsClient implements IAccountsClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -495,14 +547,14 @@ export class AccountsClient implements IAccountsClient {
                 try {
                     return this.processGetAccountsById(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<AccountDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<AccountDto>;
         }));
     }
 
-    protected processGetAccountsById(response: HttpResponseBase): Observable<void> {
+    protected processGetAccountsById(response: HttpResponseBase): Observable<AccountDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -511,7 +563,13 @@ export class AccountsClient implements IAccountsClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as AccountDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -522,9 +580,9 @@ export class AccountsClient implements IAccountsClient {
     }
 
     /**
-     * @return OK
+     * @return No Content
      */
-    updateAccount(id: number, body: UpdateAccountDto): Observable<void> {
+    updateAccount(id: number, body: UpdateAccountDto, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/accounts/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -537,6 +595,7 @@ export class AccountsClient implements IAccountsClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
             })
@@ -563,9 +622,17 @@ export class AccountsClient implements IAccountsClient {
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return _observableOf(null as any);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -578,14 +645,16 @@ export class AccountsClient implements IAccountsClient {
     /**
      * @return OK
      */
-    getAccountsByTypeReport(): Observable<void> {
+    getAccountsByTypeReport(httpContext?: HttpContext): Observable<AccountsByTypeReportDto[]> {
         let url_ = this.baseUrl + "/api/accounts/reports/by-type";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -596,14 +665,14 @@ export class AccountsClient implements IAccountsClient {
                 try {
                     return this.processGetAccountsByTypeReport(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<AccountsByTypeReportDto[]>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<AccountsByTypeReportDto[]>;
         }));
     }
 
-    protected processGetAccountsByTypeReport(response: HttpResponseBase): Observable<void> {
+    protected processGetAccountsByTypeReport(response: HttpResponseBase): Observable<AccountsByTypeReportDto[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -612,7 +681,9 @@ export class AccountsClient implements IAccountsClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as AccountsByTypeReportDto[];
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -623,9 +694,9 @@ export class AccountsClient implements IAccountsClient {
     }
 
     /**
-     * @return OK
+     * @return No Content
      */
-    deactivateAccount(id: number): Observable<void> {
+    deactivateAccount(id: number, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/accounts/{id}/deactivate";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -635,6 +706,7 @@ export class AccountsClient implements IAccountsClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
             })
         };
@@ -660,9 +732,13 @@ export class AccountsClient implements IAccountsClient {
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return _observableOf(null as any);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -681,23 +757,23 @@ export interface IANBIMA_ClassificationsClient {
      * @param ativo (optional) 
      * @return OK
      */
-    listarClassificacoesAnbima(classificacao_cvm?: string | undefined, nivel1?: string | undefined, ativo?: boolean | undefined): Observable<void>;
+    listarClassificacoesAnbima(classificacao_cvm?: string | undefined, nivel1?: string | undefined, ativo?: boolean | undefined): Observable<ListarClassificacoesAnbimaResponse>;
     /**
      * Get ANBIMA classification by codigo.
      * @return OK
      */
-    obterClassificacaoAnbimaPorCodigo(codigo: string): Observable<void>;
+    obterClassificacaoAnbimaPorCodigo(codigo: string): Observable<ClassificacaoAnbimaDto>;
     /**
      * Get hierarchical levels for ANBIMA classifications.
      * @param classificacao_cvm (optional) 
      * @return OK
      */
-    listarNiveisAnbima(classificacao_cvm?: string | undefined): Observable<void>;
+    listarNiveisAnbima(classificacao_cvm?: string | undefined): Observable<NiveisClassificacaoAnbimaResponse>;
     /**
      * Verify compatibility between ANBIMA classification and CVM classification.
      * @return OK
      */
-    verificarCompatibilidadeAnbima(codigo_anbima: string, classificacao_cvm: string): Observable<void>;
+    verificarCompatibilidadeAnbima(codigo_anbima: string, classificacao_cvm: string): Observable<VerificarCompatibilidadeResponse>;
 }
 
 @Injectable({
@@ -720,7 +796,7 @@ export class ANBIMA_ClassificationsClient implements IANBIMA_ClassificationsClie
      * @param ativo (optional) 
      * @return OK
      */
-    listarClassificacoesAnbima(classificacao_cvm?: string | undefined, nivel1?: string | undefined, ativo?: boolean | undefined): Observable<void> {
+    listarClassificacoesAnbima(classificacao_cvm?: string | undefined, nivel1?: string | undefined, ativo?: boolean | undefined, httpContext?: HttpContext): Observable<ListarClassificacoesAnbimaResponse> {
         let url_ = this.baseUrl + "/api/v1/parametros/classificacoes-anbima?";
         if (classificacao_cvm === null)
             throw new globalThis.Error("The parameter 'classificacao_cvm' cannot be null.");
@@ -739,7 +815,9 @@ export class ANBIMA_ClassificationsClient implements IANBIMA_ClassificationsClie
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -750,14 +828,14 @@ export class ANBIMA_ClassificationsClient implements IANBIMA_ClassificationsClie
                 try {
                     return this.processListarClassificacoesAnbima(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<ListarClassificacoesAnbimaResponse>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<ListarClassificacoesAnbimaResponse>;
         }));
     }
 
-    protected processListarClassificacoesAnbima(response: HttpResponseBase): Observable<void> {
+    protected processListarClassificacoesAnbima(response: HttpResponseBase): Observable<ListarClassificacoesAnbimaResponse> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -766,7 +844,9 @@ export class ANBIMA_ClassificationsClient implements IANBIMA_ClassificationsClie
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ListarClassificacoesAnbimaResponse;
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -780,7 +860,7 @@ export class ANBIMA_ClassificationsClient implements IANBIMA_ClassificationsClie
      * Get ANBIMA classification by codigo.
      * @return OK
      */
-    obterClassificacaoAnbimaPorCodigo(codigo: string): Observable<void> {
+    obterClassificacaoAnbimaPorCodigo(codigo: string, httpContext?: HttpContext): Observable<ClassificacaoAnbimaDto> {
         let url_ = this.baseUrl + "/api/v1/parametros/classificacoes-anbima/{codigo}";
         if (codigo === undefined || codigo === null)
             throw new globalThis.Error("The parameter 'codigo' must be defined.");
@@ -790,7 +870,9 @@ export class ANBIMA_ClassificationsClient implements IANBIMA_ClassificationsClie
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -801,14 +883,14 @@ export class ANBIMA_ClassificationsClient implements IANBIMA_ClassificationsClie
                 try {
                     return this.processObterClassificacaoAnbimaPorCodigo(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<ClassificacaoAnbimaDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<ClassificacaoAnbimaDto>;
         }));
     }
 
-    protected processObterClassificacaoAnbimaPorCodigo(response: HttpResponseBase): Observable<void> {
+    protected processObterClassificacaoAnbimaPorCodigo(response: HttpResponseBase): Observable<ClassificacaoAnbimaDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -817,7 +899,13 @@ export class ANBIMA_ClassificationsClient implements IANBIMA_ClassificationsClie
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ClassificacaoAnbimaDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -832,7 +920,7 @@ export class ANBIMA_ClassificationsClient implements IANBIMA_ClassificationsClie
      * @param classificacao_cvm (optional) 
      * @return OK
      */
-    listarNiveisAnbima(classificacao_cvm?: string | undefined): Observable<void> {
+    listarNiveisAnbima(classificacao_cvm?: string | undefined, httpContext?: HttpContext): Observable<NiveisClassificacaoAnbimaResponse> {
         let url_ = this.baseUrl + "/api/v1/parametros/classificacoes-anbima/niveis?";
         if (classificacao_cvm === null)
             throw new globalThis.Error("The parameter 'classificacao_cvm' cannot be null.");
@@ -843,7 +931,9 @@ export class ANBIMA_ClassificationsClient implements IANBIMA_ClassificationsClie
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -854,14 +944,14 @@ export class ANBIMA_ClassificationsClient implements IANBIMA_ClassificationsClie
                 try {
                     return this.processListarNiveisAnbima(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<NiveisClassificacaoAnbimaResponse>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<NiveisClassificacaoAnbimaResponse>;
         }));
     }
 
-    protected processListarNiveisAnbima(response: HttpResponseBase): Observable<void> {
+    protected processListarNiveisAnbima(response: HttpResponseBase): Observable<NiveisClassificacaoAnbimaResponse> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -870,7 +960,9 @@ export class ANBIMA_ClassificationsClient implements IANBIMA_ClassificationsClie
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as NiveisClassificacaoAnbimaResponse;
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -884,7 +976,7 @@ export class ANBIMA_ClassificationsClient implements IANBIMA_ClassificationsClie
      * Verify compatibility between ANBIMA classification and CVM classification.
      * @return OK
      */
-    verificarCompatibilidadeAnbima(codigo_anbima: string, classificacao_cvm: string): Observable<void> {
+    verificarCompatibilidadeAnbima(codigo_anbima: string, classificacao_cvm: string, httpContext?: HttpContext): Observable<VerificarCompatibilidadeResponse> {
         let url_ = this.baseUrl + "/api/v1/parametros/classificacoes-anbima/verificar?";
         if (codigo_anbima === undefined || codigo_anbima === null)
             throw new globalThis.Error("The parameter 'codigo_anbima' must be defined and cannot be null.");
@@ -899,7 +991,9 @@ export class ANBIMA_ClassificationsClient implements IANBIMA_ClassificationsClie
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -910,14 +1004,14 @@ export class ANBIMA_ClassificationsClient implements IANBIMA_ClassificationsClie
                 try {
                     return this.processVerificarCompatibilidadeAnbima(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<VerificarCompatibilidadeResponse>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<VerificarCompatibilidadeResponse>;
         }));
     }
 
-    protected processVerificarCompatibilidadeAnbima(response: HttpResponseBase): Observable<void> {
+    protected processVerificarCompatibilidadeAnbima(response: HttpResponseBase): Observable<VerificarCompatibilidadeResponse> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -926,7 +1020,9 @@ export class ANBIMA_ClassificationsClient implements IANBIMA_ClassificationsClie
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as VerificarCompatibilidadeResponse;
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -943,7 +1039,7 @@ export interface IAudit_LogsClient {
      * @param filter (optional) 
      * @return OK
      */
-    getAllAuditLogs(limit: number, offset: number, sortDirection: string, sortBy?: string | undefined, filter?: string | undefined): Observable<void>;
+    getAllAuditLogs(limit: number, offset: number, sortDirection: string, sortBy?: string | undefined, filter?: string | undefined): Observable<PagedResult_1OfOfAuditLogDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
 }
 
 @Injectable({
@@ -964,7 +1060,7 @@ export class Audit_LogsClient implements IAudit_LogsClient {
      * @param filter (optional) 
      * @return OK
      */
-    getAllAuditLogs(limit: number, offset: number, sortDirection: string, sortBy?: string | undefined, filter?: string | undefined): Observable<void> {
+    getAllAuditLogs(limit: number, offset: number, sortDirection: string, sortBy?: string | undefined, filter?: string | undefined, httpContext?: HttpContext): Observable<PagedResult_1OfOfAuditLogDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         let url_ = this.baseUrl + "/api/auditlogs?";
         if (limit === undefined || limit === null)
             throw new globalThis.Error("The parameter 'limit' must be defined and cannot be null.");
@@ -991,7 +1087,9 @@ export class Audit_LogsClient implements IAudit_LogsClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -1002,14 +1100,14 @@ export class Audit_LogsClient implements IAudit_LogsClient {
                 try {
                     return this.processGetAllAuditLogs(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<PagedResult_1OfOfAuditLogDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<PagedResult_1OfOfAuditLogDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
         }));
     }
 
-    protected processGetAllAuditLogs(response: HttpResponseBase): Observable<void> {
+    protected processGetAllAuditLogs(response: HttpResponseBase): Observable<PagedResult_1OfOfAuditLogDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1018,7 +1116,9 @@ export class Audit_LogsClient implements IAudit_LogsClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResult_1OfOfAuditLogDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null;
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -1043,15 +1143,15 @@ export interface ICalendárioClient {
      * @param dataFim (optional) 
      * @return OK
      */
-    getAllCalendarios(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, search?: string | undefined, praca?: number | undefined, tipoDia?: number | undefined, diaUtil?: boolean | undefined, dataInicio?: string | undefined, dataFim?: string | undefined): Observable<void>;
+    getAllCalendarios(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, search?: string | undefined, praca?: number | undefined, tipoDia?: number | undefined, diaUtil?: boolean | undefined, dataInicio?: string | undefined, dataFim?: string | undefined): Observable<PagedResult_1OfOfCalendarioDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
+    /**
+     * @return Created
+     */
+    createCalendario(body: CreateCalendarioDto): Observable<CalendarioDto>;
     /**
      * @return OK
      */
-    createCalendario(body: CreateCalendarioDto): Observable<void>;
-    /**
-     * @return OK
-     */
-    getCalendarioById(id: number): Observable<void>;
+    getCalendarioById(id: number): Observable<CalendarioDto>;
     /**
      * @return OK
      */
@@ -1112,7 +1212,7 @@ export class CalendárioClient implements ICalendárioClient {
      * @param dataFim (optional) 
      * @return OK
      */
-    getAllCalendarios(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, search?: string | undefined, praca?: number | undefined, tipoDia?: number | undefined, diaUtil?: boolean | undefined, dataInicio?: string | undefined, dataFim?: string | undefined): Observable<void> {
+    getAllCalendarios(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, search?: string | undefined, praca?: number | undefined, tipoDia?: number | undefined, diaUtil?: boolean | undefined, dataInicio?: string | undefined, dataFim?: string | undefined, httpContext?: HttpContext): Observable<PagedResult_1OfOfCalendarioDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         let url_ = this.baseUrl + "/api/v1/calendario?";
         if (limit === null)
             throw new globalThis.Error("The parameter 'limit' cannot be null.");
@@ -1159,7 +1259,9 @@ export class CalendárioClient implements ICalendárioClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -1170,14 +1272,14 @@ export class CalendárioClient implements ICalendárioClient {
                 try {
                     return this.processGetAllCalendarios(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<PagedResult_1OfOfCalendarioDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<PagedResult_1OfOfCalendarioDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
         }));
     }
 
-    protected processGetAllCalendarios(response: HttpResponseBase): Observable<void> {
+    protected processGetAllCalendarios(response: HttpResponseBase): Observable<PagedResult_1OfOfCalendarioDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1186,7 +1288,9 @@ export class CalendárioClient implements ICalendárioClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResult_1OfOfCalendarioDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null;
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -1197,9 +1301,9 @@ export class CalendárioClient implements ICalendárioClient {
     }
 
     /**
-     * @return OK
+     * @return Created
      */
-    createCalendario(body: CreateCalendarioDto): Observable<void> {
+    createCalendario(body: CreateCalendarioDto, httpContext?: HttpContext): Observable<CalendarioDto> {
         let url_ = this.baseUrl + "/api/v1/calendario";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -1209,8 +1313,10 @@ export class CalendárioClient implements ICalendárioClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -1221,23 +1327,25 @@ export class CalendárioClient implements ICalendárioClient {
                 try {
                     return this.processCreateCalendario(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<CalendarioDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<CalendarioDto>;
         }));
     }
 
-    protected processCreateCalendario(response: HttpResponseBase): Observable<void> {
+    protected processCreateCalendario(response: HttpResponseBase): Observable<CalendarioDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result201: any = null;
+            result201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as CalendarioDto;
+            return _observableOf(result201);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -1250,7 +1358,7 @@ export class CalendárioClient implements ICalendárioClient {
     /**
      * @return OK
      */
-    getCalendarioById(id: number): Observable<void> {
+    getCalendarioById(id: number, httpContext?: HttpContext): Observable<CalendarioDto> {
         let url_ = this.baseUrl + "/api/v1/calendario/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -1260,7 +1368,9 @@ export class CalendárioClient implements ICalendárioClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -1271,14 +1381,14 @@ export class CalendárioClient implements ICalendárioClient {
                 try {
                     return this.processGetCalendarioById(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<CalendarioDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<CalendarioDto>;
         }));
     }
 
-    protected processGetCalendarioById(response: HttpResponseBase): Observable<void> {
+    protected processGetCalendarioById(response: HttpResponseBase): Observable<CalendarioDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1287,7 +1397,9 @@ export class CalendárioClient implements ICalendárioClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as CalendarioDto;
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -1300,7 +1412,7 @@ export class CalendárioClient implements ICalendárioClient {
     /**
      * @return OK
      */
-    updateCalendario(id: number, body: UpdateCalendarioDto): Observable<void> {
+    updateCalendario(id: number, body: UpdateCalendarioDto, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/v1/calendario/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -1313,6 +1425,7 @@ export class CalendárioClient implements ICalendárioClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
             })
@@ -1354,7 +1467,7 @@ export class CalendárioClient implements ICalendárioClient {
     /**
      * @return OK
      */
-    deleteCalendario(id: number): Observable<void> {
+    deleteCalendario(id: number, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/v1/calendario/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -1364,6 +1477,7 @@ export class CalendárioClient implements ICalendárioClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
             })
         };
@@ -1405,7 +1519,7 @@ export class CalendárioClient implements ICalendárioClient {
      * @param praca (optional) 
      * @return OK
      */
-    checkDiaUtil(data: string, praca?: Praca | undefined): Observable<void> {
+    checkDiaUtil(data: string, praca?: Praca | undefined, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/v1/calendario/dia-util/{data}?";
         if (data === undefined || data === null)
             throw new globalThis.Error("The parameter 'data' must be defined.");
@@ -1419,6 +1533,7 @@ export class CalendárioClient implements ICalendárioClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
             })
         };
@@ -1460,7 +1575,7 @@ export class CalendárioClient implements ICalendárioClient {
      * @param praca (optional) 
      * @return OK
      */
-    getProximoDiaUtil(data: string, praca?: Praca | undefined): Observable<void> {
+    getProximoDiaUtil(data: string, praca?: Praca | undefined, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/v1/calendario/proximo-dia-util/{data}?";
         if (data === undefined || data === null)
             throw new globalThis.Error("The parameter 'data' must be defined.");
@@ -1474,6 +1589,7 @@ export class CalendárioClient implements ICalendárioClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
             })
         };
@@ -1515,7 +1631,7 @@ export class CalendárioClient implements ICalendárioClient {
      * @param praca (optional) 
      * @return OK
      */
-    calcularDMais(data: string, dias: number, praca?: Praca | undefined): Observable<void> {
+    calcularDMais(data: string, dias: number, praca?: Praca | undefined, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/v1/calendario/calcular-d-mais/{data}/{dias}?";
         if (data === undefined || data === null)
             throw new globalThis.Error("The parameter 'data' must be defined.");
@@ -1532,6 +1648,7 @@ export class CalendárioClient implements ICalendárioClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
             })
         };
@@ -1573,7 +1690,7 @@ export class CalendárioClient implements ICalendárioClient {
      * @param praca (optional) 
      * @return OK
      */
-    importarCalendario(ano: number, praca?: Praca | undefined): Observable<void> {
+    importarCalendario(ano: number, praca?: Praca | undefined, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/v1/calendario/importar/{ano}?";
         if (ano === undefined || ano === null)
             throw new globalThis.Error("The parameter 'ano' must be defined.");
@@ -1587,6 +1704,7 @@ export class CalendárioClient implements ICalendárioClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
             })
         };
@@ -1627,13 +1745,14 @@ export class CalendárioClient implements ICalendárioClient {
     /**
      * @return OK
      */
-    checkCalendarioHealth(): Observable<void> {
+    checkCalendarioHealth(httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/v1/calendario/health";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
             })
         };
@@ -1676,21 +1795,21 @@ export interface IClassesClient {
     /**
      * @return OK
      */
-    getClassesByFundo(fundoId: string): Observable<void>;
+    getClassesByFundo(fundoId: string): Observable<FundoClasseListDto[]>;
+    /**
+     * @return Created
+     */
+    createClasse(fundoId: string, body: FundoClasseCreateDto): Observable<FundoClasseResponseDto>;
     /**
      * @return OK
      */
-    createClasse(fundoId: string, body: FundoClasseCreateDto): Observable<void>;
+    getClasseById(id: string): Observable<FundoClasseResponseDto>;
     /**
      * @return OK
      */
-    getClasseById(id: string): Observable<void>;
+    updateClasse(id: string, body: FundoClasseUpdateDto): Observable<FundoClasseResponseDto>;
     /**
-     * @return OK
-     */
-    updateClasse(id: string, body: FundoClasseUpdateDto): Observable<void>;
-    /**
-     * @return OK
+     * @return No Content
      */
     deleteClasse(id: string): Observable<void>;
 }
@@ -1711,7 +1830,7 @@ export class ClassesClient implements IClassesClient {
     /**
      * @return OK
      */
-    getClassesByFundo(fundoId: string): Observable<void> {
+    getClassesByFundo(fundoId: string, httpContext?: HttpContext): Observable<FundoClasseListDto[]> {
         let url_ = this.baseUrl + "/api/v1/fundos/{fundoId}/classes";
         if (fundoId === undefined || fundoId === null)
             throw new globalThis.Error("The parameter 'fundoId' must be defined.");
@@ -1721,7 +1840,9 @@ export class ClassesClient implements IClassesClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -1732,14 +1853,14 @@ export class ClassesClient implements IClassesClient {
                 try {
                     return this.processGetClassesByFundo(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundoClasseListDto[]>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundoClasseListDto[]>;
         }));
     }
 
-    protected processGetClassesByFundo(response: HttpResponseBase): Observable<void> {
+    protected processGetClassesByFundo(response: HttpResponseBase): Observable<FundoClasseListDto[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1748,7 +1869,9 @@ export class ClassesClient implements IClassesClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundoClasseListDto[];
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -1759,9 +1882,9 @@ export class ClassesClient implements IClassesClient {
     }
 
     /**
-     * @return OK
+     * @return Created
      */
-    createClasse(fundoId: string, body: FundoClasseCreateDto): Observable<void> {
+    createClasse(fundoId: string, body: FundoClasseCreateDto, httpContext?: HttpContext): Observable<FundoClasseResponseDto> {
         let url_ = this.baseUrl + "/api/v1/fundos/{fundoId}/classes";
         if (fundoId === undefined || fundoId === null)
             throw new globalThis.Error("The parameter 'fundoId' must be defined.");
@@ -1774,8 +1897,10 @@ export class ClassesClient implements IClassesClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -1786,23 +1911,29 @@ export class ClassesClient implements IClassesClient {
                 try {
                     return this.processCreateClasse(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundoClasseResponseDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundoClasseResponseDto>;
         }));
     }
 
-    protected processCreateClasse(response: HttpResponseBase): Observable<void> {
+    protected processCreateClasse(response: HttpResponseBase): Observable<FundoClasseResponseDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result201: any = null;
+            result201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundoClasseResponseDto;
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -1815,7 +1946,7 @@ export class ClassesClient implements IClassesClient {
     /**
      * @return OK
      */
-    getClasseById(id: string): Observable<void> {
+    getClasseById(id: string, httpContext?: HttpContext): Observable<FundoClasseResponseDto> {
         let url_ = this.baseUrl + "/api/v1/classes/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -1825,7 +1956,9 @@ export class ClassesClient implements IClassesClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -1836,14 +1969,14 @@ export class ClassesClient implements IClassesClient {
                 try {
                     return this.processGetClasseById(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundoClasseResponseDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundoClasseResponseDto>;
         }));
     }
 
-    protected processGetClasseById(response: HttpResponseBase): Observable<void> {
+    protected processGetClasseById(response: HttpResponseBase): Observable<FundoClasseResponseDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1852,7 +1985,13 @@ export class ClassesClient implements IClassesClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundoClasseResponseDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -1865,7 +2004,7 @@ export class ClassesClient implements IClassesClient {
     /**
      * @return OK
      */
-    updateClasse(id: string, body: FundoClasseUpdateDto): Observable<void> {
+    updateClasse(id: string, body: FundoClasseUpdateDto, httpContext?: HttpContext): Observable<FundoClasseResponseDto> {
         let url_ = this.baseUrl + "/api/v1/classes/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -1878,8 +2017,10 @@ export class ClassesClient implements IClassesClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -1890,14 +2031,14 @@ export class ClassesClient implements IClassesClient {
                 try {
                     return this.processUpdateClasse(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundoClasseResponseDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundoClasseResponseDto>;
         }));
     }
 
-    protected processUpdateClasse(response: HttpResponseBase): Observable<void> {
+    protected processUpdateClasse(response: HttpResponseBase): Observable<FundoClasseResponseDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1906,7 +2047,17 @@ export class ClassesClient implements IClassesClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundoClasseResponseDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -1917,9 +2068,9 @@ export class ClassesClient implements IClassesClient {
     }
 
     /**
-     * @return OK
+     * @return No Content
      */
-    deleteClasse(id: string): Observable<void> {
+    deleteClasse(id: string, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/v1/classes/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -1929,6 +2080,7 @@ export class ClassesClient implements IClassesClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
             })
         };
@@ -1954,9 +2106,13 @@ export class ClassesClient implements IClassesClient {
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return _observableOf(null as any);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -1973,7 +2129,7 @@ export interface ICore_JobsClient {
      * @param filter (optional) 
      * @return OK
      */
-    getAllCoreJobs(limit: number, offset: number, sortDirection: string, sortBy?: string | undefined, filter?: string | undefined): Observable<void>;
+    getAllCoreJobs(limit: number, offset: number, sortDirection: string, sortBy?: string | undefined, filter?: string | undefined): Observable<PagedResult_1OfOfCoreJobDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
 }
 
 @Injectable({
@@ -1994,7 +2150,7 @@ export class Core_JobsClient implements ICore_JobsClient {
      * @param filter (optional) 
      * @return OK
      */
-    getAllCoreJobs(limit: number, offset: number, sortDirection: string, sortBy?: string | undefined, filter?: string | undefined): Observable<void> {
+    getAllCoreJobs(limit: number, offset: number, sortDirection: string, sortBy?: string | undefined, filter?: string | undefined, httpContext?: HttpContext): Observable<PagedResult_1OfOfCoreJobDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         let url_ = this.baseUrl + "/api/corejobs?";
         if (limit === undefined || limit === null)
             throw new globalThis.Error("The parameter 'limit' must be defined and cannot be null.");
@@ -2021,7 +2177,9 @@ export class Core_JobsClient implements ICore_JobsClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -2032,14 +2190,14 @@ export class Core_JobsClient implements ICore_JobsClient {
                 try {
                     return this.processGetAllCoreJobs(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<PagedResult_1OfOfCoreJobDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<PagedResult_1OfOfCoreJobDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
         }));
     }
 
-    protected processGetAllCoreJobs(response: HttpResponseBase): Observable<void> {
+    protected processGetAllCoreJobs(response: HttpResponseBase): Observable<PagedResult_1OfOfCoreJobDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -2048,7 +2206,9 @@ export class Core_JobsClient implements ICore_JobsClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResult_1OfOfCoreJobDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null;
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -2068,31 +2228,31 @@ export interface IFundosClient {
      * @param filter (optional) 
      * @return OK
      */
-    getAllFundos(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined): Observable<void>;
+    getAllFundos(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined): Observable<PagedResult_1OfOfFundoListDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
+    /**
+     * @return Created
+     */
+    createFundo(body: FundoCreateDto): Observable<FundoResponseDto>;
     /**
      * @return OK
      */
-    createFundo(body: FundoCreateDto): Observable<void>;
+    getFundoById(id: string): Observable<FundoResponseDto>;
     /**
      * @return OK
      */
-    getFundoById(id: string): Observable<void>;
+    updateFundo(id: string, body: FundoUpdateDto): Observable<FundoResponseDto>;
     /**
-     * @return OK
-     */
-    updateFundo(id: string, body: FundoUpdateDto): Observable<void>;
-    /**
-     * @return OK
+     * @return No Content
      */
     deleteFundo(id: string): Observable<void>;
     /**
      * @return OK
      */
-    getFundoByCnpj(cnpj: string): Observable<void>;
+    getFundoByCnpj(cnpj: string): Observable<FundoResponseDto>;
     /**
      * @return OK
      */
-    searchFundos(termo: string, limit: number): Observable<void>;
+    searchFundos(termo: string, limit: number): Observable<FundoListDto[]>;
     /**
      * Verifica se um CNPJ está disponível para cadastro de novo fundo.
      * @return OK
@@ -2126,7 +2286,7 @@ export class FundosClient implements IFundosClient {
      * @param filter (optional) 
      * @return OK
      */
-    getAllFundos(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined): Observable<void> {
+    getAllFundos(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined, httpContext?: HttpContext): Observable<PagedResult_1OfOfFundoListDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         let url_ = this.baseUrl + "/api/v1/fundos?";
         if (limit === null)
             throw new globalThis.Error("The parameter 'limit' cannot be null.");
@@ -2153,7 +2313,9 @@ export class FundosClient implements IFundosClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -2164,14 +2326,14 @@ export class FundosClient implements IFundosClient {
                 try {
                     return this.processGetAllFundos(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<PagedResult_1OfOfFundoListDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<PagedResult_1OfOfFundoListDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
         }));
     }
 
-    protected processGetAllFundos(response: HttpResponseBase): Observable<void> {
+    protected processGetAllFundos(response: HttpResponseBase): Observable<PagedResult_1OfOfFundoListDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -2180,7 +2342,9 @@ export class FundosClient implements IFundosClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResult_1OfOfFundoListDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null;
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -2191,9 +2355,9 @@ export class FundosClient implements IFundosClient {
     }
 
     /**
-     * @return OK
+     * @return Created
      */
-    createFundo(body: FundoCreateDto): Observable<void> {
+    createFundo(body: FundoCreateDto, httpContext?: HttpContext): Observable<FundoResponseDto> {
         let url_ = this.baseUrl + "/api/v1/fundos";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -2203,8 +2367,10 @@ export class FundosClient implements IFundosClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -2215,23 +2381,33 @@ export class FundosClient implements IFundosClient {
                 try {
                     return this.processCreateFundo(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundoResponseDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundoResponseDto>;
         }));
     }
 
-    protected processCreateFundo(response: HttpResponseBase): Observable<void> {
+    protected processCreateFundo(response: HttpResponseBase): Observable<FundoResponseDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result201: any = null;
+            result201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundoResponseDto;
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -2244,7 +2420,7 @@ export class FundosClient implements IFundosClient {
     /**
      * @return OK
      */
-    getFundoById(id: string): Observable<void> {
+    getFundoById(id: string, httpContext?: HttpContext): Observable<FundoResponseDto> {
         let url_ = this.baseUrl + "/api/v1/fundos/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -2254,7 +2430,9 @@ export class FundosClient implements IFundosClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -2265,14 +2443,14 @@ export class FundosClient implements IFundosClient {
                 try {
                     return this.processGetFundoById(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundoResponseDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundoResponseDto>;
         }));
     }
 
-    protected processGetFundoById(response: HttpResponseBase): Observable<void> {
+    protected processGetFundoById(response: HttpResponseBase): Observable<FundoResponseDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -2281,7 +2459,13 @@ export class FundosClient implements IFundosClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundoResponseDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -2294,7 +2478,7 @@ export class FundosClient implements IFundosClient {
     /**
      * @return OK
      */
-    updateFundo(id: string, body: FundoUpdateDto): Observable<void> {
+    updateFundo(id: string, body: FundoUpdateDto, httpContext?: HttpContext): Observable<FundoResponseDto> {
         let url_ = this.baseUrl + "/api/v1/fundos/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -2307,8 +2491,10 @@ export class FundosClient implements IFundosClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -2319,14 +2505,14 @@ export class FundosClient implements IFundosClient {
                 try {
                     return this.processUpdateFundo(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundoResponseDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundoResponseDto>;
         }));
     }
 
-    protected processUpdateFundo(response: HttpResponseBase): Observable<void> {
+    protected processUpdateFundo(response: HttpResponseBase): Observable<FundoResponseDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -2335,7 +2521,17 @@ export class FundosClient implements IFundosClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundoResponseDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -2346,9 +2542,9 @@ export class FundosClient implements IFundosClient {
     }
 
     /**
-     * @return OK
+     * @return No Content
      */
-    deleteFundo(id: string): Observable<void> {
+    deleteFundo(id: string, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/v1/fundos/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -2358,6 +2554,7 @@ export class FundosClient implements IFundosClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
             })
         };
@@ -2383,9 +2580,13 @@ export class FundosClient implements IFundosClient {
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return _observableOf(null as any);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -2398,7 +2599,7 @@ export class FundosClient implements IFundosClient {
     /**
      * @return OK
      */
-    getFundoByCnpj(cnpj: string): Observable<void> {
+    getFundoByCnpj(cnpj: string, httpContext?: HttpContext): Observable<FundoResponseDto> {
         let url_ = this.baseUrl + "/api/v1/fundos/cnpj/{cnpj}";
         if (cnpj === undefined || cnpj === null)
             throw new globalThis.Error("The parameter 'cnpj' must be defined.");
@@ -2408,7 +2609,9 @@ export class FundosClient implements IFundosClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -2419,14 +2622,14 @@ export class FundosClient implements IFundosClient {
                 try {
                     return this.processGetFundoByCnpj(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundoResponseDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundoResponseDto>;
         }));
     }
 
-    protected processGetFundoByCnpj(response: HttpResponseBase): Observable<void> {
+    protected processGetFundoByCnpj(response: HttpResponseBase): Observable<FundoResponseDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -2435,7 +2638,13 @@ export class FundosClient implements IFundosClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundoResponseDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -2448,7 +2657,7 @@ export class FundosClient implements IFundosClient {
     /**
      * @return OK
      */
-    searchFundos(termo: string, limit: number): Observable<void> {
+    searchFundos(termo: string, limit: number, httpContext?: HttpContext): Observable<FundoListDto[]> {
         let url_ = this.baseUrl + "/api/v1/fundos/busca?";
         if (termo === undefined || termo === null)
             throw new globalThis.Error("The parameter 'termo' must be defined and cannot be null.");
@@ -2463,7 +2672,9 @@ export class FundosClient implements IFundosClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -2474,14 +2685,14 @@ export class FundosClient implements IFundosClient {
                 try {
                     return this.processSearchFundos(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundoListDto[]>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundoListDto[]>;
         }));
     }
 
-    protected processSearchFundos(response: HttpResponseBase): Observable<void> {
+    protected processSearchFundos(response: HttpResponseBase): Observable<FundoListDto[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -2490,7 +2701,9 @@ export class FundosClient implements IFundosClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundoListDto[];
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -2504,7 +2717,7 @@ export class FundosClient implements IFundosClient {
      * Verifica se um CNPJ está disponível para cadastro de novo fundo.
      * @return OK
      */
-    verificarCnpjDisponivel(cnpj: string): Observable<CnpjDisponibilidadeResponseDto> {
+    verificarCnpjDisponivel(cnpj: string, httpContext?: HttpContext): Observable<CnpjDisponibilidadeResponseDto> {
         let url_ = this.baseUrl + "/api/v1/fundos/verificar-cnpj/{cnpj}";
         if (cnpj === undefined || cnpj === null)
             throw new globalThis.Error("The parameter 'cnpj' must be defined.");
@@ -2514,6 +2727,7 @@ export class FundosClient implements IFundosClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Accept": "application/json"
             })
@@ -2558,7 +2772,7 @@ export class FundosClient implements IFundosClient {
      * Cria um novo fundo via wizard com todas as entidades relacionadas.
      * @return Created
      */
-    createFundoWizard(body: FundoWizardRequestDto): Observable<FundoWizardResponseDto> {
+    createFundoWizard(body: FundoWizardRequestDto, httpContext?: HttpContext): Observable<FundoWizardResponseDto> {
         let url_ = this.baseUrl + "/api/v1/fundos/wizard";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -2568,6 +2782,7 @@ export class FundosClient implements IFundosClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
                 "Accept": "application/json"
@@ -2627,24 +2842,24 @@ export interface IFundsClient {
      * @param filter (optional) 
      * @return OK
      */
-    getAllFunds(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined): Observable<void>;
+    getAllFunds(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined): Observable<PagedResult_1OfOfFundDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
+    /**
+     * @return Created
+     */
+    createFund(body: CreateFundDto): Observable<FundDto>;
     /**
      * @return OK
      */
-    createFund(body: CreateFundDto): Observable<void>;
+    getFundById(id: number): Observable<FundDto>;
     /**
-     * @return OK
-     */
-    getFundById(id: number): Observable<void>;
-    /**
-     * @return OK
+     * @return No Content
      */
     updateFund(id: number, body: UpdateFundDto): Observable<void>;
     /**
      * @param q (optional) 
      * @return OK
      */
-    autocompleteFunds(q?: string | undefined): Observable<void>;
+    autocompleteFunds(q?: string | undefined): Observable<FundAutocompleteDto[]>;
 }
 
 @Injectable({
@@ -2668,7 +2883,7 @@ export class FundsClient implements IFundsClient {
      * @param filter (optional) 
      * @return OK
      */
-    getAllFunds(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined): Observable<void> {
+    getAllFunds(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined, httpContext?: HttpContext): Observable<PagedResult_1OfOfFundDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         let url_ = this.baseUrl + "/api/funds?";
         if (limit === null)
             throw new globalThis.Error("The parameter 'limit' cannot be null.");
@@ -2695,7 +2910,9 @@ export class FundsClient implements IFundsClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -2706,14 +2923,14 @@ export class FundsClient implements IFundsClient {
                 try {
                     return this.processGetAllFunds(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<PagedResult_1OfOfFundDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<PagedResult_1OfOfFundDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
         }));
     }
 
-    protected processGetAllFunds(response: HttpResponseBase): Observable<void> {
+    protected processGetAllFunds(response: HttpResponseBase): Observable<PagedResult_1OfOfFundDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -2722,7 +2939,9 @@ export class FundsClient implements IFundsClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResult_1OfOfFundDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null;
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -2733,9 +2952,9 @@ export class FundsClient implements IFundsClient {
     }
 
     /**
-     * @return OK
+     * @return Created
      */
-    createFund(body: CreateFundDto): Observable<void> {
+    createFund(body: CreateFundDto, httpContext?: HttpContext): Observable<FundDto> {
         let url_ = this.baseUrl + "/api/funds";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -2745,8 +2964,10 @@ export class FundsClient implements IFundsClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -2757,23 +2978,33 @@ export class FundsClient implements IFundsClient {
                 try {
                     return this.processCreateFund(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundDto>;
         }));
     }
 
-    protected processCreateFund(response: HttpResponseBase): Observable<void> {
+    protected processCreateFund(response: HttpResponseBase): Observable<FundDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result201: any = null;
+            result201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundDto;
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -2786,7 +3017,7 @@ export class FundsClient implements IFundsClient {
     /**
      * @return OK
      */
-    getFundById(id: number): Observable<void> {
+    getFundById(id: number, httpContext?: HttpContext): Observable<FundDto> {
         let url_ = this.baseUrl + "/api/funds/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -2796,7 +3027,9 @@ export class FundsClient implements IFundsClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -2807,14 +3040,14 @@ export class FundsClient implements IFundsClient {
                 try {
                     return this.processGetFundById(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundDto>;
         }));
     }
 
-    protected processGetFundById(response: HttpResponseBase): Observable<void> {
+    protected processGetFundById(response: HttpResponseBase): Observable<FundDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -2823,7 +3056,13 @@ export class FundsClient implements IFundsClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -2834,9 +3073,9 @@ export class FundsClient implements IFundsClient {
     }
 
     /**
-     * @return OK
+     * @return No Content
      */
-    updateFund(id: number, body: UpdateFundDto): Observable<void> {
+    updateFund(id: number, body: UpdateFundDto, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/funds/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -2849,6 +3088,7 @@ export class FundsClient implements IFundsClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
             })
@@ -2875,9 +3115,17 @@ export class FundsClient implements IFundsClient {
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return _observableOf(null as any);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -2891,7 +3139,7 @@ export class FundsClient implements IFundsClient {
      * @param q (optional) 
      * @return OK
      */
-    autocompleteFunds(q?: string | undefined): Observable<void> {
+    autocompleteFunds(q?: string | undefined, httpContext?: HttpContext): Observable<FundAutocompleteDto[]> {
         let url_ = this.baseUrl + "/api/funds/autocomplete?";
         if (q === null)
             throw new globalThis.Error("The parameter 'q' cannot be null.");
@@ -2902,7 +3150,9 @@ export class FundsClient implements IFundsClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -2913,14 +3163,14 @@ export class FundsClient implements IFundsClient {
                 try {
                     return this.processAutocompleteFunds(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundAutocompleteDto[]>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundAutocompleteDto[]>;
         }));
     }
 
-    protected processAutocompleteFunds(response: HttpResponseBase): Observable<void> {
+    protected processAutocompleteFunds(response: HttpResponseBase): Observable<FundAutocompleteDto[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -2929,7 +3179,9 @@ export class FundsClient implements IFundsClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundAutocompleteDto[];
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -2942,11 +3194,11 @@ export class FundsClient implements IFundsClient {
 
 export interface IHistoricosIndexadoresClient {
     /**
-     * @return OK
+     * @return Created
      */
-    createHistoricoIndexador(body: CreateHistoricoIndexadorDto): Observable<void>;
+    createHistoricoIndexador(body: CreateHistoricoIndexadorDto): Observable<HistoricoIndexadorDto>;
     /**
-     * @return OK
+     * @return No Content
      */
     deleteHistoricoIndexador(id: number): Observable<void>;
 }
@@ -2965,9 +3217,9 @@ export class HistoricosIndexadoresClient implements IHistoricosIndexadoresClient
     }
 
     /**
-     * @return OK
+     * @return Created
      */
-    createHistoricoIndexador(body: CreateHistoricoIndexadorDto): Observable<void> {
+    createHistoricoIndexador(body: CreateHistoricoIndexadorDto, httpContext?: HttpContext): Observable<HistoricoIndexadorDto> {
         let url_ = this.baseUrl + "/api/historicos-indexadores";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -2977,8 +3229,10 @@ export class HistoricosIndexadoresClient implements IHistoricosIndexadoresClient
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -2989,23 +3243,33 @@ export class HistoricosIndexadoresClient implements IHistoricosIndexadoresClient
                 try {
                     return this.processCreateHistoricoIndexador(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<HistoricoIndexadorDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<HistoricoIndexadorDto>;
         }));
     }
 
-    protected processCreateHistoricoIndexador(response: HttpResponseBase): Observable<void> {
+    protected processCreateHistoricoIndexador(response: HttpResponseBase): Observable<HistoricoIndexadorDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result201: any = null;
+            result201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as HistoricoIndexadorDto;
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -3016,9 +3280,9 @@ export class HistoricosIndexadoresClient implements IHistoricosIndexadoresClient
     }
 
     /**
-     * @return OK
+     * @return No Content
      */
-    deleteHistoricoIndexador(id: number): Observable<void> {
+    deleteHistoricoIndexador(id: number, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/historicos-indexadores/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -3028,6 +3292,7 @@ export class HistoricosIndexadoresClient implements IHistoricosIndexadoresClient
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
             })
         };
@@ -3053,9 +3318,13 @@ export class HistoricosIndexadoresClient implements IHistoricosIndexadoresClient
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return _observableOf(null as any);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -3080,21 +3349,21 @@ export interface IIndexadoresClient {
      * @param importacaoAutomatica (optional) 
      * @return OK
      */
-    getAllIndexadores(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined, tipo?: number | undefined, periodicidade?: number | undefined, fonte?: string | undefined, ativo?: boolean | undefined, importacaoAutomatica?: boolean | undefined): Observable<void>;
+    getAllIndexadores(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined, tipo?: number | undefined, periodicidade?: number | undefined, fonte?: string | undefined, ativo?: boolean | undefined, importacaoAutomatica?: boolean | undefined): Observable<PagedResult_1OfOfIndexadorDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
+    /**
+     * @return Created
+     */
+    createIndexador(body: CreateIndexadorDto): Observable<IndexadorDto>;
     /**
      * @return OK
      */
-    createIndexador(body: CreateIndexadorDto): Observable<void>;
+    getIndexadorById(id: number): Observable<IndexadorDto>;
     /**
      * @return OK
      */
-    getIndexadorById(id: number): Observable<void>;
+    updateIndexador(id: number, body: UpdateIndexadorDto): Observable<IndexadorDto>;
     /**
-     * @return OK
-     */
-    updateIndexador(id: number, body: UpdateIndexadorDto): Observable<void>;
-    /**
-     * @return OK
+     * @return No Content
      */
     deleteIndexador(id: number): Observable<void>;
     /**
@@ -3107,20 +3376,20 @@ export interface IIndexadoresClient {
      * @param dataFim (optional) 
      * @return OK
      */
-    getIndexadorHistorico(id: number, limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined, dataInicio?: Date | undefined, dataFim?: Date | undefined): Observable<void>;
+    getIndexadorHistorico(id: number, limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined, dataInicio?: Date | undefined, dataFim?: Date | undefined): Observable<PagedResult_1OfOfHistoricoIndexadorDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
     /**
      * @param dataInicio (optional) 
      * @param dataFim (optional) 
      * @return OK
      */
-    exportIndexadorHistorico(id: number, dataInicio?: Date | undefined, dataFim?: Date | undefined): Observable<void>;
+    exportIndexadorHistorico(id: number, dataInicio?: Date | undefined, dataFim?: Date | undefined): Observable<FileResponse>;
     /**
      * @param file (optional) 
      * @return OK
      */
-    importIndexadorHistorico(id: number, sobrescrever: boolean, file?: FileParameter | undefined): Observable<void>;
+    importIndexadorHistorico(id: number, sobrescrever: boolean, file?: FileParameter | undefined): Observable<ImportHistoricoIndexadorResult>;
     /**
-     * @return OK
+     * @return Accepted
      */
     importarIndexador(id: number): Observable<void>;
 }
@@ -3151,7 +3420,7 @@ export class IndexadoresClient implements IIndexadoresClient {
      * @param importacaoAutomatica (optional) 
      * @return OK
      */
-    getAllIndexadores(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined, tipo?: number | undefined, periodicidade?: number | undefined, fonte?: string | undefined, ativo?: boolean | undefined, importacaoAutomatica?: boolean | undefined): Observable<void> {
+    getAllIndexadores(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined, tipo?: number | undefined, periodicidade?: number | undefined, fonte?: string | undefined, ativo?: boolean | undefined, importacaoAutomatica?: boolean | undefined, httpContext?: HttpContext): Observable<PagedResult_1OfOfIndexadorDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         let url_ = this.baseUrl + "/api/indexadores?";
         if (limit === null)
             throw new globalThis.Error("The parameter 'limit' cannot be null.");
@@ -3198,7 +3467,9 @@ export class IndexadoresClient implements IIndexadoresClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -3209,14 +3480,14 @@ export class IndexadoresClient implements IIndexadoresClient {
                 try {
                     return this.processGetAllIndexadores(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<PagedResult_1OfOfIndexadorDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<PagedResult_1OfOfIndexadorDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
         }));
     }
 
-    protected processGetAllIndexadores(response: HttpResponseBase): Observable<void> {
+    protected processGetAllIndexadores(response: HttpResponseBase): Observable<PagedResult_1OfOfIndexadorDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -3225,7 +3496,9 @@ export class IndexadoresClient implements IIndexadoresClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResult_1OfOfIndexadorDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null;
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -3236,9 +3509,9 @@ export class IndexadoresClient implements IIndexadoresClient {
     }
 
     /**
-     * @return OK
+     * @return Created
      */
-    createIndexador(body: CreateIndexadorDto): Observable<void> {
+    createIndexador(body: CreateIndexadorDto, httpContext?: HttpContext): Observable<IndexadorDto> {
         let url_ = this.baseUrl + "/api/indexadores";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -3248,8 +3521,10 @@ export class IndexadoresClient implements IIndexadoresClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -3260,23 +3535,33 @@ export class IndexadoresClient implements IIndexadoresClient {
                 try {
                     return this.processCreateIndexador(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<IndexadorDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<IndexadorDto>;
         }));
     }
 
-    protected processCreateIndexador(response: HttpResponseBase): Observable<void> {
+    protected processCreateIndexador(response: HttpResponseBase): Observable<IndexadorDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result201: any = null;
+            result201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as IndexadorDto;
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -3289,7 +3574,7 @@ export class IndexadoresClient implements IIndexadoresClient {
     /**
      * @return OK
      */
-    getIndexadorById(id: number): Observable<void> {
+    getIndexadorById(id: number, httpContext?: HttpContext): Observable<IndexadorDto> {
         let url_ = this.baseUrl + "/api/indexadores/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -3299,7 +3584,9 @@ export class IndexadoresClient implements IIndexadoresClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -3310,14 +3597,14 @@ export class IndexadoresClient implements IIndexadoresClient {
                 try {
                     return this.processGetIndexadorById(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<IndexadorDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<IndexadorDto>;
         }));
     }
 
-    protected processGetIndexadorById(response: HttpResponseBase): Observable<void> {
+    protected processGetIndexadorById(response: HttpResponseBase): Observable<IndexadorDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -3326,7 +3613,13 @@ export class IndexadoresClient implements IIndexadoresClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as IndexadorDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -3339,7 +3632,7 @@ export class IndexadoresClient implements IIndexadoresClient {
     /**
      * @return OK
      */
-    updateIndexador(id: number, body: UpdateIndexadorDto): Observable<void> {
+    updateIndexador(id: number, body: UpdateIndexadorDto, httpContext?: HttpContext): Observable<IndexadorDto> {
         let url_ = this.baseUrl + "/api/indexadores/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -3352,8 +3645,10 @@ export class IndexadoresClient implements IIndexadoresClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -3364,14 +3659,14 @@ export class IndexadoresClient implements IIndexadoresClient {
                 try {
                     return this.processUpdateIndexador(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<IndexadorDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<IndexadorDto>;
         }));
     }
 
-    protected processUpdateIndexador(response: HttpResponseBase): Observable<void> {
+    protected processUpdateIndexador(response: HttpResponseBase): Observable<IndexadorDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -3380,7 +3675,17 @@ export class IndexadoresClient implements IIndexadoresClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as IndexadorDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -3391,9 +3696,9 @@ export class IndexadoresClient implements IIndexadoresClient {
     }
 
     /**
-     * @return OK
+     * @return No Content
      */
-    deleteIndexador(id: number): Observable<void> {
+    deleteIndexador(id: number, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/indexadores/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -3403,6 +3708,7 @@ export class IndexadoresClient implements IIndexadoresClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
             })
         };
@@ -3428,9 +3734,13 @@ export class IndexadoresClient implements IIndexadoresClient {
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return _observableOf(null as any);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -3450,7 +3760,7 @@ export class IndexadoresClient implements IIndexadoresClient {
      * @param dataFim (optional) 
      * @return OK
      */
-    getIndexadorHistorico(id: number, limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined, dataInicio?: Date | undefined, dataFim?: Date | undefined): Observable<void> {
+    getIndexadorHistorico(id: number, limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined, dataInicio?: Date | undefined, dataFim?: Date | undefined, httpContext?: HttpContext): Observable<PagedResult_1OfOfHistoricoIndexadorDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         let url_ = this.baseUrl + "/api/indexadores/{id}/historico?";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -3488,7 +3798,9 @@ export class IndexadoresClient implements IIndexadoresClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -3499,14 +3811,14 @@ export class IndexadoresClient implements IIndexadoresClient {
                 try {
                     return this.processGetIndexadorHistorico(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<PagedResult_1OfOfHistoricoIndexadorDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<PagedResult_1OfOfHistoricoIndexadorDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
         }));
     }
 
-    protected processGetIndexadorHistorico(response: HttpResponseBase): Observable<void> {
+    protected processGetIndexadorHistorico(response: HttpResponseBase): Observable<PagedResult_1OfOfHistoricoIndexadorDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -3515,7 +3827,13 @@ export class IndexadoresClient implements IIndexadoresClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResult_1OfOfHistoricoIndexadorDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null;
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -3530,7 +3848,7 @@ export class IndexadoresClient implements IIndexadoresClient {
      * @param dataFim (optional) 
      * @return OK
      */
-    exportIndexadorHistorico(id: number, dataInicio?: Date | undefined, dataFim?: Date | undefined): Observable<void> {
+    exportIndexadorHistorico(id: number, dataInicio?: Date | undefined, dataFim?: Date | undefined, httpContext?: HttpContext): Observable<FileResponse> {
         let url_ = this.baseUrl + "/api/indexadores/{id}/historico/exportar?";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -3548,7 +3866,9 @@ export class IndexadoresClient implements IIndexadoresClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "text/csv"
             })
         };
 
@@ -3559,23 +3879,34 @@ export class IndexadoresClient implements IIndexadoresClient {
                 try {
                     return this.processExportIndexadorHistorico(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FileResponse>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FileResponse>;
         }));
     }
 
-    protected processExportIndexadorHistorico(response: HttpResponseBase): Observable<void> {
+    protected processExportIndexadorHistorico(response: HttpResponseBase): Observable<FileResponse> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return _observableOf({ fileName: fileName, data: responseBlob as any, status: status, headers: _headers });
+        } else if (status === 404) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -3589,7 +3920,7 @@ export class IndexadoresClient implements IIndexadoresClient {
      * @param file (optional) 
      * @return OK
      */
-    importIndexadorHistorico(id: number, sobrescrever: boolean, file?: FileParameter | undefined): Observable<void> {
+    importIndexadorHistorico(id: number, sobrescrever: boolean, file?: FileParameter | undefined, httpContext?: HttpContext): Observable<ImportHistoricoIndexadorResult> {
         let url_ = this.baseUrl + "/api/indexadores/{id}/historico/importar?";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -3610,7 +3941,9 @@ export class IndexadoresClient implements IIndexadoresClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -3621,14 +3954,14 @@ export class IndexadoresClient implements IIndexadoresClient {
                 try {
                     return this.processImportIndexadorHistorico(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<ImportHistoricoIndexadorResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<ImportHistoricoIndexadorResult>;
         }));
     }
 
-    protected processImportIndexadorHistorico(response: HttpResponseBase): Observable<void> {
+    protected processImportIndexadorHistorico(response: HttpResponseBase): Observable<ImportHistoricoIndexadorResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -3637,7 +3970,17 @@ export class IndexadoresClient implements IIndexadoresClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ImportHistoricoIndexadorResult;
+            return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -3648,9 +3991,9 @@ export class IndexadoresClient implements IIndexadoresClient {
     }
 
     /**
-     * @return OK
+     * @return Accepted
      */
-    importarIndexador(id: number): Observable<void> {
+    importarIndexador(id: number, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/indexadores/{id}/importar";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -3660,6 +4003,7 @@ export class IndexadoresClient implements IIndexadoresClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
             })
         };
@@ -3685,9 +4029,13 @@ export class IndexadoresClient implements IIndexadoresClient {
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 202) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return _observableOf(null as any);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -3709,11 +4057,11 @@ export interface IInstituicoesClient {
      * @param ativo (optional) 
      * @return OK
      */
-    getAllInstituicoes(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined, search?: string | undefined, ativo?: boolean | undefined): Observable<void>;
+    getAllInstituicoes(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined, search?: string | undefined, ativo?: boolean | undefined): Observable<PagedResult_1OfOfInstituicaoDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
     /**
-     * @return OK
+     * @return Created
      */
-    createInstituicao(body: CreateInstituicaoDto): Observable<void>;
+    createInstituicao(body: CreateInstituicaoDto): Observable<InstituicaoDto>;
 }
 
 @Injectable({
@@ -3739,7 +4087,7 @@ export class InstituicoesClient implements IInstituicoesClient {
      * @param ativo (optional) 
      * @return OK
      */
-    getAllInstituicoes(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined, search?: string | undefined, ativo?: boolean | undefined): Observable<void> {
+    getAllInstituicoes(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined, search?: string | undefined, ativo?: boolean | undefined, httpContext?: HttpContext): Observable<PagedResult_1OfOfInstituicaoDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         let url_ = this.baseUrl + "/api/v1/instituicoes?";
         if (limit === null)
             throw new globalThis.Error("The parameter 'limit' cannot be null.");
@@ -3774,7 +4122,9 @@ export class InstituicoesClient implements IInstituicoesClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -3785,14 +4135,14 @@ export class InstituicoesClient implements IInstituicoesClient {
                 try {
                     return this.processGetAllInstituicoes(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<PagedResult_1OfOfInstituicaoDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<PagedResult_1OfOfInstituicaoDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
         }));
     }
 
-    protected processGetAllInstituicoes(response: HttpResponseBase): Observable<void> {
+    protected processGetAllInstituicoes(response: HttpResponseBase): Observable<PagedResult_1OfOfInstituicaoDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -3801,7 +4151,9 @@ export class InstituicoesClient implements IInstituicoesClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResult_1OfOfInstituicaoDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null;
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -3812,9 +4164,9 @@ export class InstituicoesClient implements IInstituicoesClient {
     }
 
     /**
-     * @return OK
+     * @return Created
      */
-    createInstituicao(body: CreateInstituicaoDto): Observable<void> {
+    createInstituicao(body: CreateInstituicaoDto, httpContext?: HttpContext): Observable<InstituicaoDto> {
         let url_ = this.baseUrl + "/api/v1/instituicoes";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -3824,8 +4176,10 @@ export class InstituicoesClient implements IInstituicoesClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -3836,23 +4190,29 @@ export class InstituicoesClient implements IInstituicoesClient {
                 try {
                     return this.processCreateInstituicao(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<InstituicaoDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<InstituicaoDto>;
         }));
     }
 
-    protected processCreateInstituicao(response: HttpResponseBase): Observable<void> {
+    protected processCreateInstituicao(response: HttpResponseBase): Observable<InstituicaoDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result201: any = null;
+            result201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as InstituicaoDto;
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -3865,13 +4225,13 @@ export class InstituicoesClient implements IInstituicoesClient {
 
 export interface IJobs_IngestionClient {
     /**
-     * @return OK
+     * @return Accepted
      */
-    importB3InstructionFile(): Observable<void>;
+    importB3InstructionFile(): Observable<ImportB3InstructionFileResponse>;
     /**
-     * @return OK
+     * @return Accepted
      */
-    testConnection(body: TestConnectionRequest): Observable<void>;
+    testConnection(body: TestConnectionRequest): Observable<TestConnectionResponse>;
 }
 
 @Injectable({
@@ -3888,16 +4248,18 @@ export class Jobs_IngestionClient implements IJobs_IngestionClient {
     }
 
     /**
-     * @return OK
+     * @return Accepted
      */
-    importB3InstructionFile(): Observable<void> {
+    importB3InstructionFile(httpContext?: HttpContext): Observable<ImportB3InstructionFileResponse> {
         let url_ = this.baseUrl + "/api/jobs-ingestion/import-b3-instruction-file";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -3908,23 +4270,25 @@ export class Jobs_IngestionClient implements IJobs_IngestionClient {
                 try {
                     return this.processImportB3InstructionFile(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<ImportB3InstructionFileResponse>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<ImportB3InstructionFileResponse>;
         }));
     }
 
-    protected processImportB3InstructionFile(response: HttpResponseBase): Observable<void> {
+    protected processImportB3InstructionFile(response: HttpResponseBase): Observable<ImportB3InstructionFileResponse> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 202) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result202: any = null;
+            result202 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ImportB3InstructionFileResponse;
+            return _observableOf(result202);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -3935,9 +4299,9 @@ export class Jobs_IngestionClient implements IJobs_IngestionClient {
     }
 
     /**
-     * @return OK
+     * @return Accepted
      */
-    testConnection(body: TestConnectionRequest): Observable<void> {
+    testConnection(body: TestConnectionRequest, httpContext?: HttpContext): Observable<TestConnectionResponse> {
         let url_ = this.baseUrl + "/api/jobs-ingestion/test-connection";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -3947,8 +4311,10 @@ export class Jobs_IngestionClient implements IJobs_IngestionClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -3959,23 +4325,25 @@ export class Jobs_IngestionClient implements IJobs_IngestionClient {
                 try {
                     return this.processTestConnection(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<TestConnectionResponse>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<TestConnectionResponse>;
         }));
     }
 
-    protected processTestConnection(response: HttpResponseBase): Observable<void> {
+    protected processTestConnection(response: HttpResponseBase): Observable<TestConnectionResponse> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 202) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result202: any = null;
+            result202 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as TestConnectionResponse;
+            return _observableOf(result202);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -3990,15 +4358,15 @@ export interface IPrazosClient {
     /**
      * @return OK
      */
-    getPrazosByFundo(fundoId: string, incluirInativos: boolean): Observable<void>;
+    getPrazosByFundo(fundoId: string, incluirInativos: boolean): Observable<FundoPrazoListDto[]>;
+    /**
+     * @return Created
+     */
+    createPrazo(fundoId: string, body: FundoPrazoCreateDto): Observable<FundoPrazoResponseDto>;
     /**
      * @return OK
      */
-    createPrazo(fundoId: string, body: FundoPrazoCreateDto): Observable<void>;
-    /**
-     * @return OK
-     */
-    updatePrazo(id: number, body: FundoPrazoUpdateDto): Observable<void>;
+    updatePrazo(id: number, body: FundoPrazoUpdateDto): Observable<FundoPrazoResponseDto>;
 }
 
 @Injectable({
@@ -4017,7 +4385,7 @@ export class PrazosClient implements IPrazosClient {
     /**
      * @return OK
      */
-    getPrazosByFundo(fundoId: string, incluirInativos: boolean): Observable<void> {
+    getPrazosByFundo(fundoId: string, incluirInativos: boolean, httpContext?: HttpContext): Observable<FundoPrazoListDto[]> {
         let url_ = this.baseUrl + "/api/v1/fundos/{fundoId}/prazos?";
         if (fundoId === undefined || fundoId === null)
             throw new globalThis.Error("The parameter 'fundoId' must be defined.");
@@ -4031,7 +4399,9 @@ export class PrazosClient implements IPrazosClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -4042,14 +4412,14 @@ export class PrazosClient implements IPrazosClient {
                 try {
                     return this.processGetPrazosByFundo(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundoPrazoListDto[]>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundoPrazoListDto[]>;
         }));
     }
 
-    protected processGetPrazosByFundo(response: HttpResponseBase): Observable<void> {
+    protected processGetPrazosByFundo(response: HttpResponseBase): Observable<FundoPrazoListDto[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -4058,7 +4428,9 @@ export class PrazosClient implements IPrazosClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundoPrazoListDto[];
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -4069,9 +4441,9 @@ export class PrazosClient implements IPrazosClient {
     }
 
     /**
-     * @return OK
+     * @return Created
      */
-    createPrazo(fundoId: string, body: FundoPrazoCreateDto): Observable<void> {
+    createPrazo(fundoId: string, body: FundoPrazoCreateDto, httpContext?: HttpContext): Observable<FundoPrazoResponseDto> {
         let url_ = this.baseUrl + "/api/v1/fundos/{fundoId}/prazos";
         if (fundoId === undefined || fundoId === null)
             throw new globalThis.Error("The parameter 'fundoId' must be defined.");
@@ -4084,8 +4456,10 @@ export class PrazosClient implements IPrazosClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -4096,23 +4470,29 @@ export class PrazosClient implements IPrazosClient {
                 try {
                     return this.processCreatePrazo(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundoPrazoResponseDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundoPrazoResponseDto>;
         }));
     }
 
-    protected processCreatePrazo(response: HttpResponseBase): Observable<void> {
+    protected processCreatePrazo(response: HttpResponseBase): Observable<FundoPrazoResponseDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result201: any = null;
+            result201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundoPrazoResponseDto;
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -4125,7 +4505,7 @@ export class PrazosClient implements IPrazosClient {
     /**
      * @return OK
      */
-    updatePrazo(id: number, body: FundoPrazoUpdateDto): Observable<void> {
+    updatePrazo(id: number, body: FundoPrazoUpdateDto, httpContext?: HttpContext): Observable<FundoPrazoResponseDto> {
         let url_ = this.baseUrl + "/api/v1/prazos/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -4138,8 +4518,10 @@ export class PrazosClient implements IPrazosClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -4150,14 +4532,14 @@ export class PrazosClient implements IPrazosClient {
                 try {
                     return this.processUpdatePrazo(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundoPrazoResponseDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundoPrazoResponseDto>;
         }));
     }
 
-    protected processUpdatePrazo(response: HttpResponseBase): Observable<void> {
+    protected processUpdatePrazo(response: HttpResponseBase): Observable<FundoPrazoResponseDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -4166,7 +4548,17 @@ export class PrazosClient implements IPrazosClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundoPrazoResponseDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -4186,26 +4578,26 @@ export interface ISecuritiesClient {
      * @param filter (optional) 
      * @return OK
      */
-    getAllSecurities(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined): Observable<void>;
+    getAllSecurities(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined): Observable<PagedResult_1OfOfSecurityDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
+    /**
+     * @return Created
+     */
+    createSecurity(body: CreateSecurityDto): Observable<SecurityDto>;
     /**
      * @return OK
      */
-    createSecurity(body: CreateSecurityDto): Observable<void>;
+    getSecuritiesById(id: number): Observable<SecurityDto>;
     /**
-     * @return OK
-     */
-    getSecuritiesById(id: number): Observable<void>;
-    /**
-     * @return OK
+     * @return No Content
      */
     updateSecurity(id: number, body: UpdateSecurityDto): Observable<void>;
     /**
      * @param q (optional) 
      * @return OK
      */
-    autocompleteSecurities(q?: string | undefined): Observable<void>;
+    autocompleteSecurities(q?: string | undefined): Observable<SecurityAutocompleteDto[]>;
     /**
-     * @return OK
+     * @return No Content
      */
     deactivateSecurity(id: number): Observable<void>;
 }
@@ -4231,7 +4623,7 @@ export class SecuritiesClient implements ISecuritiesClient {
      * @param filter (optional) 
      * @return OK
      */
-    getAllSecurities(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined): Observable<void> {
+    getAllSecurities(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined, httpContext?: HttpContext): Observable<PagedResult_1OfOfSecurityDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         let url_ = this.baseUrl + "/api/securities?";
         if (limit === null)
             throw new globalThis.Error("The parameter 'limit' cannot be null.");
@@ -4258,7 +4650,9 @@ export class SecuritiesClient implements ISecuritiesClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -4269,14 +4663,14 @@ export class SecuritiesClient implements ISecuritiesClient {
                 try {
                     return this.processGetAllSecurities(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<PagedResult_1OfOfSecurityDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<PagedResult_1OfOfSecurityDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
         }));
     }
 
-    protected processGetAllSecurities(response: HttpResponseBase): Observable<void> {
+    protected processGetAllSecurities(response: HttpResponseBase): Observable<PagedResult_1OfOfSecurityDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -4285,7 +4679,9 @@ export class SecuritiesClient implements ISecuritiesClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResult_1OfOfSecurityDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null;
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -4296,9 +4692,9 @@ export class SecuritiesClient implements ISecuritiesClient {
     }
 
     /**
-     * @return OK
+     * @return Created
      */
-    createSecurity(body: CreateSecurityDto): Observable<void> {
+    createSecurity(body: CreateSecurityDto, httpContext?: HttpContext): Observable<SecurityDto> {
         let url_ = this.baseUrl + "/api/securities";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -4308,8 +4704,10 @@ export class SecuritiesClient implements ISecuritiesClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -4320,23 +4718,33 @@ export class SecuritiesClient implements ISecuritiesClient {
                 try {
                     return this.processCreateSecurity(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<SecurityDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<SecurityDto>;
         }));
     }
 
-    protected processCreateSecurity(response: HttpResponseBase): Observable<void> {
+    protected processCreateSecurity(response: HttpResponseBase): Observable<SecurityDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result201: any = null;
+            result201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as SecurityDto;
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -4349,7 +4757,7 @@ export class SecuritiesClient implements ISecuritiesClient {
     /**
      * @return OK
      */
-    getSecuritiesById(id: number): Observable<void> {
+    getSecuritiesById(id: number, httpContext?: HttpContext): Observable<SecurityDto> {
         let url_ = this.baseUrl + "/api/securities/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -4359,7 +4767,9 @@ export class SecuritiesClient implements ISecuritiesClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -4370,14 +4780,14 @@ export class SecuritiesClient implements ISecuritiesClient {
                 try {
                     return this.processGetSecuritiesById(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<SecurityDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<SecurityDto>;
         }));
     }
 
-    protected processGetSecuritiesById(response: HttpResponseBase): Observable<void> {
+    protected processGetSecuritiesById(response: HttpResponseBase): Observable<SecurityDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -4386,7 +4796,13 @@ export class SecuritiesClient implements ISecuritiesClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as SecurityDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -4397,9 +4813,9 @@ export class SecuritiesClient implements ISecuritiesClient {
     }
 
     /**
-     * @return OK
+     * @return No Content
      */
-    updateSecurity(id: number, body: UpdateSecurityDto): Observable<void> {
+    updateSecurity(id: number, body: UpdateSecurityDto, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/securities/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -4412,6 +4828,7 @@ export class SecuritiesClient implements ISecuritiesClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
             })
@@ -4438,9 +4855,17 @@ export class SecuritiesClient implements ISecuritiesClient {
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return _observableOf(null as any);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -4454,7 +4879,7 @@ export class SecuritiesClient implements ISecuritiesClient {
      * @param q (optional) 
      * @return OK
      */
-    autocompleteSecurities(q?: string | undefined): Observable<void> {
+    autocompleteSecurities(q?: string | undefined, httpContext?: HttpContext): Observable<SecurityAutocompleteDto[]> {
         let url_ = this.baseUrl + "/api/securities/autocomplete?";
         if (q === null)
             throw new globalThis.Error("The parameter 'q' cannot be null.");
@@ -4465,7 +4890,9 @@ export class SecuritiesClient implements ISecuritiesClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -4476,14 +4903,14 @@ export class SecuritiesClient implements ISecuritiesClient {
                 try {
                     return this.processAutocompleteSecurities(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<SecurityAutocompleteDto[]>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<SecurityAutocompleteDto[]>;
         }));
     }
 
-    protected processAutocompleteSecurities(response: HttpResponseBase): Observable<void> {
+    protected processAutocompleteSecurities(response: HttpResponseBase): Observable<SecurityAutocompleteDto[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -4492,7 +4919,9 @@ export class SecuritiesClient implements ISecuritiesClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as SecurityAutocompleteDto[];
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -4503,9 +4932,9 @@ export class SecuritiesClient implements ISecuritiesClient {
     }
 
     /**
-     * @return OK
+     * @return No Content
      */
-    deactivateSecurity(id: number): Observable<void> {
+    deactivateSecurity(id: number, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/securities/{id}/deactivate";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -4515,6 +4944,7 @@ export class SecuritiesClient implements ISecuritiesClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
             })
         };
@@ -4540,9 +4970,13 @@ export class SecuritiesClient implements ISecuritiesClient {
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return _observableOf(null as any);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -4557,7 +4991,7 @@ export interface ISecurity_TypesClient {
     /**
      * @return OK
      */
-    getAllSecurityTypes(): Observable<void>;
+    getAllSecurityTypes(): Observable<SecurityTypeDto[]>;
 }
 
 @Injectable({
@@ -4576,14 +5010,16 @@ export class Security_TypesClient implements ISecurity_TypesClient {
     /**
      * @return OK
      */
-    getAllSecurityTypes(): Observable<void> {
+    getAllSecurityTypes(httpContext?: HttpContext): Observable<SecurityTypeDto[]> {
         let url_ = this.baseUrl + "/api/securitytypes";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -4594,14 +5030,14 @@ export class Security_TypesClient implements ISecurity_TypesClient {
                 try {
                     return this.processGetAllSecurityTypes(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<SecurityTypeDto[]>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<SecurityTypeDto[]>;
         }));
     }
 
-    protected processGetAllSecurityTypes(response: HttpResponseBase): Observable<void> {
+    protected processGetAllSecurityTypes(response: HttpResponseBase): Observable<SecurityTypeDto[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -4610,7 +5046,9 @@ export class Security_TypesClient implements ISecurity_TypesClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as SecurityTypeDto[];
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -4625,17 +5063,17 @@ export interface ITaxasClient {
     /**
      * @return OK
      */
-    getTaxasByFundo(fundoId: string, incluirInativas: boolean): Observable<void>;
+    getTaxasByFundo(fundoId: string, incluirInativas: boolean): Observable<FundoTaxaListDto[]>;
+    /**
+     * @return Created
+     */
+    createTaxa(fundoId: string, body: FundoTaxaCreateDto): Observable<FundoTaxaResponseDto>;
     /**
      * @return OK
      */
-    createTaxa(fundoId: string, body: FundoTaxaCreateDto): Observable<void>;
+    updateTaxa(id: number, body: FundoTaxaUpdateDto): Observable<FundoTaxaResponseDto>;
     /**
-     * @return OK
-     */
-    updateTaxa(id: number, body: FundoTaxaUpdateDto): Observable<void>;
-    /**
-     * @return OK
+     * @return No Content
      */
     deleteTaxa(id: number): Observable<void>;
 }
@@ -4656,7 +5094,7 @@ export class TaxasClient implements ITaxasClient {
     /**
      * @return OK
      */
-    getTaxasByFundo(fundoId: string, incluirInativas: boolean): Observable<void> {
+    getTaxasByFundo(fundoId: string, incluirInativas: boolean, httpContext?: HttpContext): Observable<FundoTaxaListDto[]> {
         let url_ = this.baseUrl + "/api/v1/fundos/{fundoId}/taxas?";
         if (fundoId === undefined || fundoId === null)
             throw new globalThis.Error("The parameter 'fundoId' must be defined.");
@@ -4670,7 +5108,9 @@ export class TaxasClient implements ITaxasClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -4681,14 +5121,14 @@ export class TaxasClient implements ITaxasClient {
                 try {
                     return this.processGetTaxasByFundo(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundoTaxaListDto[]>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundoTaxaListDto[]>;
         }));
     }
 
-    protected processGetTaxasByFundo(response: HttpResponseBase): Observable<void> {
+    protected processGetTaxasByFundo(response: HttpResponseBase): Observable<FundoTaxaListDto[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -4697,7 +5137,9 @@ export class TaxasClient implements ITaxasClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundoTaxaListDto[];
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -4708,9 +5150,9 @@ export class TaxasClient implements ITaxasClient {
     }
 
     /**
-     * @return OK
+     * @return Created
      */
-    createTaxa(fundoId: string, body: FundoTaxaCreateDto): Observable<void> {
+    createTaxa(fundoId: string, body: FundoTaxaCreateDto, httpContext?: HttpContext): Observable<FundoTaxaResponseDto> {
         let url_ = this.baseUrl + "/api/v1/fundos/{fundoId}/taxas";
         if (fundoId === undefined || fundoId === null)
             throw new globalThis.Error("The parameter 'fundoId' must be defined.");
@@ -4723,8 +5165,10 @@ export class TaxasClient implements ITaxasClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -4735,23 +5179,29 @@ export class TaxasClient implements ITaxasClient {
                 try {
                     return this.processCreateTaxa(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundoTaxaResponseDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundoTaxaResponseDto>;
         }));
     }
 
-    protected processCreateTaxa(response: HttpResponseBase): Observable<void> {
+    protected processCreateTaxa(response: HttpResponseBase): Observable<FundoTaxaResponseDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result201: any = null;
+            result201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundoTaxaResponseDto;
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -4764,7 +5214,7 @@ export class TaxasClient implements ITaxasClient {
     /**
      * @return OK
      */
-    updateTaxa(id: number, body: FundoTaxaUpdateDto): Observable<void> {
+    updateTaxa(id: number, body: FundoTaxaUpdateDto, httpContext?: HttpContext): Observable<FundoTaxaResponseDto> {
         let url_ = this.baseUrl + "/api/v1/taxas/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -4777,8 +5227,10 @@ export class TaxasClient implements ITaxasClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -4789,14 +5241,14 @@ export class TaxasClient implements ITaxasClient {
                 try {
                     return this.processUpdateTaxa(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundoTaxaResponseDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundoTaxaResponseDto>;
         }));
     }
 
-    protected processUpdateTaxa(response: HttpResponseBase): Observable<void> {
+    protected processUpdateTaxa(response: HttpResponseBase): Observable<FundoTaxaResponseDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -4805,7 +5257,17 @@ export class TaxasClient implements ITaxasClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundoTaxaResponseDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -4816,9 +5278,9 @@ export class TaxasClient implements ITaxasClient {
     }
 
     /**
-     * @return OK
+     * @return No Content
      */
-    deleteTaxa(id: number): Observable<void> {
+    deleteTaxa(id: number, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/v1/taxas/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -4828,6 +5290,7 @@ export class TaxasClient implements ITaxasClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
             })
         };
@@ -4853,9 +5316,13 @@ export class TaxasClient implements ITaxasClient {
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return _observableOf(null as any);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -4870,11 +5337,11 @@ export interface ITransaction_StatusesClient {
     /**
      * @return OK
      */
-    getAllTransactionStatuses(): Observable<void>;
+    getAllTransactionStatuses(): Observable<TransactionStatusDto[]>;
     /**
      * @return OK
      */
-    getTransactionStatusById(id: number): Observable<void>;
+    getTransactionStatusById(id: number): Observable<TransactionStatusDto>;
 }
 
 @Injectable({
@@ -4893,14 +5360,16 @@ export class Transaction_StatusesClient implements ITransaction_StatusesClient {
     /**
      * @return OK
      */
-    getAllTransactionStatuses(): Observable<void> {
+    getAllTransactionStatuses(httpContext?: HttpContext): Observable<TransactionStatusDto[]> {
         let url_ = this.baseUrl + "/api/transactions/status";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -4911,14 +5380,14 @@ export class Transaction_StatusesClient implements ITransaction_StatusesClient {
                 try {
                     return this.processGetAllTransactionStatuses(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<TransactionStatusDto[]>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<TransactionStatusDto[]>;
         }));
     }
 
-    protected processGetAllTransactionStatuses(response: HttpResponseBase): Observable<void> {
+    protected processGetAllTransactionStatuses(response: HttpResponseBase): Observable<TransactionStatusDto[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -4927,7 +5396,9 @@ export class Transaction_StatusesClient implements ITransaction_StatusesClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as TransactionStatusDto[];
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -4940,7 +5411,7 @@ export class Transaction_StatusesClient implements ITransaction_StatusesClient {
     /**
      * @return OK
      */
-    getTransactionStatusById(id: number): Observable<void> {
+    getTransactionStatusById(id: number, httpContext?: HttpContext): Observable<TransactionStatusDto> {
         let url_ = this.baseUrl + "/api/transactions/status/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -4950,7 +5421,9 @@ export class Transaction_StatusesClient implements ITransaction_StatusesClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -4961,14 +5434,14 @@ export class Transaction_StatusesClient implements ITransaction_StatusesClient {
                 try {
                     return this.processGetTransactionStatusById(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<TransactionStatusDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<TransactionStatusDto>;
         }));
     }
 
-    protected processGetTransactionStatusById(response: HttpResponseBase): Observable<void> {
+    protected processGetTransactionStatusById(response: HttpResponseBase): Observable<TransactionStatusDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -4977,7 +5450,13 @@ export class Transaction_StatusesClient implements ITransaction_StatusesClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as TransactionStatusDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -4993,11 +5472,11 @@ export interface ITransaction_SubTypesClient {
      * @param typeId (optional) 
      * @return OK
      */
-    getAllTransactionSubTypes(typeId?: number | undefined): Observable<void>;
+    getAllTransactionSubTypes(typeId?: number | undefined): Observable<TransactionSubTypeDto[]>;
     /**
      * @return OK
      */
-    getTransactionSubTypeById(id: number): Observable<void>;
+    getTransactionSubTypeById(id: number): Observable<TransactionSubTypeDto>;
 }
 
 @Injectable({
@@ -5017,7 +5496,7 @@ export class Transaction_SubTypesClient implements ITransaction_SubTypesClient {
      * @param typeId (optional) 
      * @return OK
      */
-    getAllTransactionSubTypes(typeId?: number | undefined): Observable<void> {
+    getAllTransactionSubTypes(typeId?: number | undefined, httpContext?: HttpContext): Observable<TransactionSubTypeDto[]> {
         let url_ = this.baseUrl + "/api/transactions/subtypes?";
         if (typeId === null)
             throw new globalThis.Error("The parameter 'typeId' cannot be null.");
@@ -5028,7 +5507,9 @@ export class Transaction_SubTypesClient implements ITransaction_SubTypesClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -5039,14 +5520,14 @@ export class Transaction_SubTypesClient implements ITransaction_SubTypesClient {
                 try {
                     return this.processGetAllTransactionSubTypes(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<TransactionSubTypeDto[]>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<TransactionSubTypeDto[]>;
         }));
     }
 
-    protected processGetAllTransactionSubTypes(response: HttpResponseBase): Observable<void> {
+    protected processGetAllTransactionSubTypes(response: HttpResponseBase): Observable<TransactionSubTypeDto[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -5055,7 +5536,9 @@ export class Transaction_SubTypesClient implements ITransaction_SubTypesClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as TransactionSubTypeDto[];
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -5068,7 +5551,7 @@ export class Transaction_SubTypesClient implements ITransaction_SubTypesClient {
     /**
      * @return OK
      */
-    getTransactionSubTypeById(id: number): Observable<void> {
+    getTransactionSubTypeById(id: number, httpContext?: HttpContext): Observable<TransactionSubTypeDto> {
         let url_ = this.baseUrl + "/api/transactions/subtypes/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -5078,7 +5561,9 @@ export class Transaction_SubTypesClient implements ITransaction_SubTypesClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -5089,14 +5574,14 @@ export class Transaction_SubTypesClient implements ITransaction_SubTypesClient {
                 try {
                     return this.processGetTransactionSubTypeById(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<TransactionSubTypeDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<TransactionSubTypeDto>;
         }));
     }
 
-    protected processGetTransactionSubTypeById(response: HttpResponseBase): Observable<void> {
+    protected processGetTransactionSubTypeById(response: HttpResponseBase): Observable<TransactionSubTypeDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -5105,7 +5590,13 @@ export class Transaction_SubTypesClient implements ITransaction_SubTypesClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as TransactionSubTypeDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -5120,11 +5611,11 @@ export interface ITransaction_TypesClient {
     /**
      * @return OK
      */
-    getAllTransactionTypes(): Observable<void>;
+    getAllTransactionTypes(): Observable<TransactionTypeDto[]>;
     /**
      * @return OK
      */
-    getTransactionTypeById(id: number): Observable<void>;
+    getTransactionTypeById(id: number): Observable<TransactionTypeDto>;
 }
 
 @Injectable({
@@ -5143,14 +5634,16 @@ export class Transaction_TypesClient implements ITransaction_TypesClient {
     /**
      * @return OK
      */
-    getAllTransactionTypes(): Observable<void> {
+    getAllTransactionTypes(httpContext?: HttpContext): Observable<TransactionTypeDto[]> {
         let url_ = this.baseUrl + "/api/transactions/types";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -5161,14 +5654,14 @@ export class Transaction_TypesClient implements ITransaction_TypesClient {
                 try {
                     return this.processGetAllTransactionTypes(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<TransactionTypeDto[]>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<TransactionTypeDto[]>;
         }));
     }
 
-    protected processGetAllTransactionTypes(response: HttpResponseBase): Observable<void> {
+    protected processGetAllTransactionTypes(response: HttpResponseBase): Observable<TransactionTypeDto[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -5177,7 +5670,9 @@ export class Transaction_TypesClient implements ITransaction_TypesClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as TransactionTypeDto[];
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -5190,7 +5685,7 @@ export class Transaction_TypesClient implements ITransaction_TypesClient {
     /**
      * @return OK
      */
-    getTransactionTypeById(id: number): Observable<void> {
+    getTransactionTypeById(id: number, httpContext?: HttpContext): Observable<TransactionTypeDto> {
         let url_ = this.baseUrl + "/api/transactions/types/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -5200,7 +5695,9 @@ export class Transaction_TypesClient implements ITransaction_TypesClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -5211,14 +5708,14 @@ export class Transaction_TypesClient implements ITransaction_TypesClient {
                 try {
                     return this.processGetTransactionTypeById(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<TransactionTypeDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<TransactionTypeDto>;
         }));
     }
 
-    protected processGetTransactionTypeById(response: HttpResponseBase): Observable<void> {
+    protected processGetTransactionTypeById(response: HttpResponseBase): Observable<TransactionTypeDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -5227,7 +5724,13 @@ export class Transaction_TypesClient implements ITransaction_TypesClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as TransactionTypeDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -5247,17 +5750,17 @@ export interface ITransactionsClient {
      * @param filter (optional) 
      * @return OK
      */
-    getAllTransactions(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined): Observable<void>;
+    getAllTransactions(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined): Observable<PagedResult_1OfOfTransactionDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
+    /**
+     * @return Created
+     */
+    createTransaction(body: CreateTransactionDto): Observable<TransactionDto>;
     /**
      * @return OK
      */
-    createTransaction(body: CreateTransactionDto): Observable<void>;
+    getTransactionById(id: number): Observable<TransactionDto>;
     /**
-     * @return OK
-     */
-    getTransactionById(id: number): Observable<void>;
-    /**
-     * @return OK
+     * @return No Content
      */
     updateTransaction(id: number, body: UpdateTransactionDto): Observable<void>;
 }
@@ -5283,7 +5786,7 @@ export class TransactionsClient implements ITransactionsClient {
      * @param filter (optional) 
      * @return OK
      */
-    getAllTransactions(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined): Observable<void> {
+    getAllTransactions(limit?: number | undefined, offset?: number | undefined, sortBy?: string | undefined, sortDirection?: string | undefined, filter?: string | undefined, httpContext?: HttpContext): Observable<PagedResult_1OfOfTransactionDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         let url_ = this.baseUrl + "/api/transactions?";
         if (limit === null)
             throw new globalThis.Error("The parameter 'limit' cannot be null.");
@@ -5310,7 +5813,9 @@ export class TransactionsClient implements ITransactionsClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -5321,14 +5826,14 @@ export class TransactionsClient implements ITransactionsClient {
                 try {
                     return this.processGetAllTransactions(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<PagedResult_1OfOfTransactionDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<PagedResult_1OfOfTransactionDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null>;
         }));
     }
 
-    protected processGetAllTransactions(response: HttpResponseBase): Observable<void> {
+    protected processGetAllTransactions(response: HttpResponseBase): Observable<PagedResult_1OfOfTransactionDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -5337,7 +5842,9 @@ export class TransactionsClient implements ITransactionsClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResult_1OfOfTransactionDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null;
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -5348,9 +5855,9 @@ export class TransactionsClient implements ITransactionsClient {
     }
 
     /**
-     * @return OK
+     * @return Created
      */
-    createTransaction(body: CreateTransactionDto): Observable<void> {
+    createTransaction(body: CreateTransactionDto, httpContext?: HttpContext): Observable<TransactionDto> {
         let url_ = this.baseUrl + "/api/transactions";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -5360,8 +5867,10 @@ export class TransactionsClient implements ITransactionsClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -5372,23 +5881,37 @@ export class TransactionsClient implements ITransactionsClient {
                 try {
                     return this.processCreateTransaction(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<TransactionDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<TransactionDto>;
         }));
     }
 
-    protected processCreateTransaction(response: HttpResponseBase): Observable<void> {
+    protected processCreateTransaction(response: HttpResponseBase): Observable<TransactionDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result201: any = null;
+            result201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as TransactionDto;
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            }));
+        } else if (status === 409) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Conflict", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -5401,7 +5924,7 @@ export class TransactionsClient implements ITransactionsClient {
     /**
      * @return OK
      */
-    getTransactionById(id: number): Observable<void> {
+    getTransactionById(id: number, httpContext?: HttpContext): Observable<TransactionDto> {
         let url_ = this.baseUrl + "/api/transactions/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -5411,7 +5934,9 @@ export class TransactionsClient implements ITransactionsClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -5422,14 +5947,14 @@ export class TransactionsClient implements ITransactionsClient {
                 try {
                     return this.processGetTransactionById(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<TransactionDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<TransactionDto>;
         }));
     }
 
-    protected processGetTransactionById(response: HttpResponseBase): Observable<void> {
+    protected processGetTransactionById(response: HttpResponseBase): Observable<TransactionDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -5438,7 +5963,13 @@ export class TransactionsClient implements ITransactionsClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as TransactionDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -5449,9 +5980,9 @@ export class TransactionsClient implements ITransactionsClient {
     }
 
     /**
-     * @return OK
+     * @return No Content
      */
-    updateTransaction(id: number, body: UpdateTransactionDto): Observable<void> {
+    updateTransaction(id: number, body: UpdateTransactionDto, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/transactions/{id}";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -5464,6 +5995,7 @@ export class TransactionsClient implements ITransactionsClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
             })
@@ -5490,9 +6022,17 @@ export class TransactionsClient implements ITransactionsClient {
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return _observableOf(null as any);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -5507,7 +6047,7 @@ export interface IUsersClient {
     /**
      * @return OK
      */
-    getCurrentUser(): Observable<void>;
+    getCurrentUser(): Observable<UserDto>;
 }
 
 @Injectable({
@@ -5526,14 +6066,16 @@ export class UsersClient implements IUsersClient {
     /**
      * @return OK
      */
-    getCurrentUser(): Observable<void> {
+    getCurrentUser(httpContext?: HttpContext): Observable<UserDto> {
         let url_ = this.baseUrl + "/api/users/me";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -5544,14 +6086,14 @@ export class UsersClient implements IUsersClient {
                 try {
                     return this.processGetCurrentUser(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<UserDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<UserDto>;
         }));
     }
 
-    protected processGetCurrentUser(response: HttpResponseBase): Observable<void> {
+    protected processGetCurrentUser(response: HttpResponseBase): Observable<UserDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -5560,7 +6102,13 @@ export class UsersClient implements IUsersClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as UserDto;
+            return _observableOf(result200);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -5575,13 +6123,13 @@ export interface IVinculosClient {
     /**
      * @return OK
      */
-    getVinculosByFundo(fundoId: string, incluirEncerrados: boolean): Observable<void>;
+    getVinculosByFundo(fundoId: string, incluirEncerrados: boolean): Observable<FundoVinculoDto[]>;
     /**
-     * @return OK
+     * @return Created
      */
-    createVinculo(fundoId: string, body: CreateFundoVinculoDto): Observable<void>;
+    createVinculo(fundoId: string, body: CreateFundoVinculoDto): Observable<FundoVinculoDto>;
     /**
-     * @return OK
+     * @return No Content
      */
     encerrarVinculo(id: number, body: EncerrarVinculoDto): Observable<void>;
 }
@@ -5602,7 +6150,7 @@ export class VinculosClient implements IVinculosClient {
     /**
      * @return OK
      */
-    getVinculosByFundo(fundoId: string, incluirEncerrados: boolean): Observable<void> {
+    getVinculosByFundo(fundoId: string, incluirEncerrados: boolean, httpContext?: HttpContext): Observable<FundoVinculoDto[]> {
         let url_ = this.baseUrl + "/api/v1/fundos/{fundoId}/vinculos?";
         if (fundoId === undefined || fundoId === null)
             throw new globalThis.Error("The parameter 'fundoId' must be defined.");
@@ -5616,7 +6164,9 @@ export class VinculosClient implements IVinculosClient {
         let options_ : any = {
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -5627,14 +6177,14 @@ export class VinculosClient implements IVinculosClient {
                 try {
                     return this.processGetVinculosByFundo(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundoVinculoDto[]>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundoVinculoDto[]>;
         }));
     }
 
-    protected processGetVinculosByFundo(response: HttpResponseBase): Observable<void> {
+    protected processGetVinculosByFundo(response: HttpResponseBase): Observable<FundoVinculoDto[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -5643,7 +6193,9 @@ export class VinculosClient implements IVinculosClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundoVinculoDto[];
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -5654,9 +6206,9 @@ export class VinculosClient implements IVinculosClient {
     }
 
     /**
-     * @return OK
+     * @return Created
      */
-    createVinculo(fundoId: string, body: CreateFundoVinculoDto): Observable<void> {
+    createVinculo(fundoId: string, body: CreateFundoVinculoDto, httpContext?: HttpContext): Observable<FundoVinculoDto> {
         let url_ = this.baseUrl + "/api/v1/fundos/{fundoId}/vinculos";
         if (fundoId === undefined || fundoId === null)
             throw new globalThis.Error("The parameter 'fundoId' must be defined.");
@@ -5669,8 +6221,10 @@ export class VinculosClient implements IVinculosClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "application/json"
             })
         };
 
@@ -5681,23 +6235,29 @@ export class VinculosClient implements IVinculosClient {
                 try {
                     return this.processCreateVinculo(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<FundoVinculoDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<FundoVinculoDto>;
         }));
     }
 
-    protected processCreateVinculo(response: HttpResponseBase): Observable<void> {
+    protected processCreateVinculo(response: HttpResponseBase): Observable<FundoVinculoDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result201: any = null;
+            result201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FundoVinculoDto;
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Bad Request", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -5708,9 +6268,9 @@ export class VinculosClient implements IVinculosClient {
     }
 
     /**
-     * @return OK
+     * @return No Content
      */
-    encerrarVinculo(id: number, body: EncerrarVinculoDto): Observable<void> {
+    encerrarVinculo(id: number, body: EncerrarVinculoDto, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/v1/vinculos/{id}/encerrar";
         if (id === undefined || id === null)
             throw new globalThis.Error("The parameter 'id' must be defined.");
@@ -5723,6 +6283,7 @@ export class VinculosClient implements IVinculosClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
             })
@@ -5749,9 +6310,13 @@ export class VinculosClient implements IVinculosClient {
             (response as any).error instanceof Blob ? (response as any).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return _observableOf(null as any);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("Not Found", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -5789,7 +6354,7 @@ export class Worker_NotificationsClient implements IWorker_NotificationsClient {
     Broadcasts to the user who created the transaction via SignalR.
      * @return OK
      */
-    transactionProcessed(body: TransactionProcessedNotification): Observable<void> {
+    transactionProcessed(body: TransactionProcessedNotification, httpContext?: HttpContext): Observable<void> {
         let url_ = this.baseUrl + "/api/worker-notifications/transaction-processed";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -5799,6 +6364,7 @@ export class Worker_NotificationsClient implements IWorker_NotificationsClient {
             body: content_,
             observe: "response",
             responseType: "blob",
+            context: httpContext,
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
             })
@@ -5854,6 +6420,86 @@ export interface TransactionProcessedNotification {
     correlationId?: string | undefined;
     /** User ID of the person who created the transaction (may be null for batch operations). */
     createdByUserId?: string | undefined;
+}
+
+export interface AccountDto {
+    id?: number;
+    code?: number;
+    name?: string | undefined;
+    typeId?: number;
+    typeDescription?: string | undefined;
+    status?: AccountStatus;
+    statusDescription?: string | undefined;
+    normalBalance?: NormalBalance;
+    normalBalanceDescription?: string | undefined;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
+    deactivatedAt?: Date | undefined;
+}
+
+export interface AccountTypeDto {
+    id?: number;
+    description?: string | undefined;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
+}
+
+export interface AccountsByTypeReportDto {
+    typeId?: number;
+    typeDescription?: string | undefined;
+    activeAccountCount?: number;
+}
+
+export interface AuditLogDto {
+    id?: number;
+    entityName?: string | undefined;
+    entityId?: string | undefined;
+    eventType?: string | undefined;
+    performedByUserId?: string | undefined;
+    performedAt?: Date;
+    dataBefore?: any | undefined;
+    dataAfter?: any | undefined;
+    correlationId?: string | undefined;
+    requestId?: string | undefined;
+    source?: string | undefined;
+}
+
+export interface CalendarioDto {
+    id?: number;
+    data?: Date;
+    diaUtil?: boolean;
+    tipoDia?: TipoDia;
+    tipoDiaDescricao?: string | undefined;
+    praca?: Praca;
+    pracaDescricao?: string | undefined;
+    descricao?: string | undefined;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
+}
+
+export interface ClassificacaoAnbimaDto {
+    id?: number;
+    codigo?: string | undefined;
+    nome?: string | undefined;
+    nivel1?: string | undefined;
+    nivel2?: string | undefined;
+    nivel3?: string | undefined;
+    classificacaoCvm?: string | undefined;
+    descricao?: string | undefined;
+    nomeCompleto?: string | undefined;
+}
+
+export interface CoreJobDto {
+    id?: number;
+    referenceId?: string | undefined;
+    status?: JobStatus;
+    statusDescription?: string | undefined;
+    jobDescription?: string | undefined;
+    creationDate?: Date;
+    runningDate?: Date | undefined;
+    finishedDate?: Date | undefined;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
 }
 
 export interface CreateAccountDto {
@@ -5948,6 +6594,24 @@ export interface EncerrarVinculoDto {
     dataFim: Date;
 }
 
+export interface FundAutocompleteDto {
+    id?: number;
+    code?: string | undefined;
+    name?: string | undefined;
+}
+
+export interface FundDto {
+    id?: number;
+    code?: string | undefined;
+    name?: string | undefined;
+    baseCurrency?: string | undefined;
+    inceptionDate?: Date;
+    valuationFrequency?: ValuationFrequency;
+    valuationFrequencyDescription?: string | undefined;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
+}
+
 export interface CnpjDisponibilidadeResponseDto {
     cnpj?: string | undefined;
     disponivel?: boolean;
@@ -5975,6 +6639,55 @@ export interface FundoCreateDto {
     permiteAlavancagem?: boolean;
     aceitaCripto?: boolean;
     percentualExterior?: number;
+}
+
+export interface FundoListDto {
+    id?: string;
+    cnpj?: string | undefined;
+    cnpjFormatado?: string | undefined;
+    razaoSocial?: string | undefined;
+    nomeCurto?: string | undefined;
+    tipoFundo?: TipoFundo;
+    tipoFundoDescricao?: string | undefined;
+    situacao?: SituacaoFundo;
+    situacaoDescricao?: string | undefined;
+    progressoCadastro?: number;
+}
+
+export interface FundoResponseDto {
+    id?: string;
+    cnpj?: string | undefined;
+    cnpjFormatado?: string | undefined;
+    razaoSocial?: string | undefined;
+    nomeFantasia?: string | undefined;
+    nomeCurto?: string | undefined;
+    dataConstituicao?: Date | undefined;
+    dataInicioAtividade?: Date | undefined;
+    tipoFundo?: TipoFundo;
+    tipoFundoDescricao?: string | undefined;
+    classificacaoCVM?: ClassificacaoCVM;
+    classificacaoCVMDescricao?: string | undefined;
+    classificacaoAnbima?: string | undefined;
+    codigoAnbima?: string | undefined;
+    situacao?: SituacaoFundo;
+    situacaoDescricao?: string | undefined;
+    prazo?: PrazoFundo;
+    prazoDescricao?: string | undefined;
+    publicoAlvo?: PublicoAlvo;
+    publicoAlvoDescricao?: string | undefined;
+    tributacao?: TributacaoFundo;
+    tributacaoDescricao?: string | undefined;
+    condominio?: TipoCondominio;
+    condominioDescricao?: string | undefined;
+    exclusivo?: boolean;
+    reservado?: boolean;
+    permiteAlavancagem?: boolean;
+    aceitaCripto?: boolean;
+    percentualExterior?: number;
+    wizardCompleto?: boolean;
+    progressoCadastro?: number;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
 }
 
 export interface FundoUpdateDto {
@@ -6009,6 +6722,34 @@ export interface FundoClasseCreateDto {
     valorMinimoAplicacao?: number | undefined;
 }
 
+export interface FundoClasseListDto {
+    id?: string;
+    fundoId?: string;
+    codigoClasse?: string | undefined;
+    nomeClasse?: string | undefined;
+    tipoClasseFidc?: TipoClasseFIDC;
+    tipoClasseFidcDescricao?: string | undefined;
+    ativa?: boolean;
+}
+
+export interface FundoClasseResponseDto {
+    id?: string;
+    fundoId?: string;
+    codigoClasse?: string | undefined;
+    nomeClasse?: string | undefined;
+    cnpjClasse?: string | undefined;
+    tipoClasseFidc?: TipoClasseFIDC;
+    tipoClasseFidcDescricao?: string | undefined;
+    ordemSubordinacao?: number | undefined;
+    rentabilidadeAlvo?: number | undefined;
+    responsabilidadeLimitada?: boolean;
+    segregacaoPatrimonial?: boolean;
+    valorMinimoAplicacao?: number | undefined;
+    ativa?: boolean;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
+}
+
 export interface FundoClasseUpdateDto {
     nomeClasse?: string | undefined;
     cnpjClasse?: string | undefined;
@@ -6032,6 +6773,38 @@ export interface FundoPrazoCreateDto {
     permiteParcial?: boolean;
     percentualMinimo?: number | undefined;
     valorMinimo?: number | undefined;
+}
+
+export interface FundoPrazoListDto {
+    id?: number;
+    fundoId?: string;
+    classeId?: string | undefined;
+    tipoPrazo?: TipoPrazoOperacional;
+    tipoPrazoDescricao?: string | undefined;
+    diasCotizacao?: number;
+    diasLiquidacao?: number;
+    horarioLimite?: string;
+    ativo?: boolean;
+}
+
+export interface FundoPrazoResponseDto {
+    id?: number;
+    fundoId?: string;
+    classeId?: string | undefined;
+    tipoPrazo?: TipoPrazoOperacional;
+    tipoPrazoDescricao?: string | undefined;
+    diasCotizacao?: number;
+    diasLiquidacao?: number;
+    diasCarencia?: number | undefined;
+    horarioLimite?: string;
+    diasUteis?: boolean;
+    calendarioId?: number | undefined;
+    permiteParcial?: boolean;
+    percentualMinimo?: number | undefined;
+    valorMinimo?: number | undefined;
+    ativo?: boolean;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
 }
 
 export interface FundoPrazoUpdateDto {
@@ -6060,6 +6833,17 @@ export interface FundoTaxaCreateDto {
     parametrosPerformance?: FundoTaxaPerformanceCreateDto;
 }
 
+export interface FundoTaxaListDto {
+    id?: number;
+    fundoId?: string;
+    classeId?: string | undefined;
+    tipoTaxa?: TipoTaxa;
+    tipoTaxaDescricao?: string | undefined;
+    percentual?: number;
+    dataInicioVigencia?: Date;
+    ativa?: boolean;
+}
+
 export interface FundoTaxaPerformanceCreateDto {
     indexadorId?: number;
     percentualBenchmark?: number;
@@ -6067,6 +6851,43 @@ export interface FundoTaxaPerformanceCreateDto {
     linhaDagua?: boolean;
     periodicidadeCristalizacao?: PeriodicidadeCristalizacao;
     mesCristalizacao?: number | undefined;
+}
+
+export interface FundoTaxaPerformanceResponseDto {
+    id?: number;
+    indexadorId?: number;
+    indexadorNome?: string | undefined;
+    percentualBenchmark?: number;
+    metodoCalculo?: MetodoCalculoPerformance;
+    metodoCalculoDescricao?: string | undefined;
+    linhaDagua?: boolean;
+    periodicidadeCristalizacao?: PeriodicidadeCristalizacao;
+    periodicidadeCristalizacaoDescricao?: string | undefined;
+    mesCristalizacao?: number | undefined;
+}
+
+export interface FundoTaxaResponseDto {
+    id?: number;
+    fundoId?: string;
+    classeId?: string | undefined;
+    tipoTaxa?: TipoTaxa;
+    tipoTaxaDescricao?: string | undefined;
+    percentual?: number;
+    baseCalculo?: BaseCalculoTaxa;
+    baseCalculoDescricao?: string | undefined;
+    periodicidadeProvisao?: PeriodicidadeProvisao;
+    periodicidadeProvisaoDescricao?: string | undefined;
+    periodicidadePagamento?: PeriodicidadePagamento;
+    periodicidadePagamentoDescricao?: string | undefined;
+    diaPagamento?: number | undefined;
+    valorMinimo?: number | undefined;
+    valorMaximo?: number | undefined;
+    dataInicioVigencia?: Date;
+    dataFimVigencia?: Date | undefined;
+    ativa?: boolean;
+    parametrosPerformance?: FundoTaxaPerformanceResponseDto;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
 }
 
 export interface FundoTaxaUpdateDto {
@@ -6079,9 +6900,180 @@ export interface FundoTaxaUpdateDto {
     valorMaximo?: number | undefined;
 }
 
+export interface FundoVinculoDto {
+    id?: number;
+    fundoId?: string;
+    instituicaoId?: number;
+    instituicaoRazaoSocial?: string | undefined;
+    instituicaoCnpj?: string | undefined;
+    tipoVinculo?: TipoVinculoInstitucional;
+    tipoVinculoDescricao?: string | undefined;
+    dataInicio?: Date;
+    dataFim?: Date | undefined;
+    contratoNumero?: string | undefined;
+    observacao?: string | undefined;
+    principal?: boolean;
+    estaVigente?: boolean;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
+}
+
+export interface HistoricoIndexadorDto {
+    id?: number;
+    indexadorId?: number;
+    indexadorCodigo?: string | undefined;
+    dataReferencia?: Date;
+    valor?: number;
+    fatorDiario?: number | undefined;
+    variacaoPercentual?: number | undefined;
+    fonte?: string | undefined;
+    importacaoId?: string | undefined;
+    createdAt?: Date;
+}
+
+export interface ImportB3InstructionFileResponse {
+    coreJobId?: number;
+    referenceId?: string | undefined;
+    status?: string | undefined;
+    message?: string | undefined;
+}
+
+export interface IndexadorDto {
+    id?: number;
+    codigo?: string | undefined;
+    nome?: string | undefined;
+    tipo?: IndexadorTipo;
+    tipoDescricao?: string | undefined;
+    fonte?: string | undefined;
+    periodicidade?: Periodicidade;
+    periodicidadeDescricao?: string | undefined;
+    fatorAcumulado?: number | undefined;
+    dataBase?: Date | undefined;
+    urlFonte?: string | undefined;
+    importacaoAutomatica?: boolean;
+    ativo?: boolean;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
+    ultimoValor?: number | undefined;
+    ultimaData?: Date | undefined;
+    historicoCount?: number;
+}
+
+export interface InstituicaoDto {
+    id?: number;
+    cnpj?: string | undefined;
+    razaoSocial?: string | undefined;
+    nomeFantasia?: string | undefined;
+    ativo?: boolean;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
+}
+
+export interface ListarClassificacoesAnbimaResponse {
+    items?: ClassificacaoAnbimaDto[] | undefined;
+    total?: number;
+    classificacaoCvmFiltrada?: string | undefined;
+    mensagem?: string | undefined;
+}
+
+export interface NiveisClassificacaoAnbimaResponse {
+    nivel1?: NivelContagem[] | undefined;
+    nivel2PorNivel1?: { [key: string]: NivelContagem[]; } | undefined;
+}
+
+export interface NivelContagem {
+    valor?: string | undefined;
+    quantidade?: number;
+}
+
+export interface SecurityAutocompleteDto {
+    id?: number;
+    ticker?: string | undefined;
+    name?: string | undefined;
+}
+
+export interface SecurityDto {
+    id?: number;
+    name?: string | undefined;
+    ticker?: string | undefined;
+    isin?: string | undefined;
+    type?: SecurityType;
+    typeDescription?: string | undefined;
+    currency?: string | undefined;
+    status?: SecurityStatus;
+    statusDescription?: string | undefined;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
+    deactivatedAt?: Date | undefined;
+}
+
+export interface SecurityTypeDto {
+    value?: number;
+    name?: string | undefined;
+    description?: string | undefined;
+}
+
 export interface TestConnectionRequest {
     referenceId?: string | undefined;
     jobDescription?: string | undefined;
+}
+
+export interface TestConnectionResponse {
+    coreJobId?: number;
+    referenceId?: string | undefined;
+    status?: string | undefined;
+    message?: string | undefined;
+    correlationId?: string | undefined;
+}
+
+export interface TransactionDto {
+    id?: number;
+    fundId?: number;
+    fundCode?: string | undefined;
+    fundName?: string | undefined;
+    securityId?: number | undefined;
+    securityTicker?: string | undefined;
+    securityName?: string | undefined;
+    transactionSubTypeId?: number;
+    transactionSubTypeDescription?: string | undefined;
+    transactionTypeId?: number;
+    transactionTypeDescription?: string | undefined;
+    tradeDate?: Date;
+    settleDate?: Date;
+    quantity?: number;
+    price?: number;
+    amount?: number;
+    currency?: string | undefined;
+    statusId?: number;
+    statusDescription?: string | undefined;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
+}
+
+export interface TransactionStatusDto {
+    id?: number;
+    shortDescription?: string | undefined;
+    longDescription?: string | undefined;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
+}
+
+export interface TransactionSubTypeDto {
+    id?: number;
+    typeId?: number;
+    typeDescription?: string | undefined;
+    shortDescription?: string | undefined;
+    longDescription?: string | undefined;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
+}
+
+export interface TransactionTypeDto {
+    id?: number;
+    shortDescription?: string | undefined;
+    longDescription?: string | undefined;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
 }
 
 export interface UpdateAccountDto {
@@ -6138,6 +7130,24 @@ export interface UpdateTransactionDto {
     amount?: number;
     currency?: string | undefined;
     statusId?: number;
+}
+
+export interface UserDto {
+    id?: number;
+    authProviderId?: string | undefined;
+    provider?: string | undefined;
+    email?: string | undefined;
+    name?: string | undefined;
+    lastLoginAt?: Date;
+    createdAt?: Date;
+    updatedAt?: Date | undefined;
+}
+
+export interface VerificarCompatibilidadeResponse {
+    compativel?: boolean;
+    codigoAnbima?: string | undefined;
+    classificacaoCvm?: string | undefined;
+    mensagem?: string | undefined;
 }
 
 export interface FundoWizardRequestDto {
@@ -6292,6 +7302,91 @@ export interface WizardVinculoDto {
     responsavelNome?: string | undefined;
     responsavelEmail?: string | undefined;
     responsavelTelefone?: string | undefined;
+}
+
+export interface PagedResult_1OfOfAccountDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null {
+    items?: AccountDto[] | undefined;
+    totalCount?: number;
+    limit?: number;
+    offset?: number;
+}
+
+export interface PagedResult_1OfOfAuditLogDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null {
+    items?: AuditLogDto[] | undefined;
+    totalCount?: number;
+    limit?: number;
+    offset?: number;
+}
+
+export interface PagedResult_1OfOfCalendarioDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null {
+    items?: CalendarioDto[] | undefined;
+    totalCount?: number;
+    limit?: number;
+    offset?: number;
+}
+
+export interface PagedResult_1OfOfCoreJobDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null {
+    items?: CoreJobDto[] | undefined;
+    totalCount?: number;
+    limit?: number;
+    offset?: number;
+}
+
+export interface PagedResult_1OfOfFundDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null {
+    items?: FundDto[] | undefined;
+    totalCount?: number;
+    limit?: number;
+    offset?: number;
+}
+
+export interface PagedResult_1OfOfFundoListDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null {
+    items?: FundoListDto[] | undefined;
+    totalCount?: number;
+    limit?: number;
+    offset?: number;
+}
+
+export interface PagedResult_1OfOfHistoricoIndexadorDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null {
+    items?: HistoricoIndexadorDto[] | undefined;
+    totalCount?: number;
+    limit?: number;
+    offset?: number;
+}
+
+export interface PagedResult_1OfOfIndexadorDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null {
+    items?: IndexadorDto[] | undefined;
+    totalCount?: number;
+    limit?: number;
+    offset?: number;
+}
+
+export interface PagedResult_1OfOfInstituicaoDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null {
+    items?: InstituicaoDto[] | undefined;
+    totalCount?: number;
+    limit?: number;
+    offset?: number;
+}
+
+export interface PagedResult_1OfOfSecurityDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null {
+    items?: SecurityDto[] | undefined;
+    totalCount?: number;
+    limit?: number;
+    offset?: number;
+}
+
+export interface PagedResult_1OfOfTransactionDtoAndApplicationAnd_0AndCulture_neutralAndPublicKeyToken_null {
+    items?: TransactionDto[] | undefined;
+    totalCount?: number;
+    limit?: number;
+    offset?: number;
+}
+
+export interface ImportHistoricoIndexadorResult {
+    totalRows?: number;
+    importedRows?: number;
+    skippedRows?: number;
+    overwrittenRows?: number;
+    errors?: string[] | undefined;
 }
 
 export enum BaseCalculoTaxa {
@@ -6460,6 +7555,13 @@ export enum IndexadorTipo {
     _7 = 7,
 }
 
+export enum JobStatus {
+    _1 = 1,
+    _2 = 2,
+    _3 = 3,
+    _4 = 4,
+}
+
 export enum NormalBalance {
     _1 = 1,
     _2 = 2,
@@ -6477,6 +7579,11 @@ export enum Praca {
     _3 = 3,
     _4 = 4,
     _5 = 5,
+}
+
+export enum SecurityStatus {
+    _1 = 1,
+    _2 = 2,
 }
 
 export enum SecurityType {
@@ -6518,6 +7625,13 @@ export enum ValuationFrequency {
 export interface FileParameter {
     data: any;
     fileName: string;
+}
+
+export interface FileResponse {
+    data: Blob;
+    status: number;
+    fileName?: string;
+    headers?: { [name: string]: any };
 }
 
 export class ApiException extends Error {

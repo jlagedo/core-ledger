@@ -41,7 +41,12 @@
       "Bash(wc:*)",
       "Bash(npx nswag:*)",
       "Bash(nx affected:*)",
-      "Bash(npx nx affected -t build --base=HEAD~1)"
+      "Bash(npx nx affected -t build --base=HEAD~1)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__plugin_context7_context7__query-docs",
+      "mcp__microsoft-docs__microsoft_docs_search",
+      "Bash(netstat:*)",
+      "Bash(ss:*)"
     ]
   },
   "enabledMcpjsonServers": [
