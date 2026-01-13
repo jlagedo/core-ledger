@@ -27,7 +27,21 @@
       "Bash(exit 1)",
       "Bash(dotnet list:*)",
       "Bash(dotnet build:*)",
-      "Bash(dotnet add package:*)"
+      "Bash(dotnet add package:*)",
+      "Bash(git rm:*)",
+      "Bash(git push:*)",
+      "Bash(xargs:*)",
+      "Bash(nx test:*)",
+      "Bash(npx nx test:*)",
+      "mcp__angular-cli__list_projects",
+      "Bash(nx run:*)",
+      "Bash(npx nx run:*)",
+      "Bash(npx knip)",
+      "Bash(grep:*)",
+      "Bash(wc:*)",
+      "Bash(npx nswag:*)",
+      "Bash(nx affected:*)",
+      "Bash(npx nx affected -t build --base=HEAD~1)"
     ]
   },
   "enabledMcpjsonServers": [

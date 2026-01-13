@@ -1,117 +1,60 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { type CoreLedgerApiClient, createCoreLedgerApiClient } from '@core-ledger/api-client';
-import { AngularRequestAdapter } from './angular-request-adapter';
+import {
+  FundosClient,
+  CalendárioClient,
+  IndexadoresClient,
+  UsersClient,
+  AccountsClient,
+  SecuritiesClient,
+  TransactionsClient,
+  ANBIMA_ClassificationsClient,
+  HistoricosIndexadoresClient,
+} from '@core-ledger/api-client';
 
 /**
- * Angular service wrapper for the Kiota-generated Core Ledger API client.
+ * Facade service providing unified access to all NSwag-generated API clients.
  *
- * Provides type-safe access to all API endpoints through the generated client.
- * Integrates with Angular's HttpClient to ensure:
- * - Authentication via HTTP interceptors
- * - Mock API support in development
- * - Consistent error handling
+ * This service simplifies API access by providing named accessors for each client.
+ * Each client is already registered as a singleton (`providedIn: 'root'`),
+ * so this facade is optional - you can inject clients directly if preferred.
  *
  * @example
  * ```typescript
- * // Inject in a component or service
+ * // Using facade service
  * private readonly apiClient = inject(ApiClientService);
+ * this.apiClient.fundos.getAllFundos()
  *
- * // Access API endpoints
- * const funds = await this.apiClient.client.api.v1.fundos.get();
- * const fund = await this.apiClient.client.api.v1.fundos.item('123').get();
- * ```
- *
- * @example
- * ```typescript
- * // Using convenience accessors
- * const funds = await this.apiClient.fundos.get();
- * const accounts = await this.apiClient.accounts.get();
+ * // Or inject clients directly
+ * private readonly fundosClient = inject(FundosClient);
+ * this.fundosClient.getAllFundos()
  * ```
  */
 @Injectable({ providedIn: 'root' })
 export class ApiClientService {
-  private readonly httpClient = inject(HttpClient);
+  /** Fundos (Funds) API - CVM 175 compliant fund management */
+  readonly fundos = inject(FundosClient);
 
-  /**
-   * Kiota-generated API client instance.
-   * Use this to access all API endpoints with full type safety.
-   */
-  readonly client: CoreLedgerApiClient;
+  /** Calendário (Calendar) API - Business days and holidays */
+  readonly calendario = inject(CalendárioClient);
 
-  constructor() {
-    // Create Angular-compatible request adapter
-    const adapter = new AngularRequestAdapter(this.httpClient);
+  /** Indexadores (Indices) API - Financial indices (CDI, IPCA, etc.) */
+  readonly indexadores = inject(IndexadoresClient);
 
-    // Initialize Kiota client
-    // Note: The adapter's getRequestUrl() uses empty baseUrl for relative URLs,
-    // allowing Angular's proxy to route '/api/**' to the backend.
-    this.client = createCoreLedgerApiClient(adapter);
-  }
+  /** Históricos de Indexadores API - Index history data */
+  readonly historicosIndexadores = inject(HistoricosIndexadoresClient);
 
-  // Convenience accessors for common API endpoints
+  /** Users API - User management */
+  readonly users = inject(UsersClient);
 
-  /**
-   * Access to Fundos (Funds) API endpoints
-   * @example await this.apiClient.fundos.get()
-   */
-  get fundos() {
-    return this.client.api.v1.fundos;
-  }
+  /** Accounts API - Chart of accounts */
+  readonly accounts = inject(AccountsClient);
 
-  /**
-   * Access to Accounts API endpoints
-   * @example await this.apiClient.accounts.get()
-   */
-  get accounts() {
-    return this.client.api.accounts;
-  }
+  /** Securities API - Financial instruments */
+  readonly securities = inject(SecuritiesClient);
 
-  /**
-   * Access to Securities API endpoints
-   * @example await this.apiClient.securities.get()
-   */
-  get securities() {
-    return this.client.api.securities;
-  }
+  /** Transactions API - Transaction management */
+  readonly transactions = inject(TransactionsClient);
 
-  /**
-   * Access to Transactions API endpoints
-   * @example await this.apiClient.transactions.get()
-   */
-  get transactions() {
-    return this.client.api.transactions;
-  }
-
-  /**
-   * Access to Indexadores (Indices) API endpoints
-   * @example await this.apiClient.indexadores.get()
-   */
-  get indexadores() {
-    return this.client.api.indexadores;
-  }
-
-  /**
-   * Access to Users API endpoints
-   * @example await this.apiClient.users.me.get()
-   */
-  get users() {
-    return this.client.api.users;
-  }
-
-  /**
-   * Access to Parametros (Parameters) API endpoints
-   * @example await this.apiClient.parametros.classificacoesAnbima.get()
-   */
-  get parametros() {
-    return this.client.api.v1.parametros;
-  }
-
-  /**
-   * Access to Calendario (Calendar) API endpoints
-   * @example await this.apiClient.calendario.get()
-   */
-  get calendario() {
-    return this.client.api.v1.calendario;
-  }
+  /** ANBIMA Classifications API - Fund classification parameters */
+  readonly parametros = inject(ANBIMA_ClassificationsClient);
 }

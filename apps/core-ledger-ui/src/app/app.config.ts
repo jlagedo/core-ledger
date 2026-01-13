@@ -21,11 +21,14 @@ import { mockApiInterceptor } from './api/mock-api.interceptor';
 import { MockApiService } from './api/mock-api.service';
 import { NotificationHubService } from './services/notification-hub.service';
 import { MockNotificationHubService } from './services/mock-notification-hub.service';
+import { API_BASE_URL } from '@core-ledger/api-client';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
+    // NSwag API client base URL (empty for Angular proxy routing)
+    { provide: API_BASE_URL, useValue: '' },
     // Conditional HTTP interceptors based on mock flags
     provideHttpClient(
       withInterceptors([

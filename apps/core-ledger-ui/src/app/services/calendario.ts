@@ -1,7 +1,11 @@
 import { inject, Injectable } from '@angular/core';
-import { from, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiClientService } from '../api/api-client.service';
+import {
+  CreateCalendarioDto,
+  UpdateCalendarioDto,
+} from '@core-ledger/api-client';
 import {
   Calendario,
   CreateCalendario,
@@ -66,62 +70,63 @@ export class CalendarioService {
     sortDirection: 'asc' | 'desc' = 'desc',
     filters?: Record<string, string>
   ): Observable<PaginatedResponse<Calendario>> {
-    return from(
-      this.apiClient.calendario.get({
-        queryParameters: {
-          limit,
-          offset,
-          sortBy,
-          sortDirection,
-          tipoDia: filters?.['tipoDia'] ? parseInt(filters['tipoDia'], 10) : undefined,
-          praca: filters?.['praca'] ? parseInt(filters['praca'], 10) : undefined,
-          diaUtil: filters?.['diaUtil'] ? filters['diaUtil'] === 'true' : undefined,
-          dataInicio: filters?.['dataInicio'],
-          dataFim: filters?.['dataFim'],
-        },
-      })
-    ).pipe(map((response) => response as unknown as PaginatedResponse<Calendario>));
+    return this.apiClient.calendario
+      .getAllCalendarios(
+        limit,
+        offset,
+        sortBy,
+        sortDirection,
+        undefined, // search
+        filters?.['praca'] ? parseInt(filters['praca'], 10) : undefined,
+        filters?.['tipoDia'] ? parseInt(filters['tipoDia'], 10) : undefined,
+        filters?.['diaUtil'] ? filters['diaUtil'] === 'true' : undefined,
+        filters?.['dataInicio'],
+        filters?.['dataFim']
+      )
+      .pipe(map((response) => response as unknown as PaginatedResponse<Calendario>));
   }
 
   /**
    * Obtém um único calendário por ID
    */
   getCalendarioById(id: number): Observable<Calendario> {
-    return from(this.apiClient.calendario.byId(id).get()).pipe(
-      map((response) => response as unknown as Calendario)
-    );
+    return this.apiClient.calendario
+      .getCalendarioById(id)
+      .pipe(map((response) => response as unknown as Calendario));
   }
 
   /**
    * Cria uma nova entrada de calendário
    */
   createCalendario(calendario: CreateCalendario): Observable<Calendario> {
-    return from(
-      this.apiClient.calendario.post({
-        data: calendario.data as any,
-        tipoDia: calendario.tipoDia,
-        praca: calendario.praca,
-        descricao: calendario.descricao,
-      })
-    ).pipe(map((response) => response as unknown as Calendario));
+    // Map local model to NSwag DTO with explicit type handling
+    const dto: CreateCalendarioDto = {
+      data: calendario.data as any,
+      tipoDia: calendario.tipoDia as any,
+      praca: calendario.praca as any,
+      descricao: calendario.descricao ?? undefined,
+    };
+    return this.apiClient.calendario
+      .createCalendario(dto)
+      .pipe(map((response) => response as unknown as Calendario));
   }
 
   /**
    * Atualiza uma entrada de calendário existente
    */
   updateCalendario(id: number, calendario: UpdateCalendario): Observable<void> {
-    return from(
-      this.apiClient.calendario.byId(id).put({
-        tipoDia: calendario.tipoDia,
-        descricao: calendario.descricao,
-      })
-    ).pipe(map(() => void 0));
+    // Map local model to NSwag DTO with explicit type handling
+    const dto: UpdateCalendarioDto = {
+      tipoDia: calendario.tipoDia as any,
+      descricao: calendario.descricao ?? undefined,
+    };
+    return this.apiClient.calendario.updateCalendario(id, dto).pipe(map(() => void 0));
   }
 
   /**
    * Deleta uma entrada de calendário
    */
   deleteCalendario(id: number): Observable<void> {
-    return from(this.apiClient.calendario.byId(id).delete()).pipe(map(() => void 0));
+    return this.apiClient.calendario.deleteCalendario(id).pipe(map(() => void 0));
   }
 }

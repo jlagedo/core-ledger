@@ -17,7 +17,6 @@ import {
   Validators,
 } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NgbInputDatepicker } from '@ng-bootstrap/ng-bootstrap';
 import { WizardStepConfig, WizardStepId } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
 import { IdentificacaoFormData } from '../../models/identificacao.model';
@@ -56,7 +55,7 @@ function dataFuturaValidator(control: AbstractControl): ValidationErrors | null 
  */
 @Component({
   selector: 'app-caracteristicas-step',
-  imports: [ReactiveFormsModule, NgbInputDatepicker],
+  imports: [ReactiveFormsModule],
   templateUrl: './caracteristicas-step.html',
   styleUrl: './caracteristicas-step.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { from, Observable, throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { UserDto } from '../models/user.model';
 import { ApiClientService } from '../api/api-client.service';
@@ -28,7 +28,7 @@ export class UserService {
    * @returns Observable<UserDto>
    */
   fetchCurrentUser(): Observable<UserDto> {
-    return from(this.apiClient.users.me.get()).pipe(
+    return this.apiClient.users.getCurrentUser().pipe(
       map((response) => response as unknown as UserDto),
       catchError((error: HttpErrorResponse) => {
         // Tratamento especial para 503 Serviço Indisponível

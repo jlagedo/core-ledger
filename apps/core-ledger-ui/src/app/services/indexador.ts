@@ -1,9 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { from, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { API_URL } from '../config/api.config';
 import { ApiClientService } from '../api/api-client.service';
+import {
+  CreateIndexadorDto,
+  UpdateIndexadorDto,
+  CreateHistoricoIndexadorDto,
+} from '@core-ledger/api-client';
 import {
   Indexador,
   CreateIndexador,
@@ -110,55 +115,53 @@ export class IndexadorService {
     sortDirection: 'asc' | 'desc' = 'asc',
     filterParams?: Record<string, string>
   ): Observable<PaginatedResponse<Indexador>> {
-    return from(
-      this.apiClient.indexadores.get({
-        queryParameters: {
-          limit,
-          offset,
-          sortBy,
-          sortDirection,
-          filter: filterParams?.['filter'],
-          tipo: filterParams?.['tipo'] ? parseInt(filterParams['tipo'], 10) : undefined,
-          periodicidade: filterParams?.['periodicidade']
-            ? parseInt(filterParams['periodicidade'], 10)
-            : undefined,
-          fonte: filterParams?.['fonte'],
-          ativo: filterParams?.['ativo'] ? filterParams['ativo'] === 'true' : undefined,
-          importacaoAutomatica: filterParams?.['importacaoAutomatica']
-            ? filterParams['importacaoAutomatica'] === 'true'
-            : undefined,
-        },
-      })
-    ).pipe(map((response) => response as unknown as PaginatedResponse<Indexador>));
+    return this.apiClient.indexadores
+      .getAllIndexadores(
+        limit,
+        offset,
+        sortBy,
+        sortDirection,
+        filterParams?.['filter'],
+        filterParams?.['tipo'] ? parseInt(filterParams['tipo'], 10) : undefined,
+        filterParams?.['periodicidade'] ? parseInt(filterParams['periodicidade'], 10) : undefined,
+        filterParams?.['fonte'],
+        filterParams?.['ativo'] ? filterParams['ativo'] === 'true' : undefined,
+        filterParams?.['importacaoAutomatica']
+          ? filterParams['importacaoAutomatica'] === 'true'
+          : undefined
+      )
+      .pipe(map((response) => response as unknown as PaginatedResponse<Indexador>));
   }
 
   /**
    * Gets a single indexador by ID
    */
   getIndexadorById(id: number): Observable<Indexador> {
-    return from(this.apiClient.indexadores.byId(id).get()).pipe(
-      map((response) => response as unknown as Indexador)
-    );
+    return this.apiClient.indexadores
+      .getIndexadorById(id)
+      .pipe(map((response) => response as unknown as Indexador));
   }
 
   /**
    * Creates a new indexador
    */
   createIndexador(indexador: CreateIndexador): Observable<Indexador> {
-    return from(
-      this.apiClient.indexadores.post({
-        codigo: indexador.codigo,
-        nome: indexador.nome,
-        tipo: indexador.tipo,
-        fonte: indexador.fonte,
-        periodicidade: indexador.periodicidade,
-        fatorAcumulado: indexador.fatorAcumulado,
-        dataBase: indexador.dataBase ? new Date(indexador.dataBase) : null,
-        urlFonte: indexador.urlFonte,
-        importacaoAutomatica: indexador.importacaoAutomatica,
-        ativo: indexador.ativo,
-      })
-    ).pipe(map((response) => response as unknown as Indexador));
+    // Map local model to NSwag DTO with explicit type handling
+    const dto: CreateIndexadorDto = {
+      codigo: indexador.codigo,
+      nome: indexador.nome,
+      tipo: indexador.tipo as any,
+      fonte: indexador.fonte ?? undefined,
+      periodicidade: indexador.periodicidade as any,
+      fatorAcumulado: indexador.fatorAcumulado ?? undefined,
+      dataBase: indexador.dataBase ? new Date(indexador.dataBase) : undefined,
+      urlFonte: indexador.urlFonte ?? undefined,
+      importacaoAutomatica: indexador.importacaoAutomatica,
+      ativo: indexador.ativo,
+    };
+    return this.apiClient.indexadores
+      .createIndexador(dto)
+      .pipe(map((response) => response as unknown as Indexador));
   }
 
   /**
@@ -166,24 +169,26 @@ export class IndexadorService {
    * Note: Tipo and Periodicidade cannot be changed after creation
    */
   updateIndexador(id: number, indexador: UpdateIndexador): Observable<Indexador> {
-    return from(
-      this.apiClient.indexadores.byId(id).put({
-        nome: indexador.nome,
-        fonte: indexador.fonte,
-        fatorAcumulado: indexador.fatorAcumulado,
-        dataBase: indexador.dataBase ? new Date(indexador.dataBase) : null,
-        urlFonte: indexador.urlFonte,
-        importacaoAutomatica: indexador.importacaoAutomatica,
-        ativo: indexador.ativo,
-      })
-    ).pipe(map((response) => response as unknown as Indexador));
+    // Map local model to NSwag DTO with explicit type handling
+    const dto: UpdateIndexadorDto = {
+      nome: indexador.nome,
+      fonte: indexador.fonte ?? undefined,
+      fatorAcumulado: indexador.fatorAcumulado ?? undefined,
+      dataBase: indexador.dataBase ? new Date(indexador.dataBase) : undefined,
+      urlFonte: indexador.urlFonte ?? undefined,
+      importacaoAutomatica: indexador.importacaoAutomatica,
+      ativo: indexador.ativo,
+    };
+    return this.apiClient.indexadores
+      .updateIndexador(id, dto)
+      .pipe(map((response) => response as unknown as Indexador));
   }
 
   /**
    * Deletes an indexador
    */
   deleteIndexador(id: number): Observable<void> {
-    return from(this.apiClient.indexadores.byId(id).delete()).pipe(map(() => void 0));
+    return this.apiClient.indexadores.deleteIndexador(id).pipe(map(() => void 0));
   }
 
   /**
@@ -198,44 +203,46 @@ export class IndexadorService {
     dataInicio?: string,
     dataFim?: string
   ): Observable<PaginatedResponse<HistoricoIndexador>> {
-    return from(
-      this.apiClient.indexadores.byId(indexadorId).historico.get({
-        queryParameters: {
-          limit,
-          offset,
-          sortBy,
-          sortDirection,
-          dataInicio: dataInicio as any,
-          dataFim: dataFim as any,
-        },
-      })
-    ).pipe(map((response) => response as unknown as PaginatedResponse<HistoricoIndexador>));
+    return this.apiClient.indexadores
+      .getIndexadorHistorico(
+        indexadorId,
+        limit,
+        offset,
+        sortBy,
+        sortDirection,
+        undefined, // filter
+        dataInicio ? new Date(dataInicio) : undefined,
+        dataFim ? new Date(dataFim) : undefined
+      )
+      .pipe(map((response) => response as unknown as PaginatedResponse<HistoricoIndexador>));
   }
 
   /**
    * Creates a new history entry
    */
   createHistorico(historico: CreateHistoricoIndexador): Observable<HistoricoIndexador> {
-    return from(
-      this.apiClient.client.api.historicosIndexadores.post({
-        indexadorId: historico.indexadorId,
-        dataReferencia: historico.dataReferencia ? new Date(historico.dataReferencia) : null,
-        valor: historico.valor,
-        fatorDiario: historico.fatorDiario,
-        variacaoPercentual: historico.variacaoPercentual,
-        fonte: historico.fonte,
-        importacaoId: historico.importacaoId as any,
-      })
-    ).pipe(map((response) => response as unknown as HistoricoIndexador));
+    // Map local model to NSwag DTO with explicit type handling
+    const dto: CreateHistoricoIndexadorDto = {
+      indexadorId: historico.indexadorId,
+      dataReferencia: historico.dataReferencia
+        ? new Date(historico.dataReferencia)
+        : new Date(),
+      valor: historico.valor ?? undefined,
+      fatorDiario: historico.fatorDiario ?? undefined,
+      variacaoPercentual: historico.variacaoPercentual ?? undefined,
+      fonte: historico.fonte ?? undefined,
+      importacaoId: (historico.importacaoId as any) ?? undefined,
+    };
+    return this.apiClient.historicosIndexadores
+      .createHistoricoIndexador(dto)
+      .pipe(map((response) => response as unknown as HistoricoIndexador));
   }
 
   /**
    * Deletes a history entry
    */
   deleteHistorico(id: number): Observable<void> {
-    return from(this.apiClient.client.api.historicosIndexadores.byId(id).delete()).pipe(
-      map(() => void 0)
-    );
+    return this.apiClient.historicosIndexadores.deleteHistoricoIndexador(id).pipe(map(() => void 0));
   }
 
   /**
@@ -280,9 +287,9 @@ export class IndexadorService {
    * Triggers automatic import for an indexador
    */
   triggerImport(indexadorId: number): Observable<{ id: number; correlationId: string }> {
-    return from(this.apiClient.indexadores.byId(indexadorId).importar.post({})).pipe(
-      map((response) => response as unknown as { id: number; correlationId: string })
-    );
+    return this.apiClient.indexadores
+      .importarIndexador(indexadorId)
+      .pipe(map((response) => response as unknown as { id: number; correlationId: string }));
   }
 
   /**

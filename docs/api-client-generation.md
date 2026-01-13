@@ -1,17 +1,19 @@
-# API Client Generation with Kiota
+# API Client Generation with NSwag
 
-This guide explains how to generate TypeScript DTOs and API clients from the Core Ledger .NET API using Microsoft Kiota.
+This guide explains how to generate TypeScript DTOs and API clients from the Core Ledger .NET API using NSwag.
 
 ## Overview
 
-The Core Ledger monorepo uses [Microsoft Kiota](https://learn.microsoft.com/en-us/openapi/kiota/overview) to automatically generate type-safe TypeScript clients from the OpenAPI specification exposed by the .NET API.
+The Core Ledger monorepo uses [NSwag](https://github.com/RicoSuter/NSwag) to automatically generate type-safe TypeScript clients from the OpenAPI specification exposed by the .NET API.
 
 ### Benefits
 
 - **Type Safety**: Full TypeScript types for all API requests and responses
 - **Auto-Generated**: No manual DTO writing or API client maintenance
 - **Always in Sync**: Regenerate after API changes to stay current
-- **IntelliSense**: Full IDE support with autocomplete and type checking
+- **Angular Native**: Uses Angular's HttpClient with RxJS Observables
+- **Multiple Clients**: One client per API controller (tag-based)
+- **Interfaces Only**: Lightweight TypeScript interfaces for DTOs (no classes)
 
 ## Architecture
 
@@ -29,15 +31,15 @@ The Core Ledger monorepo uses [Microsoft Kiota](https://learn.microsoft.com/en-u
 │    openapi.json             │
 └──────────┬──────────────────┘
            │
-           │ kiota generate
+           │ nswag run nswag.json
            ▼
 ┌─────────────────────────────┐
-│  TypeScript Client          │
+│  TypeScript Clients         │
 │  libs/api-client/           │
 │    generated/               │
-│      - DTOs                 │
-│      - API Methods          │
-│      - Request Builders     │
+│      api-clients.ts         │
+│      - Client per Tag       │
+│      - DTO Interfaces       │
 └─────────────────────────────┘
            │
            │ import
@@ -50,30 +52,23 @@ The Core Ledger monorepo uses [Microsoft Kiota](https://learn.microsoft.com/en-u
 
 ## Prerequisites
 
-### 1. Kiota CLI Tool
+### 1. NSwag CLI Tool
 
-Install Kiota globally:
+Install NSwag globally:
 
 ```bash
-dotnet tool install --global Microsoft.OpenApi.Kiota
+npm install -g nswag
 ```
 
 Verify installation:
 
 ```bash
-kiota --version
+nswag version
 ```
 
-### 2. Kiota Runtime Packages
+### 2. NSwag.MSBuild Package
 
-Already installed in the monorepo:
-
-- `@microsoft/kiota-abstractions`
-- `@microsoft/kiota-http-fetchlibrary`
-- `@microsoft/kiota-serialization-json`
-- `@microsoft/kiota-serialization-form`
-- `@microsoft/kiota-serialization-text`
-- `@microsoft/kiota-serialization-multipart`
+Already configured in the .NET API project for automated generation during Release builds.
 
 ## Generation Workflow
 
@@ -127,7 +122,7 @@ This creates `apps/core-ledger-api/openapi.json` containing the complete API spe
 
 #### Step 3: Generate TypeScript Client
 
-Generate the TypeScript client using Kiota:
+Generate the TypeScript client using NSwag:
 
 ```bash
 # Using npm script
@@ -137,11 +132,11 @@ npm run api:generate-client
 nx run api-client:generate
 ```
 
-This generates code in `libs/api-client/generated/` including:
+This generates code in `libs/api-client/generated/api-clients.ts` including:
 
+- **Clients**: One client class per API controller (FundosClient, CalendárioClient, etc.)
 - **DTOs**: TypeScript interfaces for all API models
-- **API Client**: `CoreLedgerApiClient` class with all endpoints
-- **Request Builders**: Fluent API for building requests
+- **Enums**: TypeScript enums for API enumerations
 
 #### Step 4: Verify Generation
 
@@ -152,156 +147,148 @@ ls -la libs/api-client/generated/
 ```
 
 You should see:
-- `coreLedgerApiClient.ts` - Main client class
-- `models/` - Generated DTOs
-- Various endpoint folders (funds, accounts, etc.)
+- `api-clients.ts` - All clients, DTOs, and enums in a single file
 
-## Using the Generated Client
+## NSwag Configuration
 
-### 1. Import in Angular
+### Configuration File
 
-```typescript
-import { CoreLedgerApiClient } from '@core-ledger/api-client';
-import { FetchRequestAdapter } from '@microsoft/kiota-http-fetchlibrary';
-```
+NSwag is configured via `apps/core-ledger-api/nswag.json`:
 
-### 2. Create Client Instance
-
-```typescript
-// In a service or component
-const adapter = new FetchRequestAdapter();
-adapter.baseUrl = 'https://localhost:7109';
-
-const client = new CoreLedgerApiClient(adapter);
-```
-
-### 3. Make API Calls
-
-#### Get All Funds
-```typescript
-const funds = await client.api.v1.funds.get();
-console.log(funds);
-```
-
-#### Get Fund by ID
-```typescript
-const fundId = '123e4567-e89b-12d3-a456-426614174000';
-const fund = await client.api.v1.funds.byId(fundId).get();
-console.log(fund.name);
-```
-
-#### Create New Fund
-```typescript
-import { CreateFundRequest } from '@core-ledger/api-client';
-
-const newFund: CreateFundRequest = {
-  name: 'My Investment Fund',
-  cnpj: '12345678000190',
-  // ... other properties
-};
-
-const created = await client.api.v1.funds.post(newFund);
-console.log('Created fund:', created.id);
-```
-
-#### Update Fund
-```typescript
-const fundId = '123e4567-e89b-12d3-a456-426614174000';
-
-await client.api.v1.funds.byId(fundId).put({
-  name: 'Updated Fund Name',
-  // ... other properties
-});
-```
-
-#### Delete Fund
-```typescript
-const fundId = '123e4567-e89b-12d3-a456-426614174000';
-await client.api.v1.funds.byId(fundId).delete();
-```
-
-### 4. With Authentication
-
-For authenticated requests, add bearer token:
-
-```typescript
-import { AnonymousAuthenticationProvider } from '@microsoft/kiota-abstractions';
-import { HttpClient } from '@microsoft/kiota-http-fetchlibrary';
-
-const authProvider = new AnonymousAuthenticationProvider();
-
-const httpClient = HttpClient.create({
-  middleware: [
-    {
-      intercept: async (url, init, next) => {
-        const token = await getAccessToken(); // Your auth logic
-        init.headers = {
-          ...init.headers,
-          Authorization: `Bearer ${token}`,
-        };
-        return next(url, init);
-      },
-    },
-  ],
-});
-
-const adapter = new FetchRequestAdapter(
-  authProvider,
-  undefined,
-  undefined,
-  httpClient
-);
-adapter.baseUrl = 'https://localhost:7109';
-
-const client = new CoreLedgerApiClient(adapter);
-```
-
-## Angular Integration Example
-
-### Create API Service
-
-```typescript
-// apps/core-ledger-ui/src/app/services/api.service.ts
-import { Injectable } from '@angular/core';
-import { CoreLedgerApiClient } from '@core-ledger/api-client';
-import { FetchRequestAdapter } from '@microsoft/kiota-http-fetchlibrary';
-import { environment } from '../../environments/environment';
-
-@Injectable({ providedIn: 'root' })
-export class ApiService {
-  private readonly client: CoreLedgerApiClient;
-
-  constructor() {
-    const adapter = new FetchRequestAdapter();
-    adapter.baseUrl = environment.apiUrl;
-    this.client = new CoreLedgerApiClient(adapter);
+```json
+{
+  "runtime": "Net90",
+  "documentGenerator": {
+    "fromDocument": {
+      "json": "openapi.json"
+    }
+  },
+  "codeGenerators": {
+    "openApiToTypeScriptClient": {
+      "className": "{controller}Client",
+      "template": "Angular",
+      "typeScriptVersion": 5.0,
+      "rxJsVersion": 7.0,
+      "httpClass": "HttpClient",
+      "injectionTokenType": "InjectionToken",
+      "useSingletonProvider": true,
+      "generateClientClasses": true,
+      "generateClientInterfaces": true,
+      "operationGenerationMode": "MultipleClientsFromFirstTagAndOperationId",
+      "typeStyle": "Interface",
+      "enumStyle": "Enum",
+      "dateTimeType": "Date",
+      "nullValue": "Undefined",
+      "generateOptionalParameters": true,
+      "markOptionalProperties": true,
+      "baseUrlTokenName": "API_BASE_URL",
+      "output": "../../libs/api-client/generated/api-clients.ts"
+    }
   }
-
-  get funds() {
-    return this.client.api.v1.funds;
-  }
-
-  get accounts() {
-    return this.client.api.v1.accounts;
-  }
-
-  get transactions() {
-    return this.client.api.v1.transactions;
-  }
-
-  // Add more endpoint accessors as needed
 }
 ```
 
-### Use in Components
+### Key Configuration Options
+
+| Option | Value | Description |
+|--------|-------|-------------|
+| `template` | `Angular` | Generates Angular-compatible clients with HttpClient |
+| `operationGenerationMode` | `MultipleClientsFromFirstTagAndOperationId` | One client per API controller |
+| `typeStyle` | `Interface` | DTOs as interfaces (not classes) |
+| `enumStyle` | `Enum` | Generates TypeScript enums |
+| `baseUrlTokenName` | `API_BASE_URL` | InjectionToken for base URL |
+| `httpClass` | `HttpClient` | Uses Angular HttpClient |
+| `rxJsVersion` | `7.0` | RxJS version for Observables |
+
+## Using the Generated Client
+
+### 1. Configure Providers in Angular
+
+In `app.config.ts`:
 
 ```typescript
-// apps/core-ledger-ui/src/app/pages/funds/funds.component.ts
+import { API_BASE_URL } from '@core-ledger/api-client';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    // ... other providers
+    { provide: API_BASE_URL, useValue: '' }, // Empty = use proxy
+  ],
+};
+```
+
+### 2. Create API Client Service
+
+The `ApiClientService` acts as a facade for all generated clients:
+
+```typescript
+// apps/core-ledger-ui/src/app/api/api-client.service.ts
+import { Injectable, inject } from '@angular/core';
+import {
+  FundosClient,
+  CalendárioClient,
+  IndexadoresClient,
+  UsersClient,
+  AccountsClient,
+  SecuritiesClient,
+  TransactionsClient,
+} from '@core-ledger/api-client';
+
+@Injectable({ providedIn: 'root' })
+export class ApiClientService {
+  readonly fundos = inject(FundosClient);
+  readonly calendario = inject(CalendárioClient);
+  readonly indexadores = inject(IndexadoresClient);
+  readonly users = inject(UsersClient);
+  readonly accounts = inject(AccountsClient);
+  readonly securities = inject(SecuritiesClient);
+  readonly transactions = inject(TransactionsClient);
+}
+```
+
+### 3. Use in Services
+
+```typescript
+import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { ApiClientService } from '../api/api-client.service';
+import { CreateFundoDto } from '@core-ledger/api-client';
+
+@Injectable({ providedIn: 'root' })
+export class FundoService {
+  private readonly apiClient = inject(ApiClientService);
+
+  getAllFundos(): Observable<Fundo[]> {
+    return this.apiClient.fundos.getAllFundos();
+  }
+
+  getFundoById(id: number): Observable<Fundo> {
+    return this.apiClient.fundos.getFundoById(id);
+  }
+
+  createFundo(fundo: CreateFundoDto): Observable<Fundo> {
+    return this.apiClient.fundos.createFundo(fundo);
+  }
+
+  updateFundo(id: number, fundo: UpdateFundoDto): Observable<void> {
+    return this.apiClient.fundos.updateFundo(id, fundo);
+  }
+
+  deleteFundo(id: number): Observable<void> {
+    return this.apiClient.fundos.deleteFundo(id);
+  }
+}
+```
+
+### 4. Use in Components
+
+```typescript
 import { Component, inject, signal } from '@angular/core';
-import { ApiService } from '../../services/api.service';
+import { FundoService } from '../../services/fundo.service';
 
 @Component({
-  selector: 'app-funds',
+  selector: 'app-fundos',
   template: `
     <h1>Funds</h1>
     @if (loading()) {
@@ -309,29 +296,73 @@ import { ApiService } from '../../services/api.service';
     } @else {
       <ul>
         @for (fund of funds(); track fund.id) {
-          <li>{{ fund.name }}</li>
+          <li>{{ fund.nome }}</li>
         }
       </ul>
     }
   `,
 })
-export class FundsComponent {
-  private readonly api = inject(ApiService);
+export class FundosComponent {
+  private readonly fundoService = inject(FundoService);
 
-  funds = signal<any[]>([]);
+  funds = signal<Fundo[]>([]);
   loading = signal(true);
 
-  async ngOnInit() {
-    try {
-      const result = await this.api.funds.get();
-      this.funds.set(result.items ?? []);
-    } catch (error) {
-      console.error('Failed to load funds:', error);
-    } finally {
-      this.loading.set(false);
-    }
+  ngOnInit() {
+    this.fundoService.getAllFundos().subscribe({
+      next: (result) => {
+        this.funds.set(result);
+        this.loading.set(false);
+      },
+      error: (error) => {
+        console.error('Failed to load funds:', error);
+        this.loading.set(false);
+      },
+    });
   }
 }
+```
+
+## Generated Client Classes
+
+NSwag generates one client per API controller based on OpenAPI tags:
+
+| Client | API Controller |
+|--------|----------------|
+| `FundosClient` | Fundos (Funds) |
+| `CalendárioClient` | Calendar |
+| `IndexadoresClient` | Indexes |
+| `HistoricosIndexadoresClient` | Index History |
+| `UsersClient` | Users |
+| `AccountsClient` | Chart of Accounts |
+| `SecuritiesClient` | Securities |
+| `TransactionsClient` | Transactions |
+| `ANBIMA_ClassificationsClient` | ANBIMA Classifications |
+
+## Type Handling
+
+### Enum Compatibility
+
+NSwag generates enums with `_0`, `_1` naming convention. When using with local Angular enums, use explicit type assertions:
+
+```typescript
+import { TipoDia } from '../models/calendario.model';
+import { CreateCalendarioDto, TipoDia as NSwagTipoDia } from '@core-ledger/api-client';
+
+// Local enum → NSwag DTO
+const dto: CreateCalendarioDto = {
+  tipoDia: localTipoDia as unknown as NSwagTipoDia,
+};
+```
+
+### Null vs Undefined
+
+NSwag uses `undefined` for optional fields. Convert `null` values:
+
+```typescript
+const dto = {
+  descricao: localModel.descricao ?? undefined, // null → undefined
+};
 ```
 
 ## Nx Integration
@@ -347,13 +378,20 @@ The `api-client` library is configured in `libs/api-client/project.json`:
   "sourceRoot": "libs/api-client/src",
   "targets": {
     "generate": {
-      "command": "kiota generate -l typescript -o generated -d ../../apps/core-ledger-api/openapi.json -c CoreLedgerApiClient -n CoreLedger.ApiClient --clean-output",
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npx nswag run nswag.json"],
+        "cwd": "apps/core-ledger-api",
+        "parallel": false
+      },
       "dependsOn": [
         {
           "target": "export-openapi",
           "projects": ["core-ledger-api"]
         }
-      ]
+      ],
+      "inputs": ["{workspaceRoot}/apps/core-ledger-api/openapi.json"],
+      "outputs": ["{projectRoot}/generated"]
     }
   }
 }
@@ -364,27 +402,19 @@ The `api-client` library is configured in `libs/api-client/project.json`:
 When you run `nx run api-client:generate`, Nx automatically:
 
 1. Runs `nx run core-ledger-api:export-openapi` first (if needed)
-2. Then runs the Kiota generation
+2. Then runs the NSwag generation
 
 This ensures the OpenAPI spec is always up-to-date before generating.
 
-## CI/CD Integration
+### MSBuild Integration (Optional)
 
-### In GitHub Actions / CI Pipeline
+NSwag can also run automatically during .NET Release builds via the MSBuild target in `CoreLedger.API.csproj`:
 
-```yaml
-- name: Start API for OpenAPI generation
-  run: |
-    npm run docker:up
-    npm run start:api &
-    # Wait for API to be ready
-    sleep 10
-
-- name: Generate API client
-  run: npm run api:generate-client
-
-- name: Build UI with generated client
-  run: nx build core-ledger-ui
+```xml
+<Target Name="NSwag" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Release'">
+  <Exec WorkingDirectory="$(ProjectDir)/.."
+        Command="$(NSwagExe_Net90) run nswag.json /variables:Configuration=$(Configuration)" />
+</Target>
 ```
 
 ## Troubleshooting
@@ -398,37 +428,38 @@ This ensures the OpenAPI spec is always up-to-date before generating.
 nx serve core-ledger-api
 ```
 
-### Kiota Not Found
+### NSwag Not Found
 
-**Error**: `kiota: command not found`
+**Error**: `nswag: command not found`
 
-**Solution**: Install Kiota globally:
+**Solution**: Install NSwag globally:
 ```bash
-dotnet tool install --global Microsoft.OpenApi.Kiota
-```
-
-Add to PATH (zsh):
-```bash
-export PATH="$PATH:$HOME/.dotnet/tools"
+npm install -g nswag
 ```
 
 ### Generation Errors
 
-**Error**: Various Kiota generation errors
+**Error**: Various NSwag generation errors
 
 **Solution**:
 1. Ensure OpenAPI spec is valid by visiting https://localhost:7109/swagger
 2. Delete `libs/api-client/generated/` and regenerate
-3. Check Kiota version: `kiota --version` (should be 1.29.0+)
+3. Check nswag.json configuration
 
 ### Type Errors After Generation
 
 **Error**: TypeScript compilation errors
 
 **Solution**:
-1. Run `npm install` to ensure all Kiota packages are installed
+1. Run `npm install` to ensure all packages are installed
 2. Check `tsconfig.base.json` has the correct path mapping
 3. Restart your IDE/TypeScript server
+
+### Single Client Generated
+
+**Error**: Only one client generated instead of multiple
+
+**Solution**: Ensure `operationGenerationMode` is set to `MultipleClientsFromFirstTagAndOperationId` in nswag.json.
 
 ## Best Practices
 
@@ -445,83 +476,53 @@ npm run api:generate-client
 
 Never modify files in `libs/api-client/generated/`. They will be overwritten on next generation.
 
-### 3. Add Custom Logic in Wrappers
+### 3. Use ApiClientService Facade
 
-Create wrapper services for custom logic:
+Access all clients through the `ApiClientService` facade rather than injecting clients directly:
 
 ```typescript
-// libs/api-client/src/funds.service.ts
-import { CoreLedgerApiClient } from '../generated';
+// Good
+private readonly apiClient = inject(ApiClientService);
+this.apiClient.fundos.getAllFundos();
 
-export class FundsService {
-  constructor(private client: CoreLedgerApiClient) {}
+// Avoid
+private readonly fundosClient = inject(FundosClient);
+this.fundosClient.getAllFundos();
+```
 
-  async getActiveFunds() {
-    const funds = await this.client.api.v1.funds.get();
-    return funds.items?.filter(f => f.status === 'Active') ?? [];
-  }
+### 4. Handle Type Compatibility
+
+Create mapping utilities for enum and null handling:
+
+```typescript
+function toNSwagEnum<T>(value: unknown): T {
+  return value as T;
+}
+
+function nullToUndefined<T>(value: T | null): T | undefined {
+  return value ?? undefined;
 }
 ```
 
-### 4. Version Control
+### 5. Version Control
 
 Commit the generated code to version control for these reasons:
 - Teammates can build without running the API
 - CI/CD can build without starting the API
 - Provides a clear diff when API changes
 
-Add to `.gitignore` only if you prefer generation on-demand.
-
-## Advanced Configuration
-
-### Custom Kiota Options
-
-Edit `libs/api-client/project.json` to customize generation:
-
-```json
-{
-  "targets": {
-    "generate": {
-      "command": "kiota generate -l typescript -o generated -d ../../apps/core-ledger-api/openapi.json -c CoreLedgerApiClient -n CoreLedger.ApiClient --clean-output --exclude-backward-compatible"
-    }
-  }
-}
-```
-
-Common options:
-- `-l typescript` - Target language
-- `-o generated` - Output directory
-- `-d path/to/spec.json` - OpenAPI spec path
-- `-c CoreLedgerApiClient` - Client class name
-- `-n CoreLedger.ApiClient` - Namespace
-- `--clean-output` - Delete output dir before generation
-- `--exclude-backward-compatible` - Use latest patterns only
-
-### Multiple API Versions
-
-To support multiple API versions:
-
-```bash
-# Generate for v1
-kiota generate -l typescript -o generated/v1 -d openapi-v1.json
-
-# Generate for v2
-kiota generate -l typescript -o generated/v2 -d openapi-v2.json
-```
-
 ## References
 
-- [Kiota Documentation](https://learn.microsoft.com/en-us/openapi/kiota/overview)
-- [Kiota TypeScript Samples](https://github.com/microsoft/kiota-samples/tree/main/get-started/quickstart/typescript)
+- [NSwag GitHub Repository](https://github.com/RicoSuter/NSwag)
+- [NSwag Documentation](https://github.com/RicoSuter/NSwag/wiki)
 - [OpenAPI Specification](https://swagger.io/specification/)
-- [Core Ledger API README](../libs/api-client/README.md)
 
 ## Summary
 
-1. **Install Kiota**: `dotnet tool install --global Microsoft.OpenApi.Kiota`
+1. **Install NSwag**: `npm install -g nswag`
 2. **Start API**: `nx serve core-ledger-api`
 3. **Export Spec**: `npm run api:export-spec`
 4. **Generate Client**: `npm run api:generate-client`
 5. **Use in Angular**: Import from `@core-ledger/api-client`
 
-The generated client provides full type safety and IntelliSense for all API operations!
+The generated clients provide full type safety and native Angular HttpClient integration with RxJS Observables!

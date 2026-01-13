@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { from, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiClientService } from '../api/api-client.service';
 import {
@@ -21,11 +21,7 @@ export class ParametrosService {
    * @returns Observable of ANBIMA classification items
    */
   getClassificacoesAnbima(classificacaoCvm: string): Observable<ClassificacaoAnbimaResponse> {
-    return from(
-      this.apiClient.parametros.classificacoesAnbima.get({
-        queryParameters: { classificacaoCvm },
-      })
-    ).pipe(
+    return this.apiClient.parametros.listarClassificacoesAnbima(classificacaoCvm).pipe(
       map((response) => {
         const data = response as unknown as { items?: ClassificacaoAnbimaOption[] };
         return { items: data?.items ?? [], total: data?.items?.length ?? 0 } as ClassificacaoAnbimaResponse;

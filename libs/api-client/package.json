@@ -1,15 +1,12 @@
 {
   "name": "@core-ledger/api-client",
-  "version": "0.0.1",
-  "description": "Generated TypeScript client for Core Ledger API",
+  "version": "0.0.2",
+  "description": "Generated TypeScript clients for Core Ledger API (NSwag)",
   "type": "module",
   "main": "./src/index.ts",
-  "dependencies": {
-    "@microsoft/kiota-abstractions": "^1.0.0",
-    "@microsoft/kiota-http-fetchlibrary": "^1.0.0",
-    "@microsoft/kiota-serialization-form": "^1.0.0",
-    "@microsoft/kiota-serialization-json": "^1.0.0",
-    "@microsoft/kiota-serialization-text": "^1.0.0",
-    "@microsoft/kiota-serialization-multipart": "^1.0.0"
+  "peerDependencies": {
+    "@angular/common": ">=21.0.0",
+    "@angular/core": ">=21.0.0",
+    "rxjs": ">=7.8.0"
   }
 }

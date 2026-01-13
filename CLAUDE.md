@@ -43,7 +43,7 @@ core-ledger/
 | `core-ledger-ui` | Angular 21, Bootstrap 5 | Web frontend with signals |
 | `core-ledger-api` | .NET 10 | REST API (Clean Architecture) |
 | `core-ledger-worker` | .NET 10 | RabbitMQ background worker |
-| `api-client` | TypeScript, Kiota | Generated API client with DTOs |
+| `api-client` | TypeScript, NSwag | Generated API client with DTOs |
 | `core-ledger-dotnet` | .NET 10 | Shared Domain/Application/Infrastructure |
 | `core-ledger-e2e` | Playwright | E2E tests (baseURL: http://localhost:5071) |
 | `tools/etl` | Meltano, DBT, Python | ETL for B3 financial instruments |
@@ -78,7 +78,7 @@ nx run core-ledger-api:migrate       # Run EF Core migrations
 
 # API Client Generation
 nx run core-ledger-api:export-openapi  # Export OpenAPI spec from running API
-nx run api-client:generate           # Generate TypeScript client with Kiota
+nx run api-client:generate           # Generate TypeScript client with NSwag
 ```
 
 ### npm Scripts
@@ -168,12 +168,18 @@ Each project has its own `CLAUDE.md` with detailed architecture and commands:
 - `apps/core-ledger-ui/CLAUDE.md` - Angular UI patterns and conventions
 - `tools/etl/CLAUDE.md` - Meltano ETL guidance
 
-### API Client Generation (Kiota)
-TypeScript DTOs and API clients are auto-generated from the .NET API using Microsoft Kiota:
+### API Client Generation (NSwag)
+TypeScript DTOs and API clients are auto-generated from the .NET API using NSwag:
 1. Start API: `nx serve core-ledger-api`
 2. Export spec: `npm run api:export-spec`
 3. Generate client: `npm run api:generate-client`
-4. Import: `import { CoreLedgerApiClient } from '@core-ledger/api-client'`
+4. Import clients: `import { FundosClient, CalendárioClient } from '@core-ledger/api-client'`
+
+**NSwag Configuration:**
+- Config file: `apps/core-ledger-api/nswag.json`
+- Generates one client per API controller (tag-based)
+- Uses TypeScript interfaces (not classes) for DTOs
+- Native Angular HttpClient with RxJS Observables
 
 See `docs/api-client-generation.md` for complete guide.
 
@@ -184,4 +190,4 @@ All documentation is centralized in `/docs/`:
 - `docs/testing/` - E2E test coverage and Brazilian test data
 - `docs/etl/` - B3 instruments ETL pipeline
 - `docs/compliance/` - Angular compliance review guides
-- `docs/api-client-generation.md` - TypeScript client generation with Kiota
+- `docs/api-client-generation.md` - TypeScript client generation with NSwag
