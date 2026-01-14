@@ -82,6 +82,10 @@
                 <!-- Step 9: Vínculos Institucionais -->
                 <app-vinculos-step [stepConfig]="stepConfig" />
               }
+              @case (10) {
+                <!-- Step 10: Upload de Documentos -->
+                <app-documentos-step [stepConfig]="stepConfig" />
+              }
               @default {
                 <app-placeholder-step [stepConfig]="stepConfig" />
               }

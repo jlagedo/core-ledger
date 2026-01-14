@@ -9,6 +9,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
+import { JsonPipe } from '@angular/common';
 import {
   AbstractControl,
   FormArray,
@@ -73,7 +74,7 @@ function vinculosObrigatoriosValidator(formArray: AbstractControl): ValidationEr
  */
 @Component({
   selector: 'app-vinculos-step',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, JsonPipe],
   templateUrl: './vinculos-step.html',
   styleUrl: './vinculos-step.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -137,6 +138,37 @@ export class VinculosStep {
       instituicaoId: ctrl.get('instituicaoId')?.value as string | null,
     })) as VinculoFormData[];
     return hasFidcRecommendedVinculos(vinculos);
+  });
+
+  // DEBUG: Computed for validation debugging
+  readonly debugValidation = computed(() => {
+    const vinculosArray = this.form.get('vinculos') as FormArray;
+    const missing = this.missingVinculos();
+
+    const fieldErrors = vinculosArray.controls.map((ctrl, index) => {
+      const group = ctrl as FormGroup;
+      const errors: any = {};
+      const values: any = {};
+      Object.keys(group.controls).forEach((key) => {
+        const control = group.get(key);
+        values[key] = control?.value;
+        if (control?.invalid && control?.errors) {
+          errors[key] = control.errors;
+        }
+      });
+      return { index, errors, valid: ctrl.valid, values };
+    });
+
+    return {
+      formValid: this.form.valid,
+      formStatus: this.form.status,
+      arrayValid: vinculosArray.valid,
+      arrayErrors: vinculosArray.errors,
+      missingVinculos: missing,
+      fieldErrors: fieldErrors.filter(f => !f.valid),
+      allVinculos: fieldErrors,
+      totalVinculos: vinculosArray.length,
+    };
   });
 
   // Computed: Get optional vinculo types available to add
@@ -276,18 +308,30 @@ export class VinculosStep {
     group.get('dataFim')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       const dataInicio = group.get('dataInicio')?.value;
       const dataFim = group.get('dataFim')?.value;
+      const dataFimControl = group.get('dataFim');
 
       if (dataInicio && dataFim && dataFim < dataInicio) {
-        group.get('dataFim')?.setErrors({ dataFimAnterior: true });
+        dataFimControl?.setErrors({ dataFimAnterior: true });
+      } else if (dataFimControl?.hasError('dataFimAnterior')) {
+        // Clear custom error if date is now valid
+        const errors = { ...dataFimControl.errors };
+        delete errors['dataFimAnterior'];
+        dataFimControl.setErrors(Object.keys(errors).length > 0 ? errors : null);
       }
     });
 
     group.get('dataInicio')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       const dataInicio = group.get('dataInicio')?.value;
       const today = this.getTodayISODate();
+      const dataInicioControl = group.get('dataInicio');
 
       if (dataInicio && dataInicio > today) {
-        group.get('dataInicio')?.setErrors({ dataInicioFutura: true });
+        dataInicioControl?.setErrors({ dataInicioFutura: true });
+      } else if (dataInicioControl?.hasError('dataInicioFutura')) {
+        // Clear custom error if date is now valid
+        const errors = { ...dataInicioControl.errors };
+        delete errors['dataInicioFutura'];
+        dataInicioControl.setErrors(Object.keys(errors).length > 0 ? errors : null);
       }
     });
   }

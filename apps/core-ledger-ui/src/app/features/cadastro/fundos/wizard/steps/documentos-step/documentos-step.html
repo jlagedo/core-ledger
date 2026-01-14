@@ -1,0 +1,254 @@
+<div class="documentos-step">
+  <!-- Info Banner: Step is Optional -->
+  <div class="alert alert-info d-flex align-items-center mb-4 border-0 shadow-sm" role="alert">
+    <i class="bi bi-info-circle-fill fs-4 me-3" aria-hidden="true"></i>
+    <div>
+      <strong>Etapa Opcional</strong> — Você pode adicionar documentos agora ou posteriormente na
+      gestão do fundo.
+    </div>
+  </div>
+
+  <!-- Warning: Missing REGULAMENTO -->
+  @if (missingRegulamento() && documentCount() > 0) {
+    <div class="alert alert-warning d-flex align-items-center mb-4 border-0 shadow-sm" role="alert">
+      <i class="bi bi-exclamation-triangle-fill fs-4 me-3" aria-hidden="true"></i>
+      <div>
+        <strong>Regulamento não anexado</strong> — Recomendamos anexar o regulamento do fundo para
+        conformidade regulatória.
+      </div>
+    </div>
+  }
+
+  <!-- Error Message -->
+  @if (errorMessage(); as error) {
+    <div class="alert alert-danger d-flex align-items-center mb-4 border-0 shadow-sm" role="alert">
+      <i class="bi bi-exclamation-triangle-fill fs-4 me-3" aria-hidden="true"></i>
+      <div>{{ error }}</div>
+    </div>
+  }
+
+  <!-- Upload Form -->
+  <div class="card bg-body-tertiary border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+      <h6 class="text-uppercase text-secondary fw-semibold mb-3 fs-6 letter-spacing-wide">
+        <i class="bi bi-cloud-upload me-2"></i>
+        Adicionar Documento
+      </h6>
+
+      <form [formGroup]="form" class="row g-3">
+        <!-- Tipo de Documento -->
+        <div class="col-md-6">
+          <label for="tipoDocumento" class="form-label fw-medium">
+            Tipo de Documento
+            <span class="text-danger">*</span>
+          </label>
+          <select
+            id="tipoDocumento"
+            class="form-select"
+            formControlName="tipoDocumento"
+            [class.is-invalid]="isInvalid('tipoDocumento')"
+            [class.is-valid]="isValid('tipoDocumento')"
+          >
+            <option [ngValue]="null">Selecione o tipo...</option>
+            @for (option of tipoDocumentoOptions; track option.value) {
+              <option [ngValue]="option.value">
+                {{ option.label }}
+                @if (option.recommended) {
+                  (Recomendado)
+                }
+              </option>
+            }
+          </select>
+          @if (isInvalid('tipoDocumento')) {
+            <div class="invalid-feedback">Selecione o tipo de documento</div>
+          }
+        </div>
+
+        <!-- Data de Vigência -->
+        <div class="col-md-3">
+          <label for="dataVigencia" class="form-label fw-medium">
+            Data de Vigência
+            <span class="text-danger">*</span>
+          </label>
+          <div class="input-group">
+            <input
+              id="dataVigencia"
+              class="form-control"
+              placeholder="dd/mm/aaaa"
+              formControlName="dataVigencia"
+              ngbDatepicker
+              #dv="ngbDatepicker"
+              [class.is-invalid]="isInvalid('dataVigencia')"
+              [class.is-valid]="isValid('dataVigencia')"
+            />
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              (click)="dv.toggle()"
+              aria-label="Abrir calendário"
+            >
+              <i class="bi bi-calendar3"></i>
+            </button>
+          </div>
+          @if (isInvalid('dataVigencia')) {
+            <div class="invalid-feedback d-block">Data de vigência obrigatória</div>
+          }
+        </div>
+
+        <!-- Data Fim Vigência -->
+        <div class="col-md-3">
+          <label for="dataFimVigencia" class="form-label fw-medium">
+            Data Fim Vigência
+            <span class="text-muted small">(opcional)</span>
+          </label>
+          <div class="input-group">
+            <input
+              id="dataFimVigencia"
+              class="form-control"
+              placeholder="dd/mm/aaaa"
+              formControlName="dataFimVigencia"
+              ngbDatepicker
+              #dfv="ngbDatepicker"
+            />
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              (click)="dfv.toggle()"
+              aria-label="Abrir calendário"
+            >
+              <i class="bi bi-calendar3"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Observações -->
+        <div class="col-12">
+          <label for="observacoes" class="form-label fw-medium">
+            Observações
+            <span class="text-muted small">(opcional)</span>
+          </label>
+          <textarea
+            id="observacoes"
+            class="form-control"
+            formControlName="observacoes"
+            rows="2"
+            placeholder="Adicione observações sobre este documento..."
+            maxlength="500"
+          ></textarea>
+          <div class="form-text">Máximo 500 caracteres</div>
+        </div>
+      </form>
+
+      <!-- Drag-and-Drop Zone -->
+      <div class="mt-4">
+        <div
+          class="drop-zone"
+          [class.drag-over]="isDragOver()"
+          [class.disabled]="form.invalid"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+        >
+          <i class="bi bi-file-earmark-arrow-up display-4 mb-3 drop-icon"></i>
+          <p class="mb-2 fw-medium">Arraste arquivos aqui ou clique para selecionar</p>
+          <p class="text-muted small mb-3">
+            Formatos: PDF, DOC, DOCX | Máximo: 10MB por arquivo
+          </p>
+          <label class="btn btn-outline-primary btn-sm" [class.disabled]="form.invalid">
+            <i class="bi bi-upload me-2"></i>
+            Selecionar Arquivo
+            <input
+              type="file"
+              class="d-none"
+              [accept]="'.pdf,.doc,.docx'"
+              multiple
+              (change)="onFileInputChange($event)"
+              [disabled]="form.invalid"
+            />
+          </label>
+          @if (form.invalid) {
+            <p class="text-muted small mt-2 mb-0">
+              Preencha o tipo e a data de vigência antes de anexar o arquivo
+            </p>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Document List -->
+  @if (documentos().length > 0) {
+    <div class="card bg-body-tertiary border-0 shadow-sm rounded-4">
+      <div class="card-body p-4">
+        <h6 class="text-uppercase text-secondary fw-semibold mb-4 fs-6 letter-spacing-wide">
+          <i class="bi bi-files me-2"></i>
+          Documentos Anexados
+          <span class="badge bg-primary rounded-pill ms-2">{{ documentCount() }}</span>
+        </h6>
+
+        <div class="documents-list">
+          @for (doc of documentos(); track doc.tempId; let i = $index) {
+            <div class="document-card" [style.animation-delay.ms]="i * 50">
+              <div class="document-icon" [style.background-color]="getDocumentoOption(doc.tipoDocumento)?.color">
+                <i [class]="getDocumentoOption(doc.tipoDocumento)?.icon"></i>
+              </div>
+              <div class="document-info">
+                <div class="document-header">
+                  <h6 class="document-title mb-1">
+                    {{ getDocumentoOption(doc.tipoDocumento)?.label }}
+                    <span class="version-badge">v{{ doc.versao }}</span>
+                    @if (doc.tipoDocumento === 'REGULAMENTO') {
+                      <span class="badge bg-success-subtle text-success border border-success-subtle ms-2">
+                        Recomendado
+                      </span>
+                    }
+                  </h6>
+                  <p class="document-filename font-monospace small mb-2">{{ doc.arquivoNome }}</p>
+                </div>
+                <div class="document-meta">
+                  <span class="meta-item">
+                    <i class="bi bi-calendar3 me-1"></i>
+                    Vigência: {{ formatDate(doc.dataVigencia) }}
+                    @if (doc.dataFimVigencia) {
+                      até {{ formatDate(doc.dataFimVigencia) }}
+                    }
+                  </span>
+                  <span class="meta-item">
+                    <i class="bi bi-hdd me-1"></i>
+                    {{ formatSize(doc.arquivoTamanho) }}
+                  </span>
+                  @if (doc.observacoes) {
+                    <span class="meta-item">
+                      <i class="bi bi-chat-left-text me-1"></i>
+                      {{ doc.observacoes }}
+                    </span>
+                  }
+                </div>
+              </div>
+              <div class="document-actions">
+                <button
+                  class="btn btn-sm btn-outline-danger"
+                  type="button"
+                  (click)="removeDocumento(doc.tempId)"
+                  aria-label="Remover documento"
+                  title="Remover documento"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  } @else {
+    <!-- Empty State -->
+    <div class="empty-state text-center py-5">
+      <i class="bi bi-files display-1 text-muted mb-3"></i>
+      <p class="text-muted">Nenhum documento anexado ainda</p>
+      <p class="text-muted small">
+        Preencha os campos acima e arraste arquivos para a área de upload
+      </p>
+    </div>
+  }
+</div>
