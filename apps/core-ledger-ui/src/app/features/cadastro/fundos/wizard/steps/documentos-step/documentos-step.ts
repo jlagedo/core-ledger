@@ -8,6 +8,7 @@ import {
   untracked,
   signal,
   computed,
+  OnDestroy,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -31,6 +32,7 @@ import {
   MAX_FILE_SIZE,
 } from '../../models/documentos.model';
 import { WizardStore } from '../../wizard-store';
+import { WizardPersistenceService } from '../../services/wizard-persistence.service';
 import { NgbDateBRParserFormatter } from '../../../../../../shared/formatters/ngb-date-br-parser-formatter';
 
 /**
@@ -46,18 +48,26 @@ import { NgbDateBRParserFormatter } from '../../../../../../shared/formatters/ng
   styleUrl: './documentos-step.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DocumentosStep {
+export class DocumentosStep implements OnDestroy {
   stepConfig = input.required<WizardStepConfig>();
 
   private readonly formBuilder = inject(FormBuilder);
   private readonly wizardStore = inject(WizardStore);
+  private readonly persistenceService = inject(WizardPersistenceService);
   private readonly destroyRef = inject(DestroyRef);
 
   // Enum options for template
   readonly tipoDocumentoOptions = TIPO_DOCUMENTO_OPTIONS;
 
-  // Track step ID to avoid re-loading
+  // Track step ID and dataVersion to avoid re-loading unless store data changes
   private lastLoadedStepId: WizardStepId | null = null;
+  private lastDataVersion = -1;
+
+  // Flag to prevent store updates during data restoration
+  private isRestoring = false;
+
+  // Track object URLs for cleanup to prevent memory leaks
+  private readonly objectUrls: string[] = [];
 
   // Signal for uploaded documents
   readonly documentos = signal<DocumentoFundo[]>([]);
@@ -94,15 +104,23 @@ export class DocumentosStep {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.updateStepValidation());
 
-    // Effect to load data when step changes
+    // Effect to load data when step changes OR when store data is restored (dataVersion changes)
     effect(() => {
       const stepConfig = this.stepConfig();
       const stepId = stepConfig.id;
+      const dataVersion = this.wizardStore.dataVersion();
 
-      if (this.lastLoadedStepId === stepId) {
+      // Skip if same step AND same dataVersion (no changes)
+      const sameStep = this.lastLoadedStepId === stepId;
+      const sameVersion = this.lastDataVersion === dataVersion;
+      if (sameStep && sameVersion) {
         return;
       }
       this.lastLoadedStepId = stepId;
+      this.lastDataVersion = dataVersion;
+
+      // Set restoration flag to prevent store updates
+      this.isRestoring = true;
 
       // Load documentos from store
       const stepData = untracked(
@@ -111,16 +129,31 @@ export class DocumentosStep {
 
       if (stepData && Array.isArray(stepData)) {
         this.documentos.set(stepData);
+        // Load file blobs from IndexedDB to hydrate arquivoConteudo
+        // Use IIFE to properly await async operation before clearing isRestoring
+        untracked(() => {
+          this.loadFilesFromIndexedDB().finally(() => {
+            this.isRestoring = false;
+            this.updateStepValidation();
+          });
+        });
       } else {
         this.documentos.set([]);
+        // Clear restoration flag
+        this.isRestoring = false;
+        untracked(() => this.updateStepValidation());
       }
-
-      untracked(() => this.updateStepValidation());
     });
 
-    // Watch documentos changes and update store
+    // Watch documentos changes and update store (skip during restoration)
     effect(() => {
       const docs = this.documentos();
+
+      // Skip store update during data restoration
+      if (this.isRestoring) {
+        return;
+      }
+
       const stepConfig = untracked(() => this.stepConfig());
       this.wizardStore.setStepData(stepConfig.key, docs);
       untracked(() => this.updateStepValidation());
@@ -229,6 +262,9 @@ export class DocumentosStep {
     // Add to list
     this.documentos.update((docs) => [...docs, documento]);
 
+    // Save file to IndexedDB for persistence
+    this.saveFileToIndexedDB(documento, file);
+
     // Reset form (keep tipo_documento selected for convenience)
     this.form.patchValue({
       dataVigencia: null,
@@ -240,6 +276,8 @@ export class DocumentosStep {
 
   removeDocumento(tempId: string): void {
     this.documentos.update((docs) => docs.filter((d) => d.tempId !== tempId));
+    // Delete file from IndexedDB
+    this.deleteFileFromIndexedDB(tempId);
   }
 
   // Helper: format file size for display
@@ -321,5 +359,100 @@ export class DocumentosStep {
 
   hasError(name: string, error: string): boolean {
     return this.getControl(name).errors?.[error] ?? false;
+  }
+
+  // ========== IndexedDB File Persistence ==========
+
+  /**
+   * Save a file to IndexedDB for persistence across page refreshes.
+   * Called when a new document is added.
+   */
+  private async saveFileToIndexedDB(documento: DocumentoFundo, file: File): Promise<void> {
+    const draftId = this.wizardStore.draftId();
+    if (!draftId) {
+      console.warn('Cannot save file: no draft ID available');
+      return;
+    }
+
+    try {
+      await this.persistenceService.saveFile(draftId, 'documentos', file, documento.tempId, {
+        tipoDocumento: documento.tipoDocumento,
+        versao: documento.versao,
+        dataVigencia: documento.dataVigencia,
+        dataFimVigencia: documento.dataFimVigencia,
+        observacoes: documento.observacoes,
+      });
+    } catch (error) {
+      console.error('Failed to save file to IndexedDB:', error);
+      this.errorMessage.set('Erro ao salvar arquivo localmente. Tente novamente.');
+    }
+  }
+
+  /**
+   * Load files from IndexedDB and hydrate the documentos signal with file blobs.
+   * Called when the step is initialized or after restoring a draft.
+   */
+  private async loadFilesFromIndexedDB(): Promise<void> {
+    const draftId = this.wizardStore.draftId();
+    if (!draftId) {
+      return;
+    }
+
+    try {
+      const files = await this.persistenceService.loadFiles(draftId, 'documentos');
+
+      if (files.length === 0) {
+        return;
+      }
+
+      // Update documentos with file blobs
+      this.documentos.update((docs) => {
+        return docs.map((doc) => {
+          const storedFile = files.find((f) => f.tempId === doc.tempId);
+          if (storedFile) {
+            // Create a File object from the stored Blob
+            const file = new File([storedFile.blob], storedFile.fileName, {
+              type: storedFile.fileType,
+            });
+            // Create object URL for preview
+            const url = URL.createObjectURL(storedFile.blob);
+            this.objectUrls.push(url);
+
+            return {
+              ...doc,
+              arquivoConteudo: file,
+              arquivoUrl: url,
+            };
+          }
+          return doc;
+        });
+      });
+    } catch (error) {
+      console.error('Failed to load files from IndexedDB:', error);
+    }
+  }
+
+  /**
+   * Delete a file from IndexedDB.
+   * Called when a document is removed.
+   */
+  private async deleteFileFromIndexedDB(tempId: string): Promise<void> {
+    const draftId = this.wizardStore.draftId();
+    if (!draftId) {
+      return;
+    }
+
+    try {
+      await this.persistenceService.deleteFileByTempId(draftId, tempId);
+    } catch (error) {
+      console.error('Failed to delete file from IndexedDB:', error);
+    }
+  }
+
+  /**
+   * Cleanup object URLs to prevent memory leaks.
+   */
+  ngOnDestroy(): void {
+    this.objectUrls.forEach((url) => URL.revokeObjectURL(url));
   }
 }

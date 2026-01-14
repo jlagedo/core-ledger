@@ -1,9 +1,14 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, HostListener, inject, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { DirtyComponent } from './guards/unsaved-changes.guard';
 import { WizardStore } from './wizard-store';
 import { WIZARD_STEPS } from './models/wizard.model';
+import { WizardDraft } from './models/persistence.model';
+import { WizardPersistenceService } from './services/wizard-persistence.service';
 import { WizardStepper } from './components/wizard-stepper/wizard-stepper';
 import { WizardNavigation } from './components/wizard-navigation/wizard-navigation';
+import { RecoveryBanner } from './components/recovery-banner/recovery-banner';
+import { SaveStatusIndicator } from './components/save-status-indicator/save-status-indicator';
 import { PlaceholderStep } from './steps/placeholder-step/placeholder-step';
 import { IdentificacaoStep } from './steps/identificacao-step/identificacao-step';
 import { ClassificacaoStep } from './steps/classificacao-step/classificacao-step';
@@ -24,6 +29,8 @@ import { ToastService } from '../../../../services/toast-service';
     PageHeader,
     WizardStepper,
     WizardNavigation,
+    RecoveryBanner,
+    SaveStatusIndicator,
     PlaceholderStep,
     IdentificacaoStep,
     ClassificacaoStep,
@@ -41,12 +48,31 @@ import { ToastService } from '../../../../services/toast-service';
   styleUrl: './wizard-container.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WizardContainer {
+export class WizardContainer implements DirtyComponent, OnInit {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly toastService = inject(ToastService);
+  private readonly persistenceService = inject(WizardPersistenceService);
 
   // Wizard Store
   readonly store = inject(WizardStore);
+
+  // Recovery state
+  readonly showRecoveryBanner = signal(false);
+  readonly recoveryDraft = signal<WizardDraft | null>(null);
+
+  /**
+   * Prevents accidental browser close/refresh when there are unsaved changes.
+   * Shows the browser's native "Leave site?" dialog.
+   */
+  @HostListener('window:beforeunload', ['$event'])
+  handleBeforeUnload(event: BeforeUnloadEvent): void {
+    if (this.isDirty()) {
+      event.preventDefault();
+      // Setting returnValue is required for some browsers
+      event.returnValue = '';
+    }
+  }
 
   // Lista de passos (todos os passos, para referência)
   readonly steps = WIZARD_STEPS;
@@ -66,16 +92,109 @@ export class WizardContainer {
   readonly isFirstStep = this.store.isFirstStep;
   readonly isLastStep = this.store.isLastStep;
   readonly isSubmitting = this.store.isSubmitting;
-  readonly isDirty = this.store.isDirty;
 
   /**
-   * Guard CanDeactivate - confirma saída se houver mudanças não salvas
+   * DirtyComponent interface implementation.
+   * Returns true if there are unsaved changes and we're not currently submitting.
+   * Used by unsavedChangesGuard and beforeunload handler.
    */
-  canDeactivate(): boolean {
-    if (this.isDirty() && !this.isSubmitting()) {
-      return confirm('Deseja sair sem salvar? Os dados preenchidos serão perdidos.');
+  isDirty(): boolean {
+    return this.store.isDirty() && !this.store.isSubmitting();
+  }
+
+  /**
+   * Initialize the wizard:
+   * 1. Cleanup stale drafts (older than 7 days)
+   * 2. Check for existing draft (from route param or most recent)
+   * 3. Show recovery banner if draft found, otherwise start fresh
+   */
+  async ngOnInit(): Promise<void> {
+    console.log('[WizardContainer] ngOnInit starting');
+
+    // Cleanup stale drafts first (older than 7 days)
+    await this.persistenceService.cleanupStaleDrafts(7);
+
+    // Check for existing draft (from route param or most recent)
+    const draftIdFromRoute = this.route.snapshot.queryParamMap.get('draftId');
+    console.log('[WizardContainer] Looking for draft, route param:', draftIdFromRoute);
+
+    const draft = draftIdFromRoute
+      ? await this.persistenceService.loadDraft(draftIdFromRoute)
+      : await this.persistenceService.getMostRecentDraft();
+
+    console.log('[WizardContainer] Draft found:', draft ? {
+      id: draft.id,
+      currentStep: draft.currentStep,
+      completedSteps: draft.completedSteps,
+      formDataKeys: Object.keys(draft.formData),
+      updatedAt: draft.updatedAt,
+    } : null);
+
+    if (draft && this.isDraftValid(draft)) {
+      console.log('[WizardContainer] Draft is valid, showing recovery banner');
+      this.recoveryDraft.set(draft);
+      this.showRecoveryBanner.set(true);
+    } else {
+      console.log('[WizardContainer] No valid draft, initializing fresh');
+      // No valid draft found, start fresh
+      this.store.initializeDraft();
     }
-    return true;
+  }
+
+  /**
+   * Check if a draft is still valid (not older than 7 days)
+   */
+  private isDraftValid(draft: WizardDraft): boolean {
+    const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days in ms
+    return Date.now() - draft.updatedAt.getTime() < maxAge;
+  }
+
+  /**
+   * Restore the saved draft and hide the recovery banner.
+   * Awaits the async loadDraft() to ensure data is fully loaded before showing toast.
+   */
+  async restoreDraft(): Promise<void> {
+    const draft = this.recoveryDraft();
+    console.log('[WizardContainer] restoreDraft called with draft:', draft?.id);
+    if (!draft) return;
+
+    console.log('[WizardContainer] Calling store.loadDraft...');
+    const success = await this.store.loadDraft(draft.id);
+    console.log('[WizardContainer] loadDraft returned:', success);
+    console.log('[WizardContainer] Store state after load:', {
+      currentStep: this.store.currentStep(),
+      dataVersion: this.store.dataVersion(),
+      stepDataKeys: Object.keys(this.store.stepData()),
+    });
+
+    this.showRecoveryBanner.set(false);
+
+    if (success) {
+      this.toastService.success('Rascunho restaurado com sucesso');
+    } else {
+      this.toastService.error('Erro ao restaurar rascunho. Iniciando novo cadastro.');
+      this.store.initializeDraft();
+    }
+  }
+
+  /**
+   * Discard the saved draft and start fresh
+   */
+  dismissRecovery(): void {
+    const draft = this.recoveryDraft();
+    if (draft) {
+      this.persistenceService.deleteDraft(draft.id);
+    }
+    this.recoveryDraft.set(null);
+    this.showRecoveryBanner.set(false);
+    this.store.initializeDraft();
+  }
+
+  /**
+   * Retry auto-save after an error
+   */
+  retrySave(): void {
+    this.store.retryAutoSave();
   }
 
   /**
@@ -105,7 +224,7 @@ export class WizardContainer {
    * Handler do botão Cancelar
    */
   onCancel(): void {
-    if (this.canDeactivate()) {
+    if (!this.isDirty() || confirm('Existem alterações não salvas. Deseja realmente sair?')) {
       this.router.navigate(['/cadastro']);
     }
   }
@@ -113,7 +232,7 @@ export class WizardContainer {
   /**
    * Handler do botão Salvar Fundo (submissão final)
    */
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (!this.canSubmit()) {
       this.toastService.warning('Complete todos os passos antes de salvar');
       return;
@@ -122,10 +241,13 @@ export class WizardContainer {
     this.store.setSubmitting(true);
 
     // Simular submissão (API será implementada no passo de Mock API)
-    setTimeout(() => {
+    setTimeout(async () => {
       this.toastService.success('Fundo cadastrado com sucesso!');
       this.store.markAsPristine();
       this.store.setSubmitting(false);
+
+      // Delete the draft after successful submission
+      await this.store.deleteDraft();
 
       // Redirecionar para lista de fundos (a ser implementada)
       this.router.navigate(['/cadastro/fundos']);

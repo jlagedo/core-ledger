@@ -2,6 +2,8 @@
  * Wizard de Cadastro de Fundo - Modelos TypeScript
  */
 
+import { SaveStatus } from './persistence.model';
+
 // IDs dos passos do wizard (1-11)
 export type WizardStepId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 
@@ -53,6 +55,15 @@ export interface WizardState {
   isSubmitting: boolean;
   submitError: string | null;
   isDirty: boolean;
+  // Persistence state
+  draftId: string | null;
+  saveStatus: SaveStatus;
+  lastSavedAt: Date | null;
+  /**
+   * Version counter that increments when bulk data is loaded (e.g., draft restoration).
+   * Step components watch this to know when to re-load their forms from store.
+   */
+  dataVersion: number;
 }
 
 /**

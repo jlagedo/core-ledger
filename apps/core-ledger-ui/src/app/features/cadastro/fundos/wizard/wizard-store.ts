@@ -1,5 +1,8 @@
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import { computed } from '@angular/core';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { computed, inject } from '@angular/core';
+import { pipe, from, timer, Subject, EMPTY } from 'rxjs';
+import { debounceTime, switchMap, retry, tap, filter, catchError } from 'rxjs/operators';
 import {
   WizardStepId,
   WizardState,
@@ -8,6 +11,8 @@ import {
   WizardStepConfig,
 } from './models/wizard.model';
 import { IdentificacaoFormData, TipoFundo } from './models/identificacao.model';
+import { SaveStatus } from './models/persistence.model';
+import { WizardPersistenceService } from './services/wizard-persistence.service';
 
 /**
  * Estado inicial do wizard
@@ -38,6 +43,13 @@ const initialState: WizardState = {
   isSubmitting: false,
   submitError: null,
   isDirty: false,
+  // Persistence state
+  draftId: null,
+  saveStatus: 'idle' as SaveStatus,
+  lastSavedAt: null,
+  // Data version: increments when bulk data is loaded (e.g., draft restoration)
+  // Step components watch this to know when to re-load from store
+  dataVersion: 0,
 };
 
 /** Step ID do Parâmetros FIDC (condicional) */
@@ -190,9 +202,34 @@ export const WizardStore = signalStore(
         const currentStepId = store.currentStep();
         return store.stepValidation()[currentStepId] || initialStepValidation;
       }),
+
+      /**
+       * Indica se há um rascunho ativo (com ID definido)
+       */
+      hasDraft: computed<boolean>(() => store.draftId() !== null),
+
+      /**
+       * Indica se há alterações não salvas
+       */
+      hasUnsavedChanges: computed<boolean>(() => {
+        return store.isDirty() && store.saveStatus() !== 'saved';
+      }),
+
+      /**
+       * Indica se o auto-save está ativo (salvando ou com erro)
+       */
+      isSaving: computed<boolean>(() => store.saveStatus() === 'saving'),
+
+      /**
+       * Indica se houve erro no último save
+       */
+      hasSaveError: computed<boolean>(() => store.saveStatus() === 'error'),
     };
   }),
   withMethods((store) => {
+    const persistenceService = inject(WizardPersistenceService);
+    const autoSaveTrigger$ = new Subject<void>();
+
     /**
      * Encontra o próximo step visível a partir de um ID
      */
@@ -222,6 +259,53 @@ export const WizardStore = signalStore(
       }
       return null;
     }
+
+    /**
+     * Generates a UUID v4 for draft identification
+     */
+    function generateDraftId(): string {
+      return crypto.randomUUID();
+    }
+
+    /**
+     * Auto-save rxMethod with debounce and retry logic.
+     * Triggered by changes to step data.
+     */
+    const autoSave = rxMethod<void>(
+      pipe(
+        debounceTime(800),
+        filter(() => store.draftId() !== null),
+        tap(() => patchState(store, { saveStatus: 'saving' })),
+        switchMap(() =>
+          from(
+            persistenceService.saveDraft(
+              store.draftId()!,
+              store.stepData(),
+              store.currentStep(),
+              Array.from(store.completedSteps())
+            )
+          ).pipe(
+            retry({
+              count: 3,
+              delay: (_error, retryCount) => timer(Math.pow(2, retryCount) * 1000),
+            }),
+            tap(() =>
+              patchState(store, {
+                saveStatus: 'saved',
+                lastSavedAt: new Date(),
+              })
+            ),
+            catchError(() => {
+              patchState(store, { saveStatus: 'error' });
+              return EMPTY;
+            })
+          )
+        )
+      )
+    );
+
+    // Connect the trigger to autoSave
+    autoSave(autoSaveTrigger$);
 
     return {
       /**
@@ -272,7 +356,8 @@ export const WizardStore = signalStore(
       },
 
       /**
-       * Define os dados de um passo
+       * Define os dados de um passo.
+       * Triggers auto-save if draft is initialized.
        */
       setStepData<T>(stepKey: string, data: T): void {
         patchState(store, {
@@ -282,10 +367,13 @@ export const WizardStore = signalStore(
           },
           isDirty: true,
         });
+        // Trigger auto-save
+        autoSaveTrigger$.next();
       },
 
       /**
-       * Atualiza parcialmente os dados de um passo
+       * Atualiza parcialmente os dados de um passo.
+       * Triggers auto-save if draft is initialized.
        */
       updateStepData<T>(stepKey: string, partialData: Partial<T>): void {
         const currentData = (store.stepData()[stepKey] || {}) as T;
@@ -296,6 +384,8 @@ export const WizardStore = signalStore(
           },
           isDirty: true,
         });
+        // Trigger auto-save
+        autoSaveTrigger$.next();
       },
 
       /**
@@ -357,6 +447,127 @@ export const WizardStore = signalStore(
        */
       markAsPristine(): void {
         patchState(store, { isDirty: false });
+      },
+
+      // ==================== Persistence Methods ====================
+
+      /**
+       * Initializes a new draft with a generated UUID.
+       * Call this when starting a fresh wizard session.
+       */
+      initializeDraft(): void {
+        const draftId = generateDraftId();
+        patchState(store, {
+          ...initialState,
+          draftId,
+          saveStatus: 'idle',
+        });
+      },
+
+      /**
+       * Loads an existing draft from IndexedDB.
+       * Restores all form data, step position, and completed steps.
+       * Increments dataVersion to signal step components to reload.
+       */
+      async loadDraft(draftId: string): Promise<boolean> {
+        console.log('[WizardStore] loadDraft called with ID:', draftId);
+        const draft = await persistenceService.loadDraft(draftId);
+
+        if (!draft) {
+          console.error('[WizardStore] loadDraft: draft not found in IndexedDB');
+          return false;
+        }
+
+        console.log('[WizardStore] loadDraft: draft loaded:', {
+          id: draft.id,
+          currentStep: draft.currentStep,
+          completedSteps: draft.completedSteps,
+          formDataKeys: Object.keys(draft.formData),
+          formData: draft.formData,
+        });
+
+        const newDataVersion = store.dataVersion() + 1;
+        console.log('[WizardStore] loadDraft: incrementing dataVersion from', store.dataVersion(), 'to', newDataVersion);
+
+        patchState(store, {
+          draftId: draft.id,
+          stepData: draft.formData,
+          currentStep: draft.currentStep,
+          completedSteps: new Set(draft.completedSteps),
+          saveStatus: 'saved',
+          lastSavedAt: draft.updatedAt,
+          isDirty: false,
+          // Increment dataVersion to signal step components to reload their forms
+          dataVersion: newDataVersion,
+        });
+
+        console.log('[WizardStore] loadDraft: state patched. New state:', {
+          currentStep: store.currentStep(),
+          dataVersion: store.dataVersion(),
+          stepDataKeys: Object.keys(store.stepData()),
+        });
+
+        return true;
+      },
+
+      /**
+       * Sets the draft ID without loading data.
+       * Useful when restoring from a URL parameter.
+       */
+      setDraftId(draftId: string): void {
+        patchState(store, { draftId });
+      },
+
+      /**
+       * Deletes the current draft from IndexedDB.
+       * Call this after successful submission or when user discards draft.
+       */
+      async deleteDraft(): Promise<void> {
+        const draftId = store.draftId();
+        if (draftId) {
+          await persistenceService.deleteDraft(draftId);
+          patchState(store, {
+            draftId: null,
+            saveStatus: 'idle',
+            lastSavedAt: null,
+          });
+        }
+      },
+
+      /**
+       * Manually triggers a save attempt.
+       * Useful for retry after error.
+       */
+      retryAutoSave(): void {
+        if (store.draftId()) {
+          autoSaveTrigger$.next();
+        }
+      },
+
+      /**
+       * Forces an immediate save (bypasses debounce).
+       * Useful before navigation or submission.
+       */
+      async forceSave(): Promise<void> {
+        const draftId = store.draftId();
+        if (!draftId) return;
+
+        patchState(store, { saveStatus: 'saving' });
+
+        try {
+          await persistenceService.saveDraft(
+            draftId,
+            store.stepData(),
+            store.currentStep(),
+            Array.from(store.completedSteps())
+          );
+          patchState(store, {
+            saveStatus: 'saved',
+            lastSavedAt: new Date(),
+          });
+        } catch {
+          patchState(store, { saveStatus: 'error' });
+        }
       },
     };
   })

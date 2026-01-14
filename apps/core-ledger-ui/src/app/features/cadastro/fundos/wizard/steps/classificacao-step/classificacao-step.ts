@@ -62,8 +62,9 @@ export class ClassificacaoStep {
   readonly anbimaMessage = signal<string | null>(null);
   readonly restrictedPublicoAlvo = signal<PublicoAlvo | null>(null);
 
-  // Track step ID to avoid re-loading
+  // Track step ID and dataVersion to avoid re-loading unless store data changes
   private lastLoadedStepId: WizardStepId | null = null;
+  private lastDataVersion = -1;
 
   // Loading flag to prevent store updates during restoration
   private isRestoring = false;
@@ -121,9 +122,7 @@ export class ClassificacaoStep {
 
         // Fetch ANBIMA options
         untracked(() => this.loadAnbimaOptions(cvmValue));
-      },
-      { allowSignalWrites: true }
-    );
+      });
 
     // Effect to apply restrictions based on tipo_fundo from Step 1
     effect(
@@ -159,19 +158,30 @@ export class ClassificacaoStep {
             this.form.get('tributacao')?.setValue(suggestedTributacao);
           }
         }
-      },
-      { allowSignalWrites: true }
-    );
+      });
 
-    // Effect to load data when step changes
+    // Effect to load data when step changes OR when store data is restored (dataVersion changes)
     effect(() => {
       const stepConfig = this.stepConfig();
       const stepId = stepConfig.id;
+      const dataVersion = this.wizardStore.dataVersion();
 
-      if (this.lastLoadedStepId === stepId) {
+      console.log('[ClassificacaoStep] Effect triggered:', {
+        stepId,
+        dataVersion,
+        lastLoadedStepId: this.lastLoadedStepId,
+        lastDataVersion: this.lastDataVersion,
+      });
+
+      // Skip if same step AND same dataVersion (no changes)
+      const sameStep = this.lastLoadedStepId === stepId;
+      const sameVersion = this.lastDataVersion === dataVersion;
+      if (sameStep && sameVersion) {
+        console.log('[ClassificacaoStep] Effect skipped: same step and version');
         return;
       }
       this.lastLoadedStepId = stepId;
+      this.lastDataVersion = dataVersion;
 
       // Set restoration flag to prevent store updates
       this.isRestoring = true;
@@ -185,11 +195,20 @@ export class ClassificacaoStep {
             | undefined
       );
 
+      console.log('[ClassificacaoStep] Effect loading data:', {
+        stepKey: stepConfig.key,
+        stepData,
+        allStepDataKeys: Object.keys(untracked(() => this.wizardStore.stepData())),
+      });
+
       if (stepData) {
         const formValue = this.prepareDataForForm(stepData);
+        console.log('[ClassificacaoStep] Patching form with:', formValue);
         // Patch WITHOUT emitEvent: false - let events fire naturally
         this.form.patchValue(formValue);
         this.form.markAsDirty();
+      } else {
+        console.log('[ClassificacaoStep] No step data found to restore');
       }
 
       // Clear restoration flag

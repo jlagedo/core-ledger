@@ -132,6 +132,7 @@ export interface DocumentoFundo {
   arquivoTipo: string; // MIME type
   arquivoConteudo?: File; // File object (apenas no upload)
   arquivoHash?: string; // SHA-256 (após upload no backend)
+  arquivoUrl?: string; // Object URL for preview (from IndexedDB blob)
 
   // Status de upload
   uploadStatus: 'pending' | 'uploading' | 'uploaded' | 'error';

@@ -19,7 +19,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter } from 'rxjs/operators';
+import { filter, startWith } from 'rxjs/operators';
 import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
 import { IdentificacaoFormData, TipoFundo } from '../../models/identificacao.model';
@@ -82,8 +82,9 @@ export class ParametrosFidcStep {
   readonly defaultLimiteCedente = DEFAULT_LIMITE_CEDENTE;
   readonly defaultLimiteSacado = DEFAULT_LIMITE_SACADO;
 
-  // Track step ID to avoid re-loading
+  // Track step ID and dataVersion to avoid re-loading unless store data changes
   private lastLoadedStepId: WizardStepId | null = null;
+  private lastDataVersion = -1;
 
   // Loading flag to prevent store updates during restoration
   private isRestoring = false;
@@ -146,9 +147,12 @@ export class ParametrosFidcStep {
       });
 
     // RF-04: Setup conditional validator for coobrigação percentual
-    this.form
-      .get('possuiCoobrigacao')
-      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+    const coobrigacaoControl = this.form.get('possuiCoobrigacao');
+    coobrigacaoControl?.valueChanges
+      .pipe(
+        startWith(coobrigacaoControl.value),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe((possuiCoobrigacao: boolean | null) => {
         const percentualControl = this.form.get('percentualCoobrigacao');
         if (possuiCoobrigacao) {
@@ -161,9 +165,12 @@ export class ParametrosFidcStep {
       });
 
     // RF-07: Setup conditional visibility for registradora fields
-    this.form
-      .get('registradoraRecebiveis')
-      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+    const registradoraControl = this.form.get('registradoraRecebiveis');
+    registradoraControl?.valueChanges
+      .pipe(
+        startWith(registradoraControl.value),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe((registradora: RegistradoraRecebiveis | null) => {
         const contaControl = this.form.get('contaRegistradora');
         const integracaoControl = this.form.get('integracaoRegistradora');
@@ -173,15 +180,20 @@ export class ParametrosFidcStep {
         }
       });
 
-    // Effect: Load data when step changes
+    // Effect: Load data when step changes or dataVersion changes (draft restoration)
     effect(() => {
       const stepConfig = this.stepConfig();
       const stepId = stepConfig.id;
+      const dataVersion = this.wizardStore.dataVersion();
 
-      if (this.lastLoadedStepId === stepId) {
+      // Skip if same step AND same dataVersion (no changes)
+      const sameStep = this.lastLoadedStepId === stepId;
+      const sameVersion = this.lastDataVersion === dataVersion;
+      if (sameStep && sameVersion) {
         return;
       }
       this.lastLoadedStepId = stepId;
+      this.lastDataVersion = dataVersion;
 
       // Set restoration flag to prevent store updates
       this.isRestoring = true;

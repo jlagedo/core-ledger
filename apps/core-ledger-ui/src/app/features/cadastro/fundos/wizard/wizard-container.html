@@ -1,5 +1,10 @@
 <app-page-header title="Cadastro de Fundo">
-  <div class="d-flex align-items-center gap-2">
+  <div class="d-flex align-items-center gap-3">
+    <!-- Auto-save Status Indicator -->
+    <app-save-status-indicator
+      [status]="store.saveStatus()"
+      (retry)="retrySave()"
+    />
     <!-- Progress Badge -->
     <span class="wizard-progress-badge font-monospace">
       <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
@@ -20,6 +25,14 @@
   <div class="wizard-layout">
     <!-- Main Content Area -->
     <div class="wizard-content">
+      <!-- Recovery Banner -->
+      <app-recovery-banner
+        [showBanner]="showRecoveryBanner()"
+        [lastSavedAt]="recoveryDraft()?.updatedAt ?? null"
+        (restore)="restoreDraft()"
+        (dismiss)="dismissRecovery()"
+      />
+
       <!-- Stepper: Progress Matrix -->
       <app-wizard-stepper
         [steps]="visibleSteps()"

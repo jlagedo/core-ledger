@@ -74,13 +74,20 @@
       "WebFetch(domain:en.bioerrorlog.work)",
       "WebFetch(domain:github.com)",
       "Bash(chmod:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npx vitest:*)",
+      "Bash(knip:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(tee:*)",
+      "Bash(npx eslint:*)"
     ]
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "angular-cli",
     "nuget",
     "postgres",
-    "microsoft-docs"
+    "microsoft-docs",
+    "playwright-test"
   ]
 }

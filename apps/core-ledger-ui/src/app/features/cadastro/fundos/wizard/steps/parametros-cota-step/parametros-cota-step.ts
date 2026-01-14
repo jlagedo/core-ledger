@@ -57,8 +57,9 @@ export class ParametrosCotaStep {
   readonly casasDecimaisQuantidadeOptions = CASAS_DECIMAIS_QUANTIDADE_OPTIONS;
   readonly casasDecimaisPlOptions = CASAS_DECIMAIS_PL_OPTIONS;
 
-  // Track step ID to avoid re-loading
+  // Track step ID and dataVersion to avoid re-loading unless store data changes
   private lastLoadedStepId: WizardStepId | null = null;
+  private lastDataVersion = -1;
 
   // Loading flag to prevent store updates during restoration
   private isRestoring = false;
@@ -162,19 +163,22 @@ export class ParametrosCotaStep {
       () => {
         const permiteCotaEstimada = this.form.get('permiteCotaEstimada')?.value;
         this.showCotaEstimadaInfo.set(permiteCotaEstimada === true);
-      },
-      { allowSignalWrites: true }
-    );
+      });
 
-    // Effect: Load data when step changes and set dataCotaInicial from identificacao
+    // Effect: Load data when step changes OR when store data is restored (dataVersion changes)
     effect(() => {
       const stepConfig = this.stepConfig();
       const stepId = stepConfig.id;
+      const dataVersion = this.wizardStore.dataVersion();
 
-      if (this.lastLoadedStepId === stepId) {
+      // Skip if same step AND same dataVersion (no changes)
+      const sameStep = this.lastLoadedStepId === stepId;
+      const sameVersion = this.lastDataVersion === dataVersion;
+      if (sameStep && sameVersion) {
         return;
       }
       this.lastLoadedStepId = stepId;
+      this.lastDataVersion = dataVersion;
 
       // Set restoration flag to prevent store updates
       this.isRestoring = true;

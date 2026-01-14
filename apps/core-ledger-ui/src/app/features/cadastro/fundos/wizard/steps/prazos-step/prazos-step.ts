@@ -74,8 +74,9 @@ export class PrazosStep {
   readonly maxPrazos = MAX_PRAZOS;
   readonly maxPrazoDias = MAX_PRAZO_DIAS;
 
-  // Track step ID to avoid re-loading
+  // Track step ID and dataVersion to avoid re-loading unless store data changes
   private lastLoadedStepId: WizardStepId | null = null;
+  private lastDataVersion = -1;
 
   // Flag to prevent store updates during data restoration
   private isRestoring = false;
@@ -124,15 +125,20 @@ export class PrazosStep {
         this.wizardStore.setStepData(stepConfig.key, dataForStore);
       });
 
-    // Effect: Load data when step changes
+    // Effect: Load data when step changes or dataVersion changes (draft restoration)
     effect(() => {
       const stepConfig = this.stepConfig();
       const stepId = stepConfig.id;
+      const dataVersion = this.wizardStore.dataVersion();
 
-      if (this.lastLoadedStepId === stepId) {
+      // Skip if same step AND same dataVersion (no changes)
+      const sameStep = this.lastLoadedStepId === stepId;
+      const sameVersion = this.lastDataVersion === dataVersion;
+      if (sameStep && sameVersion) {
         return;
       }
       this.lastLoadedStepId = stepId;
+      this.lastDataVersion = dataVersion;
 
       // Get identificacao data for tipo fundo defaults (RF-02)
       const identificacaoData = untracked(

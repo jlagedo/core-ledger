@@ -130,7 +130,8 @@
     "test": {
       "executor": "@angular/build:unit-test",
       "options": {
-        "tsConfig": "apps/core-ledger-ui/tsconfig.spec.json"
+        "tsConfig": "apps/core-ledger-ui/tsconfig.spec.json",
+        "setupFiles": ["apps/core-ledger-ui/src/test-setup.ts"]
       }
     }
   }
