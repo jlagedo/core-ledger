@@ -79,7 +79,19 @@
       "Bash(knip:*)",
       "Bash(npx playwright test:*)",
       "Bash(tee:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "mcp__playwright-test__planner_setup_page",
+      "mcp__playwright-test__browser_navigate",
+      "mcp__playwright-test__browser_snapshot",
+      "mcp__playwright-test__browser_type",
+      "mcp__playwright-test__browser_select_option",
+      "mcp__playwright-test__browser_evaluate",
+      "mcp__playwright-test__browser_click",
+      "mcp__playwright-test__browser_handle_dialog",
+      "mcp__playwright-test__browser_close",
+      "mcp__playwright-test__browser_press_key",
+      "mcp__playwright-test__browser_wait_for",
+      "mcp__playwright-test__planner_save_plan"
     ]
   },
   "enableAllProjectMcpServers": true,
