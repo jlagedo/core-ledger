@@ -1,18 +1,13 @@
 // ============================================================
 // IDENTIFICACAO STEP — Fund Identification Form
-// Terminal-style form with Bloomberg aesthetic
 // Uses shared wizard styles from _components.scss
 // ============================================================
 
-.identificacao-step {
-  animation: step-enter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+@use "../../../../../../../styles/mixins" as *;
 
-// ============================================================
-// REDUCED MOTION
-// ============================================================
+@include step-enter-animation('.identificacao-step');
 
-@media (prefers-reduced-motion: reduce) {
+@include reduced-motion {
   .identificacao-step {
     animation: none;
   }

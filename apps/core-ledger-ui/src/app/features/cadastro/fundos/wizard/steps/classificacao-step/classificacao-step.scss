@@ -1,18 +1,13 @@
 // ============================================================
 // CLASSIFICACAO STEP — Fund Classification Form
-// Terminal-style form with Bloomberg aesthetic
 // Uses shared wizard styles from _components.scss
 // ============================================================
 
-.classificacao-step {
-  animation: step-enter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+@use "../../../../../../../styles/mixins" as *;
 
-// ============================================================
-// REDUCED MOTION
-// ============================================================
+@include step-enter-animation('.classificacao-step');
 
-@media (prefers-reduced-motion: reduce) {
+@include reduced-motion {
   .classificacao-step {
     animation: none;
   }

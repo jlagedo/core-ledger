@@ -1,18 +1,13 @@
 // ============================================================
 // CARACTERISTICAS STEP — Fund Characteristics Form
-// Terminal-style form with Bloomberg aesthetic
 // Uses shared wizard styles from _components.scss
 // ============================================================
 
-.caracteristicas-step {
-  animation: step-enter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+@use "../../../../../../../styles/mixins" as *;
 
-// ============================================================
-// REDUCED MOTION
-// ============================================================
+@include step-enter-animation('.caracteristicas-step');
 
-@media (prefers-reduced-motion: reduce) {
+@include reduced-motion {
   .caracteristicas-step {
     animation: none;
   }

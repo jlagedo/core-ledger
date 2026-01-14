@@ -4,9 +4,9 @@
 // Uses shared wizard styles from _components.scss
 // ============================================================
 
-.fidc-step {
-  animation: step-enter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+@use "../../../../../../../styles/mixins" as *;
+
+@include step-enter-animation('.fidc-step');
 
 // ============================================================
 // RECEBIVEIS GRID (RF-03) - FIDC-specific
@@ -30,7 +30,7 @@
   font-size: 0.6875rem;
   font-weight: 600;
   color: var(--accent-coral);
-  animation: pulse 2s ease-in-out infinite;
+  @include pulse-warning;
 }
 
 .recebiveis-grid {
@@ -164,7 +164,7 @@
 // REDUCED MOTION
 // ============================================================
 
-@media (prefers-reduced-motion: reduce) {
+@include reduced-motion {
   .fidc-step,
   .recebiveis-warning {
     animation: none;

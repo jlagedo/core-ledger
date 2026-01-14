@@ -1,25 +1,16 @@
 // ============================================================
 // PLACEHOLDER STEP — Development Test Component
 // Terminal-style test form with visual feedback
+// Uses shared wizard styles from _components.scss
 // ============================================================
+
+@use "../../../../../../../styles/mixins" as *;
 
 // --- Design Tokens ---
 $field-radius: 2px;
 
-.placeholder-step {
-  animation: step-enter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+@include step-enter-animation('.placeholder-step');
 
-@keyframes step-enter {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 // ============================================================
 // DEVELOPMENT NOTICE — Info Banner
@@ -194,16 +185,6 @@ $field-radius: 2px;
   color: var(--accent-teal);
 }
 
-@keyframes feedback-enter {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 // ============================================================
 // PLACEHOLDER HINT — Help Text
@@ -294,7 +275,7 @@ $field-radius: 2px;
 // REDUCED MOTION
 // ============================================================
 
-@media (prefers-reduced-motion: reduce) {
+@include reduced-motion {
   .placeholder-step,
   .placeholder-field__error,
   .placeholder-field__success {

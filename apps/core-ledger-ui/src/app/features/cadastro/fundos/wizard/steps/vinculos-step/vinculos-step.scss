@@ -4,9 +4,9 @@
 // Uses shared wizard styles from _components.scss
 // ============================================================
 
-.vinculos-step {
-  animation: step-enter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+@use "../../../../../../../styles/mixins" as *;
+
+@include step-enter-animation('.vinculos-step');
 
 // ============================================================
 // VINCULOS HEADER
@@ -68,7 +68,7 @@
   border: 1px solid var(--coral-20);
   border-radius: 2px;
   color: var(--accent-coral);
-  animation: pulse 2s ease-in-out infinite;
+  @include pulse-warning;
 
   i {
     font-size: 1rem;
@@ -262,62 +262,16 @@
 }
 
 // ============================================================
-// AUTOCOMPLETE
+// AUTOCOMPLETE OVERRIDES
+// Base styles from _components.scss, only overrides here
 // ============================================================
 
-.autocomplete-wrapper {
-  position: relative;
+// Indigo-themed hover for vinculos step
+.autocomplete-item:hover {
+  background: var(--indigo-5);
 }
 
-.autocomplete-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  max-height: 240px;
-  overflow-y: auto;
-  background: var(--bs-body-bg);
-  border: 1px solid var(--table-border-color);
-  border-top: none;
-  border-radius: 0 0 2px 2px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  animation: dropdown-enter 0.2s ease;
-}
-
-@keyframes dropdown-enter {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.autocomplete-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-  width: 100%;
-  padding: 0.625rem 0.875rem;
-  background: none;
-  border: none;
-  border-bottom: 1px solid var(--table-border-color);
-  text-align: left;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &:hover {
-    background: var(--indigo-5);
-  }
-}
-
+// Semantic class names for instituição data (matches shared pattern)
 .autocomplete-item__nome {
   font-size: 0.8125rem;
   font-weight: 600;
@@ -329,23 +283,7 @@
   color: var(--bs-secondary-color);
 }
 
-.autocomplete-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 1.25rem 1rem;
-  font-size: 0.75rem;
-  color: var(--bs-secondary-color);
-  text-align: center;
-
-  i {
-    font-size: 1.5rem;
-    opacity: 0.4;
-  }
-}
-
+// Extension: action buttons in empty state
 .autocomplete-empty__actions {
   display: flex;
   align-items: center;
@@ -428,12 +366,9 @@
 }
 
 .vinculo-details__content {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
-  background: var(--indigo-2);
-  animation: field-slide-down 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  @include wizard-section(indigo);
+  margin-top: 0;
+  border: none;
 }
 
 // ============================================================
@@ -613,8 +548,8 @@
       border-color: var(--daylight-indigo);
 
       &:hover {
-        background: #4338ca;
-        border-color: #4338ca;
+        background: color-mix(in srgb, var(--daylight-indigo) 90%, black);
+        border-color: color-mix(in srgb, var(--daylight-indigo) 90%, black);
       }
     }
   }
@@ -656,7 +591,7 @@
 // REDUCED MOTION
 // ============================================================
 
-@media (prefers-reduced-motion: reduce) {
+@include reduced-motion {
   .vinculos-step,
   .vinculo-details__content,
   .autocomplete-dropdown,

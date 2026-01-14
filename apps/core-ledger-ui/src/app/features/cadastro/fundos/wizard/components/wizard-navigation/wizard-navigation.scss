@@ -113,7 +113,7 @@ $transition-duration: 0.2s;
 
 // --- Secondary: Subtle ---
 .wizard-btn--secondary {
-  background: rgba(255, 255, 255, 0.03);
+  background: transparent;
   border-color: var(--table-border-color);
   color: var(--bs-secondary-color);
 
@@ -207,7 +207,7 @@ $transition-duration: 0.2s;
   }
 
   .wizard-btn--secondary {
-    background: rgba(0, 0, 0, 0.02);
+    background: transparent;
     border-color: var(--amber-15);
     color: var(--bs-secondary-color);
 
