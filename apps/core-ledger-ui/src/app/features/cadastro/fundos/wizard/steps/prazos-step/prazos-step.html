@@ -1,0 +1,457 @@
+<div class="prazos-step">
+  <form [formGroup]="form" class="step-form" novalidate>
+    <!-- Header with Add Button -->
+    <div class="prazos-header">
+      <div class="prazos-header__info">
+        <span class="prazos-header__count font-monospace">
+          {{ prazosCount() }}/{{ maxPrazos }} prazos
+        </span>
+        @if (!hasAplicacao()) {
+          <span class="prazos-header__warning">
+            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+            Prazo de aplicacao obrigatorio
+          </span>
+        }
+        @if (!hasResgate()) {
+          <span class="prazos-header__warning">
+            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+            Prazo de resgate obrigatorio
+          </span>
+        }
+      </div>
+      <button
+        type="button"
+        class="btn btn-sm btn-outline-secondary"
+        (click)="addPrazo()"
+        [disabled]="!canAddPrazo()"
+        aria-label="Adicionar novo prazo"
+      >
+        <i class="bi bi-plus-lg" aria-hidden="true"></i>
+        Adicionar Prazo
+      </button>
+    </div>
+
+    <!-- Prazo Cards List -->
+    <div class="prazos-list" formArrayName="prazos">
+      @for (prazo of prazosArray().controls; track $index; let i = $index) {
+        <div
+          class="prazo-card"
+          [formGroupName]="i"
+          [class.prazo-card--aplicacao]="getPrazoGroup(i).get('tipoOperacao')?.value === 'APLICACAO'"
+          [class.prazo-card--resgate]="getPrazoGroup(i).get('tipoOperacao')?.value === 'RESGATE'"
+          [class.prazo-card--resgate-crise]="getPrazoGroup(i).get('tipoOperacao')?.value === 'RESGATE_CRISE'"
+        >
+          <!-- Card Header -->
+          <div class="prazo-card__header">
+            <div class="prazo-card__number font-monospace">
+              {{ (i + 1).toString().padStart(2, '0') }}
+            </div>
+            <div class="prazo-card__title">
+              @if (getPrazoGroup(i).get('tipoOperacao')?.value; as tipoOperacao) {
+                {{ getTipoOperacaoLabel(tipoOperacao) }}
+              } @else {
+                Novo Prazo
+              }
+            </div>
+            @if (canRemovePrazo(i)) {
+              <button
+                type="button"
+                class="btn btn-sm btn-link prazo-card__remove"
+                (click)="removePrazo(i)"
+                aria-label="Remover prazo"
+              >
+                <i class="bi bi-trash" aria-hidden="true"></i>
+              </button>
+            } @else {
+              <span class="prazo-card__locked">
+                <i class="bi bi-lock-fill" aria-hidden="true"></i>
+              </span>
+            }
+          </div>
+
+          <!-- Card Body -->
+          <div class="prazo-card__body">
+            <!-- Row 1: Tipo Operacao e Calendario -->
+            <div class="step-form__grid step-form__grid--2-cols">
+              <!-- Tipo Operacao -->
+              <div class="step-field">
+                <label [for]="'tipoOperacao-' + i" class="step-field__label">
+                  <span class="step-field__label-text">Tipo de Operacao</span>
+                  <span class="step-field__required" aria-label="obrigatorio">*</span>
+                </label>
+                <select
+                  class="form-select step-field__input"
+                  [class.is-invalid]="isFieldInvalid(i, 'tipoOperacao')"
+                  [class.is-valid]="isFieldValid(i, 'tipoOperacao')"
+                  [id]="'tipoOperacao-' + i"
+                  formControlName="tipoOperacao"
+                >
+                  <option [ngValue]="null">Selecione o tipo</option>
+                  @for (option of tipoOperacaoOptions; track option.value) {
+                    <option [ngValue]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+                @if (isFieldInvalid(i, 'tipoOperacao')) {
+                  <div class="step-field__error">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    Tipo de operacao e obrigatorio
+                  </div>
+                }
+              </div>
+
+              <!-- Tipo Calendario (RF-04) -->
+              <div class="step-field">
+                <label [for]="'tipoCalendario-' + i" class="step-field__label">
+                  <span class="step-field__label-text">Calendario</span>
+                  <span class="step-field__required" aria-label="obrigatorio">*</span>
+                </label>
+                <select
+                  class="form-select step-field__input"
+                  [class.is-invalid]="isFieldInvalid(i, 'tipoCalendario')"
+                  [class.is-valid]="isFieldValid(i, 'tipoCalendario')"
+                  [id]="'tipoCalendario-' + i"
+                  formControlName="tipoCalendario"
+                >
+                  @for (option of tipoCalendarioOptions; track option.value) {
+                    <option [ngValue]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+                @if (isFieldInvalid(i, 'tipoCalendario')) {
+                  <div class="step-field__error">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    Calendario e obrigatorio
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Row 2: Prazos D+X (RF-03) -->
+            <div class="step-form__grid step-form__grid--2-cols">
+              <!-- Prazo Cotizacao -->
+              <div class="step-field">
+                <label [for]="'prazoCotizacao-' + i" class="step-field__label">
+                  <span class="step-field__label-text">Cotizacao</span>
+                  <span class="step-field__required" aria-label="obrigatorio">*</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text step-input-prefix">D+</span>
+                  <input
+                    type="number"
+                    class="form-control step-field__input font-monospace"
+                    [class.is-invalid]="isFieldInvalid(i, 'prazoCotizacao') || hasLiquidacaoError(i)"
+                    [class.is-valid]="isFieldValid(i, 'prazoCotizacao') && !hasLiquidacaoError(i)"
+                    [id]="'prazoCotizacao-' + i"
+                    formControlName="prazoCotizacao"
+                    placeholder="0"
+                    min="0"
+                    [max]="maxPrazoDias"
+                  />
+                </div>
+                @if (isFieldInvalid(i, 'prazoCotizacao')) {
+                  <div class="step-field__error">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    @if (getFieldError(i, 'prazoCotizacao', 'required')) {
+                      Prazo de cotizacao e obrigatorio
+                    } @else if (getFieldError(i, 'prazoCotizacao', 'min')) {
+                      Valor minimo: 0
+                    } @else if (getFieldError(i, 'prazoCotizacao', 'max')) {
+                      Valor maximo: {{ maxPrazoDias }}
+                    }
+                  </div>
+                }
+              </div>
+
+              <!-- Prazo Liquidacao -->
+              <div class="step-field">
+                <label [for]="'prazoLiquidacao-' + i" class="step-field__label">
+                  <span class="step-field__label-text">Liquidacao</span>
+                  <span class="step-field__required" aria-label="obrigatorio">*</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text step-input-prefix">D+</span>
+                  <input
+                    type="number"
+                    class="form-control step-field__input font-monospace"
+                    [class.is-invalid]="isFieldInvalid(i, 'prazoLiquidacao') || hasLiquidacaoError(i)"
+                    [class.is-valid]="isFieldValid(i, 'prazoLiquidacao') && !hasLiquidacaoError(i)"
+                    [id]="'prazoLiquidacao-' + i"
+                    formControlName="prazoLiquidacao"
+                    placeholder="0"
+                    min="0"
+                    [max]="maxPrazoDias"
+                  />
+                </div>
+                @if (isFieldInvalid(i, 'prazoLiquidacao')) {
+                  <div class="step-field__error">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    @if (getFieldError(i, 'prazoLiquidacao', 'required')) {
+                      Prazo de liquidacao e obrigatorio
+                    } @else if (getFieldError(i, 'prazoLiquidacao', 'min')) {
+                      Valor minimo: 0
+                    } @else if (getFieldError(i, 'prazoLiquidacao', 'max')) {
+                      Valor maximo: {{ maxPrazoDias }}
+                    }
+                  </div>
+                } @else if (hasLiquidacaoError(i)) {
+                  <div class="step-field__error">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    Liquidacao deve ser maior ou igual a cotizacao
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Row 3: Valores Minimos (RF-06) -->
+            <div class="step-form__grid step-form__grid--2-cols">
+              <!-- Valor Minimo Inicial -->
+              <div class="step-field">
+                <label [for]="'valorMinimoInicial-' + i" class="step-field__label">
+                  <span class="step-field__label-text">Valor Minimo Inicial</span>
+                  <span class="step-field__optional">(opcional)</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text step-input-prefix">R$</span>
+                  <input
+                    type="text"
+                    appCurrencyMask
+                    class="form-control step-field__input font-monospace"
+                    [class.is-invalid]="isFieldInvalid(i, 'valorMinimoInicial')"
+                    [class.is-valid]="isFieldValid(i, 'valorMinimoInicial')"
+                    [id]="'valorMinimoInicial-' + i"
+                    formControlName="valorMinimoInicial"
+                    placeholder="1.000,00"
+                  />
+                </div>
+                <div class="step-field__hint">
+                  <i class="bi bi-lightbulb" aria-hidden="true"></i>
+                  Primeira aplicacao
+                </div>
+              </div>
+
+              <!-- Valor Minimo Adicional -->
+              <div class="step-field">
+                <label [for]="'valorMinimoAdicional-' + i" class="step-field__label">
+                  <span class="step-field__label-text">Valor Minimo Adicional</span>
+                  <span class="step-field__optional">(opcional)</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text step-input-prefix">R$</span>
+                  <input
+                    type="text"
+                    appCurrencyMask
+                    class="form-control step-field__input font-monospace"
+                    [class.is-invalid]="isFieldInvalid(i, 'valorMinimoAdicional')"
+                    [class.is-valid]="isFieldValid(i, 'valorMinimoAdicional')"
+                    [id]="'valorMinimoAdicional-' + i"
+                    formControlName="valorMinimoAdicional"
+                    placeholder="1.000,00"
+                  />
+                </div>
+                <div class="step-field__hint">
+                  <i class="bi bi-lightbulb" aria-hidden="true"></i>
+                  Aplicacoes subsequentes
+                </div>
+              </div>
+            </div>
+
+            <!-- Resgate-specific fields (RF-05, RF-06) -->
+            @if (isResgatePrazo(i)) {
+              <div class="prazo-card__resgate-section step-field--conditional">
+                <h6 class="form-section-title">
+                  <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                  Parametros de Resgate
+                </h6>
+
+                <!-- Row: Valores de Resgate -->
+                <div class="step-form__grid step-form__grid--2-cols">
+                  <!-- Valor Minimo Resgate -->
+                  <div class="step-field">
+                    <label [for]="'valorMinimoResgate-' + i" class="step-field__label">
+                      <span class="step-field__label-text">Valor Minimo de Resgate</span>
+                      <span class="step-field__optional">(opcional)</span>
+                    </label>
+                    <div class="input-group">
+                      <span class="input-group-text step-input-prefix">R$</span>
+                      <input
+                        type="text"
+                        appCurrencyMask
+                        class="form-control step-field__input font-monospace"
+                        [class.is-invalid]="isFieldInvalid(i, 'valorMinimoResgate')"
+                        [class.is-valid]="isFieldValid(i, 'valorMinimoResgate')"
+                        [id]="'valorMinimoResgate-' + i"
+                        formControlName="valorMinimoResgate"
+                        placeholder="1.000,00"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Valor Minimo Permanencia -->
+                  <div class="step-field">
+                    <label [for]="'valorMinimoPermanencia-' + i" class="step-field__label">
+                      <span class="step-field__label-text">Valor Minimo Permanencia</span>
+                      <span class="step-field__optional">(opcional)</span>
+                    </label>
+                    <div class="input-group">
+                      <span class="input-group-text step-input-prefix">R$</span>
+                      <input
+                        type="text"
+                        appCurrencyMask
+                        class="form-control step-field__input font-monospace"
+                        [class.is-invalid]="isFieldInvalid(i, 'valorMinimoPermanencia')"
+                        [class.is-valid]="isFieldValid(i, 'valorMinimoPermanencia')"
+                        [id]="'valorMinimoPermanencia-' + i"
+                        formControlName="valorMinimoPermanencia"
+                        placeholder="5.000,00"
+                      />
+                    </div>
+                    <div class="step-field__hint">
+                      <i class="bi bi-lightbulb" aria-hidden="true"></i>
+                      Saldo minimo que deve permanecer
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Row: Carencia (RF-05) -->
+                <div class="step-form__grid step-form__grid--2-cols">
+                  <!-- Prazo Carencia -->
+                  <div class="step-field">
+                    <label [for]="'prazoCarenciaDias-' + i" class="step-field__label">
+                      <span class="step-field__label-text">Carencia</span>
+                      <span class="step-field__optional">(opcional)</span>
+                    </label>
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        class="form-control step-field__input font-monospace"
+                        [class.is-invalid]="isFieldInvalid(i, 'prazoCarenciaDias')"
+                        [class.is-valid]="isFieldValid(i, 'prazoCarenciaDias')"
+                        [id]="'prazoCarenciaDias-' + i"
+                        formControlName="prazoCarenciaDias"
+                        placeholder="30"
+                        min="0"
+                        [max]="maxPrazoDias"
+                      />
+                      <span class="input-group-text step-input-suffix">dias</span>
+                    </div>
+                    <div class="step-field__hint">
+                      <i class="bi bi-lightbulb" aria-hidden="true"></i>
+                      Periodo minimo de permanencia (dias corridos)
+                    </div>
+                  </div>
+
+                  <!-- Spacer for grid alignment -->
+                  <div class="step-field"></div>
+                </div>
+
+                <!-- Checkboxes: Resgate Total e Programado (RF-07) -->
+                <div class="step-form__grid step-form__grid--2-cols">
+                  <!-- Permite Resgate Total -->
+                  <div class="step-field">
+                    <div class="step-checkbox">
+                      <input
+                        type="checkbox"
+                        class="form-check-input step-checkbox__input"
+                        [id]="'permiteResgateTotal-' + i"
+                        formControlName="permiteResgateTotal"
+                      />
+                      <label class="step-checkbox__label" [for]="'permiteResgateTotal-' + i">
+                        <span class="step-checkbox__label-text">Permite Resgate Total</span>
+                      </label>
+                    </div>
+                    @if (isResgateTotalDisabled(i)) {
+                      <div class="step-field__warning">
+                        <i class="bi bi-info-circle" aria-hidden="true"></i>
+                        Cotista nao podera zerar posicao
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Permite Resgate Programado -->
+                  <div class="step-field">
+                    <div class="step-checkbox">
+                      <input
+                        type="checkbox"
+                        class="form-check-input step-checkbox__input"
+                        [id]="'permiteResgateProgramado-' + i"
+                        formControlName="permiteResgateProgramado"
+                      />
+                      <label class="step-checkbox__label" [for]="'permiteResgateProgramado-' + i">
+                        <span class="step-checkbox__label-text">Permite Resgate Programado</span>
+                      </label>
+                    </div>
+                    <div class="step-field__hint">
+                      <i class="bi bi-lightbulb" aria-hidden="true"></i>
+                      Permite agendamento de resgate
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Conditional: Prazo Maximo Programacao (RF-07) -->
+                @if (isResgateProgramadoEnabled(i)) {
+                  <div class="step-form__grid step-form__grid--2-cols step-field--conditional">
+                    <div class="step-field">
+                      <label [for]="'prazoMaximoProgramacao-' + i" class="step-field__label">
+                        <span class="step-field__label-text">Prazo Maximo para Programacao</span>
+                        <span class="step-field__required" aria-label="obrigatorio">*</span>
+                      </label>
+                      <div class="input-group">
+                        <input
+                          type="number"
+                          class="form-control step-field__input font-monospace"
+                          [class.is-invalid]="isFieldInvalid(i, 'prazoMaximoProgramacao')"
+                          [class.is-valid]="isFieldValid(i, 'prazoMaximoProgramacao')"
+                          [id]="'prazoMaximoProgramacao-' + i"
+                          formControlName="prazoMaximoProgramacao"
+                          placeholder="60"
+                          min="1"
+                          [max]="maxPrazoDias"
+                        />
+                        <span class="input-group-text step-input-suffix">dias uteis</span>
+                      </div>
+                      @if (isFieldInvalid(i, 'prazoMaximoProgramacao')) {
+                        <div class="step-field__error">
+                          <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                          @if (getFieldError(i, 'prazoMaximoProgramacao', 'required')) {
+                            Prazo maximo e obrigatorio quando resgate programado esta habilitado
+                          } @else if (getFieldError(i, 'prazoMaximoProgramacao', 'min')) {
+                            Valor minimo: 1
+                          } @else if (getFieldError(i, 'prazoMaximoProgramacao', 'max')) {
+                            Valor maximo: {{ maxPrazoDias }}
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      } @empty {
+        <div class="prazos-empty">
+          <i class="bi bi-inbox prazos-empty__icon" aria-hidden="true"></i>
+          <p class="prazos-empty__text">Nenhum prazo cadastrado</p>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-secondary"
+            (click)="addPrazo()"
+          >
+            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+            Adicionar Prazo
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Form Footer -->
+    <div class="step-form__footer">
+      <div class="step-hint">
+        <i class="bi bi-lightbulb step-hint__icon" aria-hidden="true"></i>
+        <span class="step-hint__text">
+          E obrigatorio ter pelo menos um prazo de <strong>aplicacao</strong> e um de <strong>resgate</strong>.
+          Preencha todos os campos obrigatorios (<span class="text-danger">*</span>) para habilitar o botao "Proximo"
+        </span>
+      </div>
+    </div>
+  </form>
+</div>

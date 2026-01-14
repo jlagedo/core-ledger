@@ -1,0 +1,1054 @@
+// ============================================================
+// CLASSES STEP — CVM 175 Multi-class Fund Structure
+// Terminal-style form with dynamic list of class cards
+// ============================================================
+
+$field-radius: 2px;
+
+.classes-step {
+  animation: step-enter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes step-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================================
+// STEP FORM LAYOUT (inherited from identificacao-step)
+// ============================================================
+
+.step-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.step-form__section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.step-form__grid {
+  display: grid;
+  gap: 1rem;
+
+  &--1-col {
+    grid-template-columns: 1fr;
+  }
+
+  &--2-cols {
+    grid-template-columns: 1fr;
+
+    @media (min-width: 576px) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+  }
+}
+
+.step-form__footer {
+  padding-top: 1rem;
+  border-top: 1px dashed var(--table-border-color);
+}
+
+// ============================================================
+// MULTICLASSE TOGGLE SECTION (RF-01)
+// ============================================================
+
+.classes-toggle-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(99, 102, 241, 0.03);
+  border: 1px solid var(--table-border-color);
+  border-radius: $field-radius;
+}
+
+.classes-toggle__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.classes-toggle__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1rem;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: $field-radius;
+  color: var(--accent-indigo, #6366f1);
+}
+
+.classes-toggle__text {
+  flex: 1;
+}
+
+.classes-toggle__title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bs-body-color);
+}
+
+.classes-toggle__subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: var(--bs-secondary-color);
+}
+
+.classes-toggle__options {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.classes-toggle__option {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex: 1;
+  min-width: 140px;
+  padding: 0.75rem 1rem;
+  background: var(--bs-secondary-bg);
+  border: 1px solid var(--table-border-color);
+  border-radius: $field-radius;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: rgba(99, 102, 241, 0.3);
+    background: rgba(99, 102, 241, 0.02);
+  }
+
+  &--selected {
+    border-color: var(--accent-indigo, #6366f1);
+    background: rgba(99, 102, 241, 0.05);
+
+    .classes-toggle__radio {
+      border-color: var(--accent-indigo, #6366f1);
+      background: var(--accent-indigo, #6366f1);
+
+      &::after {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  }
+
+  &:has(input:disabled) {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.classes-toggle__radio {
+  position: relative;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--table-border-color);
+  border-radius: 50%;
+  transition: all 0.2s ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0.375rem;
+    height: 0.375rem;
+    background: white;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    transition: all 0.2s ease;
+  }
+}
+
+.classes-toggle__label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.classes-toggle__label-text {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+}
+
+.classes-toggle__label-desc {
+  font-size: 0.6875rem;
+  color: var(--bs-secondary-color);
+}
+
+.classes-toggle__notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  background: rgba(99, 102, 241, 0.08);
+  border-radius: $field-radius;
+  color: var(--accent-indigo, #6366f1);
+}
+
+// ============================================================
+// SINGLE MODE MESSAGE
+// ============================================================
+
+.classes-single-mode {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: rgba(74, 246, 195, 0.03);
+  border: 1px solid rgba(74, 246, 195, 0.2);
+  border-radius: $field-radius;
+}
+
+.classes-single-mode__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.25rem;
+  background: rgba(74, 246, 195, 0.1);
+  border-radius: $field-radius;
+  color: var(--accent-teal, #4af6c3);
+}
+
+.classes-single-mode__content {
+  flex: 1;
+}
+
+.classes-single-mode__title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent-teal, #4af6c3);
+}
+
+.classes-single-mode__text {
+  margin: 0.375rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--bs-secondary-color);
+  line-height: 1.5;
+}
+
+// ============================================================
+// CLASSES HEADER
+// ============================================================
+
+.classes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.625rem 0.875rem;
+  background: rgba(99, 102, 241, 0.02);
+  border: 1px solid var(--table-border-color);
+  border-radius: $field-radius;
+}
+
+.classes-header__info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.classes-header__count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+}
+
+.classes-header__warning {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--accent-coral, #ff433d);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+// ============================================================
+// CLASSES LIST
+// ============================================================
+
+.classes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.classes-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  background: rgba(99, 102, 241, 0.02);
+  border: 1px dashed var(--table-border-color);
+  border-radius: $field-radius;
+  color: var(--bs-secondary-color);
+}
+
+.classes-empty__icon {
+  font-size: 2rem;
+  opacity: 0.5;
+}
+
+.classes-empty__text {
+  font-size: 0.8125rem;
+  margin: 0;
+}
+
+// ============================================================
+// CLASSE CARD
+// ============================================================
+
+.classe-card {
+  background: var(--bs-secondary-bg);
+  border: 1px solid var(--table-border-color);
+  border-radius: $field-radius;
+  overflow: hidden;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: rgba(99, 102, 241, 0.3);
+  }
+
+  &--senior {
+    border-color: rgba(74, 246, 195, 0.3);
+
+    .classe-card__header {
+      background: rgba(74, 246, 195, 0.05);
+    }
+
+    .classe-card__number {
+      background: rgba(74, 246, 195, 0.15);
+      color: var(--accent-teal, #4af6c3);
+    }
+
+    .classe-card__tipo-badge {
+      background: rgba(74, 246, 195, 0.15);
+      color: var(--accent-teal, #4af6c3);
+    }
+  }
+
+  &--subordinada {
+    border-color: rgba(255, 160, 40, 0.3);
+
+    .classe-card__header {
+      background: rgba(255, 160, 40, 0.05);
+    }
+
+    .classe-card__number {
+      background: rgba(255, 160, 40, 0.15);
+      color: var(--accent-amber, #ffa028);
+    }
+
+    .classe-card__tipo-badge {
+      background: rgba(255, 160, 40, 0.15);
+      color: var(--accent-amber, #ffa028);
+    }
+  }
+}
+
+.classe-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(99, 102, 241, 0.02);
+  border-bottom: 1px solid var(--table-border-color);
+}
+
+.classe-card__number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: $field-radius;
+  color: var(--accent-indigo, #6366f1);
+}
+
+.classe-card__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bs-body-color);
+}
+
+.classe-card__tipo-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: $field-radius;
+  color: var(--accent-indigo, #6366f1);
+}
+
+.classe-card__remove {
+  padding: 0.25rem;
+  color: var(--accent-coral, #ff433d);
+  opacity: 0.7;
+  transition: all 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+    background: rgba(255, 67, 61, 0.1);
+  }
+}
+
+.classe-card__locked {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--bs-secondary-color);
+  opacity: 0.5;
+}
+
+.classe-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+// ============================================================
+// TAXAS SECTION (RF-07)
+// ============================================================
+
+.classe-card__taxas-section {
+  margin-top: 0.5rem;
+  border: 1px dashed var(--table-border-color);
+  border-radius: $field-radius;
+
+  &[open] {
+    .classe-card__taxas-toggle {
+      border-bottom: 1px dashed var(--table-border-color);
+    }
+  }
+}
+
+.classe-card__taxas-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bs-secondary-color);
+  cursor: pointer;
+  list-style: none;
+  transition: all 0.2s ease;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &:hover {
+    color: var(--bs-body-color);
+    background: rgba(99, 102, 241, 0.02);
+  }
+
+  i {
+    font-size: 0.75rem;
+  }
+}
+
+.classe-card__taxas-hint {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--terminal-text-muted);
+}
+
+.classe-card__taxas-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(99, 102, 241, 0.01);
+  animation: field-slide-down 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ============================================================
+// SUBORDINATION INFO (RF-08)
+// ============================================================
+
+.subordination-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(99, 102, 241, 0.03);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: $field-radius;
+}
+
+.subordination-info__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent-indigo, #6366f1);
+
+  i {
+    font-size: 0.875rem;
+  }
+}
+
+.subordination-info__formula {
+  padding: 0.75rem;
+  background: var(--bs-secondary-bg);
+  border: 1px solid var(--table-border-color);
+  border-radius: $field-radius;
+
+  code {
+    font-size: 0.8125rem;
+    color: var(--bs-body-color);
+
+    sub {
+      font-size: 0.625rem;
+      color: var(--bs-secondary-color);
+    }
+  }
+}
+
+.subordination-info__note {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.6875rem;
+  color: var(--bs-secondary-color);
+
+  i {
+    color: var(--accent-indigo, #6366f1);
+  }
+}
+
+// ============================================================
+// STEP FIELD STYLES (inherited from identificacao-step)
+// ============================================================
+
+.step-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.step-field__label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bs-body-color);
+}
+
+.step-field__required {
+  color: var(--accent-coral, #ff433d);
+  font-weight: 700;
+}
+
+.step-field__optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--terminal-text-muted);
+  font-size: 0.625rem;
+}
+
+.step-field__input {
+  font-size: 0.8125rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: $field-radius;
+  transition: all 0.2s ease;
+
+  &::placeholder {
+    color: var(--terminal-text-placeholder);
+    font-style: italic;
+  }
+
+  &:focus {
+    border-color: var(--accent-indigo, #6366f1);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+  }
+
+  &.is-valid {
+    border-color: var(--accent-teal, #4af6c3);
+    box-shadow: 0 0 0 2px rgba(74, 246, 195, 0.1);
+  }
+
+  &.is-invalid {
+    border-color: var(--accent-coral, #ff433d);
+    box-shadow: 0 0 0 2px rgba(255, 67, 61, 0.1);
+  }
+}
+
+// ============================================================
+// VALIDATION FEEDBACK
+// ============================================================
+
+.step-field__error,
+.step-field__success {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  animation: feedback-enter 0.2s ease;
+
+  i {
+    font-size: 0.6875rem;
+  }
+}
+
+.step-field__error {
+  color: var(--accent-coral, #ff433d);
+}
+
+.step-field__success {
+  color: var(--accent-teal, #4af6c3);
+}
+
+@keyframes feedback-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================================
+// HINTS
+// ============================================================
+
+.step-field__hint {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.625rem;
+  color: var(--bs-secondary-color);
+  margin-top: 0.25rem;
+}
+
+.step-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  background: rgba(99, 102, 241, 0.04);
+  border: 1px dashed rgba(99, 102, 241, 0.2);
+  border-radius: $field-radius;
+}
+
+.step-hint__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  background: rgba(99, 102, 241, 0.15);
+  border-radius: 50%;
+  color: var(--accent-indigo, #6366f1);
+}
+
+.step-hint__text {
+  font-size: 0.6875rem;
+  color: var(--bs-secondary-color);
+}
+
+// ============================================================
+// INPUT GROUP PREFIX/SUFFIX
+// ============================================================
+
+.step-input-prefix,
+.step-input-suffix {
+  background: var(--bs-secondary-bg);
+  border: 1px solid var(--table-border-color);
+  color: var(--bs-secondary-color);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--bs-font-monospace);
+  padding: 0.5rem 0.75rem;
+}
+
+.step-input-prefix {
+  border-right: none;
+}
+
+.step-input-suffix {
+  border-left: none;
+}
+
+.input-group:has(.step-field__input.is-valid) .step-input-prefix,
+.input-group:has(.step-field__input.is-valid) .step-input-suffix {
+  border-color: var(--accent-teal, #4af6c3);
+}
+
+.input-group:has(.step-field__input.is-invalid) .step-input-prefix,
+.input-group:has(.step-field__input.is-invalid) .step-input-suffix {
+  border-color: var(--accent-coral, #ff433d);
+}
+
+// ============================================================
+// CHECKBOX STYLES
+// ============================================================
+
+.step-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(99, 102, 241, 0.02);
+  border: 1px solid var(--table-border-color);
+  border-radius: $field-radius;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(99, 102, 241, 0.04);
+    border-color: rgba(99, 102, 241, 0.3);
+  }
+
+  &:has(.step-checkbox__input:checked) {
+    background: rgba(74, 246, 195, 0.05);
+    border-color: var(--accent-teal, #4af6c3);
+  }
+}
+
+.step-checkbox__input {
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid var(--table-border-color);
+  border-radius: $field-radius;
+  cursor: pointer;
+
+  &:checked {
+    background-color: var(--accent-teal, #4af6c3);
+    border-color: var(--accent-teal, #4af6c3);
+  }
+
+  &:focus {
+    border-color: var(--accent-indigo, #6366f1);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+  }
+}
+
+.step-checkbox__label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  cursor: pointer;
+  margin: 0;
+}
+
+.step-checkbox__label-text {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+}
+
+// ============================================================
+// CONDITIONAL FIELDS ANIMATION
+// ============================================================
+
+.step-field--conditional {
+  animation: field-slide-down 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes field-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 500px;
+  }
+}
+
+// ============================================================
+// LIGHT MODE OVERRIDES
+// ============================================================
+
+[data-bs-theme='light'] {
+  .classes-toggle-section {
+    background: rgba(79, 70, 229, 0.02);
+  }
+
+  .classes-toggle__icon {
+    background: rgba(79, 70, 229, 0.1);
+    color: #4f46e5;
+  }
+
+  .classes-toggle__option {
+    &:hover {
+      border-color: rgba(79, 70, 229, 0.3);
+      background: rgba(79, 70, 229, 0.02);
+    }
+
+    &--selected {
+      border-color: #4f46e5;
+      background: rgba(79, 70, 229, 0.05);
+
+      .classes-toggle__radio {
+        border-color: #4f46e5;
+        background: #4f46e5;
+      }
+    }
+  }
+
+  .classes-toggle__notice {
+    background: rgba(79, 70, 229, 0.08);
+    color: #4f46e5;
+  }
+
+  .classes-single-mode {
+    background: rgba(5, 150, 105, 0.03);
+    border-color: rgba(5, 150, 105, 0.2);
+  }
+
+  .classes-single-mode__icon {
+    background: rgba(5, 150, 105, 0.1);
+    color: #059669;
+  }
+
+  .classes-single-mode__title {
+    color: #059669;
+  }
+
+  .classes-header {
+    background: rgba(79, 70, 229, 0.02);
+  }
+
+  .classes-header__warning {
+    color: #dc2626;
+  }
+
+  .classes-empty {
+    background: rgba(79, 70, 229, 0.02);
+  }
+
+  .classe-card {
+    &:hover {
+      border-color: rgba(79, 70, 229, 0.3);
+    }
+
+    &--senior {
+      border-color: rgba(5, 150, 105, 0.3);
+
+      .classe-card__header {
+        background: rgba(5, 150, 105, 0.05);
+      }
+
+      .classe-card__number {
+        background: rgba(5, 150, 105, 0.15);
+        color: #059669;
+      }
+
+      .classe-card__tipo-badge {
+        background: rgba(5, 150, 105, 0.15);
+        color: #059669;
+      }
+    }
+
+    &--subordinada {
+      border-color: rgba(180, 83, 9, 0.3);
+
+      .classe-card__header {
+        background: rgba(180, 83, 9, 0.05);
+      }
+
+      .classe-card__number {
+        background: rgba(180, 83, 9, 0.15);
+        color: var(--daylight-amber, #b45309);
+      }
+
+      .classe-card__tipo-badge {
+        background: rgba(180, 83, 9, 0.15);
+        color: var(--daylight-amber, #b45309);
+      }
+    }
+  }
+
+  .classe-card__header {
+    background: rgba(79, 70, 229, 0.02);
+  }
+
+  .classe-card__number {
+    background: rgba(79, 70, 229, 0.1);
+    color: #4f46e5;
+  }
+
+  .classe-card__tipo-badge {
+    background: rgba(79, 70, 229, 0.1);
+    color: #4f46e5;
+  }
+
+  .classe-card__remove {
+    color: #dc2626;
+
+    &:hover {
+      background: rgba(220, 38, 38, 0.1);
+    }
+  }
+
+  .classe-card__taxas-toggle:hover {
+    background: rgba(79, 70, 229, 0.02);
+  }
+
+  .classe-card__taxas-content {
+    background: rgba(79, 70, 229, 0.01);
+  }
+
+  .subordination-info {
+    background: rgba(79, 70, 229, 0.03);
+    border-color: rgba(79, 70, 229, 0.15);
+  }
+
+  .subordination-info__header {
+    color: #4f46e5;
+  }
+
+  .subordination-info__note i {
+    color: #4f46e5;
+  }
+
+  .step-field__input {
+    &:focus {
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+    }
+
+    &.is-valid {
+      border-color: #059669;
+      box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.1);
+    }
+
+    &.is-invalid {
+      border-color: #dc2626;
+      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+    }
+  }
+
+  .step-field__error {
+    color: #dc2626;
+  }
+
+  .step-field__success {
+    color: #059669;
+  }
+
+  .step-hint {
+    background: rgba(79, 70, 229, 0.03);
+    border-color: rgba(79, 70, 229, 0.15);
+  }
+
+  .step-hint__icon {
+    background: rgba(79, 70, 229, 0.1);
+    color: #4f46e5;
+  }
+
+  .step-checkbox {
+    background: rgba(79, 70, 229, 0.02);
+
+    &:hover {
+      background: rgba(79, 70, 229, 0.04);
+      border-color: rgba(79, 70, 229, 0.3);
+    }
+
+    &:has(.step-checkbox__input:checked) {
+      background: rgba(5, 150, 105, 0.05);
+      border-color: #059669;
+    }
+  }
+
+  .step-checkbox__input {
+    &:checked {
+      background-color: #059669;
+      border-color: #059669;
+    }
+
+    &:focus {
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+    }
+  }
+}
+
+// ============================================================
+// REDUCED MOTION
+// ============================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .classes-step,
+  .step-field--conditional,
+  .step-field__error,
+  .step-field__success,
+  .classe-card__taxas-content,
+  .classes-header__warning {
+    animation: none;
+  }
+}

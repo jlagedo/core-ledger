@@ -2,8 +2,11 @@
  * Wizard de Cadastro de Fundo - Modelos TypeScript
  */
 
-// IDs dos passos do wizard (1-10)
-export type WizardStepId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+// IDs dos passos do wizard (1-11)
+export type WizardStepId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+
+// Tipos de condição para steps condicionais
+export type StepCondition = 'fidc';
 
 // Estados visuais do passo
 export type StepStatus = 'pending' | 'current' | 'completed' | 'error';
@@ -18,6 +21,7 @@ export interface WizardStepConfig {
   shortLabel: string;  // 6 caracteres max para display terminal
   icon: string;        // Bootstrap icon class
   descricao: string;   // Texto de ajuda/tooltip
+  conditional?: StepCondition; // Se definido, step é condicional
 }
 
 /**
@@ -43,7 +47,8 @@ export interface WizardState {
 }
 
 /**
- * Configuração dos 10 passos do wizard (PT-BR)
+ * Configuração dos 11 passos do wizard (PT-BR)
+ * Step 8 (Parâmetros FIDC) é condicional - só aparece para fundos FIDC/FIDC_NP
  */
 export const WIZARD_STEPS: WizardStepConfig[] = [
   {
@@ -100,10 +105,19 @@ export const WIZARD_STEPS: WizardStepConfig[] = [
     label: 'Classes',
     shortLabel: 'CLASSE',
     icon: 'bi-layers',
-    descricao: 'Classes de cotas e subclasses',
+    descricao: 'Classes de cotas CVM 175',
   },
   {
     id: 8,
+    key: 'parametrosFidc',
+    label: 'Parâmetros FIDC',
+    shortLabel: 'FIDC',
+    icon: 'bi-bank2',
+    descricao: 'Configuração específica de FIDC',
+    conditional: 'fidc',
+  },
+  {
+    id: 9,
     key: 'vinculos',
     label: 'Vínculos',
     shortLabel: 'VINC',
@@ -111,7 +125,7 @@ export const WIZARD_STEPS: WizardStepConfig[] = [
     descricao: 'Vínculos com outros fundos (master/feeder)',
   },
   {
-    id: 9,
+    id: 10,
     key: 'documentos',
     label: 'Documentos',
     shortLabel: 'DOCS',
@@ -119,7 +133,7 @@ export const WIZARD_STEPS: WizardStepConfig[] = [
     descricao: 'Upload de regulamento e documentos',
   },
   {
-    id: 10,
+    id: 11,
     key: 'revisao',
     label: 'Revisão',
     shortLabel: 'REVIS',

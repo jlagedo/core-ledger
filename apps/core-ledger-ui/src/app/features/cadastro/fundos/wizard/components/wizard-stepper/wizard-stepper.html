@@ -46,6 +46,6 @@
   <div class="wizard-stepper__current-step" aria-live="polite">
     <span class="font-monospace">{{ currentStep().toString().padStart(2, '0') }}/{{ steps().length.toString().padStart(2, '0') }}</span>
     &nbsp;·&nbsp;
-    {{ steps()[currentStep() - 1]?.label }}
+    {{ getCurrentStepLabel() }}
   </div>
 </div>

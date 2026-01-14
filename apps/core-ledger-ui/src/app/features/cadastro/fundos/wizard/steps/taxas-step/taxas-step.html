@@ -1,0 +1,386 @@
+<div class="taxas-step">
+  <form [formGroup]="form" class="step-form" novalidate>
+    <!-- Header with Add Button -->
+    <div class="taxas-header">
+      <div class="taxas-header__info">
+        <span class="taxas-header__count font-monospace">
+          {{ taxasCount() }}/{{ maxTaxas }} taxas
+        </span>
+        @if (!hasAdministracao()) {
+          <span class="taxas-header__warning">
+            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+            Taxa de administracao obrigatoria
+          </span>
+        }
+      </div>
+      <button
+        type="button"
+        class="btn btn-sm btn-outline-secondary"
+        (click)="addTaxa()"
+        [disabled]="!canAddTaxa()"
+        aria-label="Adicionar nova taxa"
+      >
+        <i class="bi bi-plus-lg" aria-hidden="true"></i>
+        Adicionar Taxa
+      </button>
+    </div>
+
+    <!-- Taxa Cards List -->
+    <div class="taxas-list" formArrayName="taxas">
+      @for (taxa of taxasArray().controls; track $index; let i = $index) {
+        <div
+          class="taxa-card"
+          [formGroupName]="i"
+          [class.taxa-card--performance]="isPerformanceTaxa(i)"
+          [class.taxa-card--administracao]="getTaxaGroup(i).get('tipoTaxa')?.value === 'ADMINISTRACAO'"
+        >
+          <!-- Card Header -->
+          <div class="taxa-card__header">
+            <div class="taxa-card__number font-monospace">
+              {{ (i + 1).toString().padStart(2, '0') }}
+            </div>
+            <div class="taxa-card__title">
+              @if (getTaxaGroup(i).get('tipoTaxa')?.value; as tipoTaxa) {
+                {{ getTipoTaxaLabel(tipoTaxa) }}
+              } @else {
+                Nova Taxa
+              }
+            </div>
+            @if (canRemoveTaxa(i)) {
+              <button
+                type="button"
+                class="btn btn-sm btn-link taxa-card__remove"
+                (click)="removeTaxa(i)"
+                aria-label="Remover taxa"
+              >
+                <i class="bi bi-trash" aria-hidden="true"></i>
+              </button>
+            } @else {
+              <span class="taxa-card__locked">
+                <i class="bi bi-lock-fill" aria-hidden="true"></i>
+              </span>
+            }
+          </div>
+
+          <!-- Card Body -->
+          <div class="taxa-card__body">
+            <!-- Row 1: Tipo e Percentual -->
+            <div class="step-form__grid step-form__grid--2-cols">
+              <!-- Tipo Taxa -->
+              <div class="step-field">
+                <label [for]="'tipoTaxa-' + i" class="step-field__label">
+                  <span class="step-field__label-text">Tipo da Taxa</span>
+                  <span class="step-field__required" aria-label="obrigatorio">*</span>
+                </label>
+                <select
+                  class="form-select step-field__input"
+                  [class.is-invalid]="isFieldInvalid(i, 'tipoTaxa')"
+                  [class.is-valid]="isFieldValid(i, 'tipoTaxa')"
+                  [id]="'tipoTaxa-' + i"
+                  formControlName="tipoTaxa"
+                >
+                  <option [ngValue]="null">Selecione o tipo</option>
+                  @for (option of tipoTaxaOptions; track option.value) {
+                    <option [ngValue]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+                @if (isFieldInvalid(i, 'tipoTaxa')) {
+                  <div class="step-field__error">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    Tipo da taxa e obrigatorio
+                  </div>
+                }
+              </div>
+
+              <!-- Percentual -->
+              <div class="step-field">
+                <label [for]="'percentual-' + i" class="step-field__label">
+                  <span class="step-field__label-text">Percentual</span>
+                  <span class="step-field__required" aria-label="obrigatorio">*</span>
+                </label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    class="form-control step-field__input font-monospace"
+                    [class.is-invalid]="isFieldInvalid(i, 'percentual')"
+                    [class.is-valid]="isFieldValid(i, 'percentual')"
+                    [id]="'percentual-' + i"
+                    formControlName="percentual"
+                    placeholder="1.50"
+                    step="0.01"
+                    min="0"
+                    [max]="getMaxPercentual(getTaxaGroup(i).get('tipoTaxa')?.value)"
+                  />
+                  <span class="input-group-text step-input-suffix">% a.a.</span>
+                </div>
+                @if (isFieldInvalid(i, 'percentual')) {
+                  <div class="step-field__error">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    @if (getFieldError(i, 'percentual', 'required')) {
+                      Percentual e obrigatorio
+                    } @else if (getFieldError(i, 'percentual', 'min')) {
+                      Valor minimo: 0.000001%
+                    } @else if (getFieldError(i, 'percentual', 'max')) {
+                      Valor maximo: {{ getMaxPercentual(getTaxaGroup(i).get('tipoTaxa')?.value) }}%
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Row 2: Base Calculo e Forma Cobranca -->
+            <div class="step-form__grid step-form__grid--2-cols">
+              <!-- Base Calculo -->
+              <div class="step-field">
+                <label [for]="'baseCalculo-' + i" class="step-field__label">
+                  <span class="step-field__label-text">Base de Calculo</span>
+                  <span class="step-field__required" aria-label="obrigatorio">*</span>
+                </label>
+                <select
+                  class="form-select step-field__input"
+                  [class.is-invalid]="isFieldInvalid(i, 'baseCalculo')"
+                  [class.is-valid]="isFieldValid(i, 'baseCalculo')"
+                  [id]="'baseCalculo-' + i"
+                  formControlName="baseCalculo"
+                >
+                  <option [ngValue]="null">Selecione a base</option>
+                  @for (option of baseCalculoOptions; track option.value) {
+                    <option [ngValue]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+                @if (isFieldInvalid(i, 'baseCalculo')) {
+                  <div class="step-field__error">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    Base de calculo e obrigatoria
+                  </div>
+                }
+              </div>
+
+              <!-- Forma Cobranca -->
+              <div class="step-field">
+                <label [for]="'formaCobranca-' + i" class="step-field__label">
+                  <span class="step-field__label-text">Forma de Cobranca</span>
+                  <span class="step-field__required" aria-label="obrigatorio">*</span>
+                </label>
+                <select
+                  class="form-select step-field__input"
+                  [class.is-invalid]="isFieldInvalid(i, 'formaCobranca')"
+                  [class.is-valid]="isFieldValid(i, 'formaCobranca')"
+                  [id]="'formaCobranca-' + i"
+                  formControlName="formaCobranca"
+                >
+                  <option [ngValue]="null">Selecione a forma</option>
+                  @for (option of formaCobrancaOptions; track option.value) {
+                    <option [ngValue]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+                @if (isFieldInvalid(i, 'formaCobranca')) {
+                  <div class="step-field__error">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    Forma de cobranca e obrigatoria
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Row 3: Vigencia -->
+            <div class="step-form__grid step-form__grid--2-cols">
+              <!-- Data Inicio Vigencia -->
+              <div class="step-field">
+                <label [for]="'dataInicioVigencia-' + i" class="step-field__label">
+                  <span class="step-field__label-text">Inicio Vigencia</span>
+                  <span class="step-field__required" aria-label="obrigatorio">*</span>
+                </label>
+                <input
+                  type="date"
+                  class="form-control step-field__input"
+                  [class.is-invalid]="isFieldInvalid(i, 'dataInicioVigencia')"
+                  [class.is-valid]="isFieldValid(i, 'dataInicioVigencia')"
+                  [id]="'dataInicioVigencia-' + i"
+                  formControlName="dataInicioVigencia"
+                />
+                @if (isFieldInvalid(i, 'dataInicioVigencia')) {
+                  <div class="step-field__error">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    Data de inicio e obrigatoria
+                  </div>
+                }
+              </div>
+
+              <!-- Data Fim Vigencia -->
+              <div class="step-field">
+                <label [for]="'dataFimVigencia-' + i" class="step-field__label">
+                  <span class="step-field__label-text">Fim Vigencia</span>
+                  <span class="step-field__optional">(opcional)</span>
+                </label>
+                <input
+                  type="date"
+                  class="form-control step-field__input"
+                  [class.is-invalid]="isFieldInvalid(i, 'dataFimVigencia') || getTaxaGroup(i).hasError('dataFimAnterior')"
+                  [class.is-valid]="isFieldValid(i, 'dataFimVigencia') && !getTaxaGroup(i).hasError('dataFimAnterior')"
+                  [id]="'dataFimVigencia-' + i"
+                  formControlName="dataFimVigencia"
+                />
+                @if (getTaxaGroup(i).hasError('dataFimAnterior')) {
+                  <div class="step-field__error">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    Data fim deve ser maior ou igual a data inicio
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Performance Tax Conditional Fields (RF-03) -->
+            @if (isPerformanceTaxa(i)) {
+              <div class="taxa-card__performance-section step-field--conditional">
+                <h6 class="form-section-title">
+                  <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
+                  Parametros de Performance
+                </h6>
+
+                <!-- Benchmark -->
+                <div class="step-form__grid step-form__grid--2-cols">
+                  <div class="step-field">
+                    <label [for]="'benchmarkId-' + i" class="step-field__label">
+                      <span class="step-field__label-text">Benchmark</span>
+                      <span class="step-field__required" aria-label="obrigatorio">*</span>
+                    </label>
+                    <div class="benchmark-search">
+                      <input
+                        type="text"
+                        class="form-control step-field__input mb-2"
+                        [id]="'benchmarkSearch-' + i"
+                        placeholder="Buscar indexador..."
+                        (input)="searchIndexadores($any($event.target).value)"
+                        aria-label="Buscar indexador"
+                      />
+                      @if (searchingIndexadores()) {
+                        <div class="benchmark-search__loading">
+                          <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                          <span class="visually-hidden">Buscando...</span>
+                        </div>
+                      }
+                    </div>
+                    <select
+                      class="form-select step-field__input"
+                      [class.is-invalid]="isFieldInvalid(i, 'benchmarkId')"
+                      [class.is-valid]="isFieldValid(i, 'benchmarkId')"
+                      [id]="'benchmarkId-' + i"
+                      formControlName="benchmarkId"
+                    >
+                      <option [ngValue]="null">Selecione o benchmark</option>
+                      @for (indexador of indexadores(); track indexador.id) {
+                        <option [ngValue]="indexador.id">{{ indexador.codigo }} - {{ indexador.nome }}</option>
+                      }
+                    </select>
+                    @if (indexadores().length === 0 && !searchingIndexadores()) {
+                      <div class="step-field__hint text-muted">
+                        <i class="bi bi-info-circle" aria-hidden="true"></i>
+                        Nenhum indexador encontrado
+                      </div>
+                    }
+                    @if (isFieldInvalid(i, 'benchmarkId')) {
+                      <div class="step-field__error">
+                        <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                        Benchmark e obrigatorio para taxa de performance
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Percentual Benchmark -->
+                  <div class="step-field">
+                    <label [for]="'percentualBenchmark-' + i" class="step-field__label">
+                      <span class="step-field__label-text">% do Benchmark</span>
+                    </label>
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        class="form-control step-field__input font-monospace"
+                        [class.is-invalid]="isFieldInvalid(i, 'percentualBenchmark')"
+                        [class.is-valid]="isFieldValid(i, 'percentualBenchmark')"
+                        [id]="'percentualBenchmark-' + i"
+                        formControlName="percentualBenchmark"
+                        placeholder="100"
+                        step="1"
+                        min="0"
+                        max="200"
+                      />
+                      <span class="input-group-text step-input-suffix">%</span>
+                    </div>
+                    <div class="step-field__hint">
+                      <i class="bi bi-lightbulb" aria-hidden="true"></i>
+                      Ex: 100% do CDI = CDI cheio
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Checkboxes: Hurdle e HWM -->
+                <div class="step-form__grid step-form__grid--2-cols">
+                  <div class="step-field">
+                    <div class="step-checkbox">
+                      <input
+                        type="checkbox"
+                        class="form-check-input step-checkbox__input"
+                        [id]="'possuiHurdle-' + i"
+                        formControlName="possuiHurdle"
+                      />
+                      <label class="step-checkbox__label" [for]="'possuiHurdle-' + i">
+                        <span class="step-checkbox__label-text">Hurdle Rate</span>
+                      </label>
+                    </div>
+                    <div class="step-field__hint">
+                      <i class="bi bi-lightbulb" aria-hidden="true"></i>
+                      Taxa minima de retorno
+                    </div>
+                  </div>
+
+                  <div class="step-field">
+                    <div class="step-checkbox">
+                      <input
+                        type="checkbox"
+                        class="form-check-input step-checkbox__input"
+                        [id]="'possuiHighWaterMark-' + i"
+                        formControlName="possuiHighWaterMark"
+                      />
+                      <label class="step-checkbox__label" [for]="'possuiHighWaterMark-' + i">
+                        <span class="step-checkbox__label-text">High Water Mark</span>
+                      </label>
+                    </div>
+                    <div class="step-field__hint">
+                      <i class="bi bi-lightbulb" aria-hidden="true"></i>
+                      Linha d'agua para calculo
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      } @empty {
+        <div class="taxas-empty">
+          <i class="bi bi-inbox taxas-empty__icon" aria-hidden="true"></i>
+          <p class="taxas-empty__text">Nenhuma taxa cadastrada</p>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-secondary"
+            (click)="addTaxa()"
+          >
+            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+            Adicionar Taxa
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Form Footer -->
+    <div class="step-form__footer">
+      <div class="step-hint">
+        <i class="bi bi-lightbulb step-hint__icon" aria-hidden="true"></i>
+        <span class="step-hint__text">
+          A taxa de <strong>administracao</strong> e obrigatoria. Preencha todos os campos
+          obrigatorios (<span class="text-danger">*</span>) para habilitar o botao "Proximo"
+        </span>
+      </div>
+    </div>
+  </form>
+</div>

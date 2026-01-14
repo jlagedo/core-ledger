@@ -22,7 +22,7 @@
     <div class="wizard-content">
       <!-- Stepper: Progress Matrix -->
       <app-wizard-stepper
-        [steps]="steps"
+        [steps]="visibleSteps()"
         [currentStep]="currentStep()"
         [completedSteps]="store.completedSteps()"
         [stepValidation]="store.stepValidation()"
@@ -60,6 +60,23 @@
               }
               @case (3) {
                 <app-caracteristicas-step [stepConfig]="stepConfig" />
+              }
+              @case (4) {
+                <app-parametros-cota-step [stepConfig]="stepConfig" />
+              }
+              @case (5) {
+                <app-taxas-step [stepConfig]="stepConfig" />
+              }
+              @case (6) {
+                <app-prazos-step [stepConfig]="stepConfig" />
+              }
+              @case (7) {
+                <!-- Step 7: Classes CVM 175 -->
+                <app-classes-step [stepConfig]="stepConfig" />
+              }
+              @case (8) {
+                <!-- Step 8: Parâmetros FIDC (Condicional - só aparece para FIDC/FIDC_NP) -->
+                <app-parametros-fidc-step [stepConfig]="stepConfig" />
               }
               @default {
                 <app-placeholder-step [stepConfig]="stepConfig" />
@@ -106,7 +123,7 @@
           <!-- Pending Steps -->
           <div class="wizard-stat">
             <div class="wizard-stat__value font-monospace wizard-stat__value--pending">
-              {{ steps.length - store.completedStepsCount() }}
+              {{ store.totalVisibleSteps() - store.completedStepsCount() }}
             </div>
             <div class="wizard-stat__label">Pendentes</div>
           </div>
@@ -122,7 +139,7 @@
           <!-- Total Steps -->
           <div class="wizard-stat">
             <div class="wizard-stat__value font-monospace">
-              {{ steps.length }}
+              {{ store.totalVisibleSteps() }}
             </div>
             <div class="wizard-stat__label">Total</div>
           </div>
@@ -135,12 +152,13 @@
             NAVEGAÇÃO
           </div>
           <ul class="wizard-nav-list">
-            @for (step of steps; track step.id) {
+            @for (step of visibleSteps(); track step.id) {
               <li
                 class="wizard-nav-item"
                 [class.wizard-nav-item--completed]="store.completedSteps().has(step.id)"
                 [class.wizard-nav-item--current]="step.id === currentStep()"
                 [class.wizard-nav-item--clickable]="store.completedSteps().has(step.id) || step.id === currentStep()"
+                [class.wizard-nav-item--conditional]="step.conditional"
                 (click)="onStepClick(step.id)"
                 (keydown.enter)="onStepClick(step.id)"
                 [attr.tabindex]="store.completedSteps().has(step.id) || step.id === currentStep() ? 0 : -1"

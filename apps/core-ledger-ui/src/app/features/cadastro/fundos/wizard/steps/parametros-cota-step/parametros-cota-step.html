@@ -1,0 +1,369 @@
+<div class="parametros-cota-step">
+  <form [formGroup]="form" class="step-form" novalidate>
+    <!-- Section: Precisao de Calculo -->
+    <div class="step-form__section">
+      <h6 class="form-section-title">
+        <i class="bi bi-calculator me-2" aria-hidden="true"></i>
+        Precisao de Calculo
+      </h6>
+
+      <div class="precision-grid">
+        <!-- Casas Decimais Cota -->
+        <div class="precision-card">
+          <div class="precision-card__header">
+            <label for="casasDecimaisCota" class="step-field__label">
+              <span class="step-field__label-text">Cota</span>
+              <span class="step-field__required" aria-label="obrigatorio">*</span>
+            </label>
+          </div>
+          <select
+            class="form-select step-field__input"
+            [class.is-invalid]="isInvalid('casasDecimaisCota')"
+            [class.is-valid]="isValid('casasDecimaisCota')"
+            id="casasDecimaisCota"
+            formControlName="casasDecimaisCota"
+          >
+            @for (option of casasDecimaisCotaOptions; track option.value) {
+            <option [ngValue]="option.value">{{ option.label }}</option>
+            }
+          </select>
+          <div class="precision-card__preview">
+            <span class="precision-preview__label">Preview:</span>
+            <span class="precision-preview__value font-monospace">{{ previewCota() }}</span>
+          </div>
+          @if (isInvalid('casasDecimaisCota')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Casas decimais da cota e obrigatorio
+          </div>
+          }
+        </div>
+
+        <!-- Casas Decimais Quantidade -->
+        <div class="precision-card">
+          <div class="precision-card__header">
+            <label for="casasDecimaisQuantidade" class="step-field__label">
+              <span class="step-field__label-text">Quantidade</span>
+              <span class="step-field__required" aria-label="obrigatorio">*</span>
+            </label>
+          </div>
+          <select
+            class="form-select step-field__input"
+            [class.is-invalid]="isInvalid('casasDecimaisQuantidade')"
+            [class.is-valid]="isValid('casasDecimaisQuantidade')"
+            id="casasDecimaisQuantidade"
+            formControlName="casasDecimaisQuantidade"
+          >
+            @for (option of casasDecimaisQuantidadeOptions; track option.value) {
+            <option [ngValue]="option.value">{{ option.label }}</option>
+            }
+          </select>
+          <div class="precision-card__preview">
+            <span class="precision-preview__label">Preview:</span>
+            <span class="precision-preview__value font-monospace">{{ previewQuantidade() }}</span>
+          </div>
+          @if (isInvalid('casasDecimaisQuantidade')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Casas decimais da quantidade e obrigatorio
+          </div>
+          }
+        </div>
+
+        <!-- Casas Decimais PL -->
+        <div class="precision-card">
+          <div class="precision-card__header">
+            <label for="casasDecimaisPl" class="step-field__label">
+              <span class="step-field__label-text">Patrimonio Liquido</span>
+              <span class="step-field__required" aria-label="obrigatorio">*</span>
+            </label>
+          </div>
+          <select
+            class="form-select step-field__input"
+            [class.is-invalid]="isInvalid('casasDecimaisPl')"
+            [class.is-valid]="isValid('casasDecimaisPl')"
+            id="casasDecimaisPl"
+            formControlName="casasDecimaisPl"
+          >
+            @for (option of casasDecimaisPlOptions; track option.value) {
+            <option [ngValue]="option.value">{{ option.label }}</option>
+            }
+          </select>
+          <div class="precision-card__preview">
+            <span class="precision-preview__label">Preview:</span>
+            <span class="precision-preview__value font-monospace">{{ previewPl() }}</span>
+          </div>
+          @if (isInvalid('casasDecimaisPl')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Casas decimais do PL e obrigatorio
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Valor Inicial -->
+    <div class="step-form__section">
+      <h6 class="form-section-title">
+        <i class="bi bi-currency-dollar me-2" aria-hidden="true"></i>
+        Valor Inicial
+      </h6>
+
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Cota Inicial -->
+        <div class="step-field">
+          <label for="cotaInicial" class="step-field__label">
+            <span class="step-field__label-text">Valor da Cota Inicial</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <div class="input-group">
+            <span class="input-group-text step-input-prefix">R$</span>
+            <input
+              type="number"
+              class="form-control step-field__input font-monospace"
+              [class.is-invalid]="isInvalid('cotaInicial')"
+              [class.is-valid]="isValid('cotaInicial')"
+              id="cotaInicial"
+              formControlName="cotaInicial"
+              placeholder="1,00"
+              step="0.01"
+              min="0.01"
+              max="1000000"
+            />
+          </div>
+          <!-- Quick value buttons (RF-03) -->
+          <div class="quick-values">
+            <button
+              type="button"
+              class="quick-values__btn"
+              (click)="setCotaInicial(1)"
+              [class.quick-values__btn--active]="form.get('cotaInicial')?.value === 1"
+            >
+              R$ 1,00
+            </button>
+            <button
+              type="button"
+              class="quick-values__btn"
+              (click)="setCotaInicial(1000)"
+              [class.quick-values__btn--active]="form.get('cotaInicial')?.value === 1000"
+            >
+              R$ 1.000,00
+            </button>
+          </div>
+          @if (isInvalid('cotaInicial')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            @if (form.get('cotaInicial')?.hasError('required')) {
+            Valor da cota inicial e obrigatorio
+            } @else if (form.get('cotaInicial')?.hasError('min')) {
+            Valor minimo: R$ 0,01
+            } @else if (form.get('cotaInicial')?.hasError('max')) {
+            Valor maximo: R$ 1.000.000,00
+            }
+          </div>
+          } @else {
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            Valor usado como base no inicio do fundo
+          </div>
+          }
+        </div>
+
+        <!-- Data Cota Inicial -->
+        <div class="step-field">
+          <label for="dataCotaInicial" class="step-field__label">
+            <span class="step-field__label-text">Data da Primeira Cota</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <input
+            type="date"
+            class="form-control step-field__input"
+            [class.is-invalid]="isInvalid('dataCotaInicial')"
+            [class.is-valid]="isValid('dataCotaInicial')"
+            id="dataCotaInicial"
+            formControlName="dataCotaInicial"
+          />
+          @if (isInvalid('dataCotaInicial')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Data da primeira cota e obrigatoria
+          </div>
+          } @else {
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            Normalmente igual a data de inicio de atividade
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Metodologia -->
+    <div class="step-form__section">
+      <h6 class="form-section-title">
+        <i class="bi bi-gear me-2" aria-hidden="true"></i>
+        Metodologia de Calculo
+      </h6>
+
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Tipo de Cota -->
+        <div class="step-field">
+          <label for="tipoCota" class="step-field__label">
+            <span class="step-field__label-text">Tipo de Cota</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <select
+            class="form-select step-field__input"
+            [class.is-invalid]="isInvalid('tipoCota')"
+            [class.is-valid]="isValid('tipoCota')"
+            id="tipoCota"
+            formControlName="tipoCota"
+          >
+            <option [ngValue]="null">Selecione o tipo de cota</option>
+            @for (option of tipoCotaOptions; track option.value) {
+            <option [ngValue]="option.value">{{ option.label }}</option>
+            }
+          </select>
+          @if (isInvalid('tipoCota')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Tipo de cota e obrigatorio
+          </div>
+          } @else {
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            Define quando a cota e calculada
+          </div>
+          }
+        </div>
+
+        <!-- Horario de Corte -->
+        <div class="step-field">
+          <label for="horarioCorte" class="step-field__label">
+            <span class="step-field__label-text">Horario de Corte</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+            <span class="step-field__tooltip" title="Movimentacoes recebidas apos este horario serao processadas no dia util seguinte">
+              <i class="bi bi-info-circle" aria-hidden="true"></i>
+            </span>
+          </label>
+          <div class="input-group">
+            <input
+              type="time"
+              class="form-control step-field__input font-monospace"
+              [class.is-invalid]="isInvalid('horarioCorte')"
+              [class.is-valid]="isValid('horarioCorte')"
+              id="horarioCorte"
+              formControlName="horarioCorte"
+            />
+            <span class="input-group-text step-input-suffix">
+              <i class="bi bi-clock" aria-hidden="true"></i>
+            </span>
+          </div>
+          @if (isInvalid('horarioCorte')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            @if (form.get('horarioCorte')?.hasError('required')) {
+            Horario de corte e obrigatorio
+            } @else if (form.get('horarioCorte')?.hasError('pattern')) {
+            Formato invalido (use HH:mm)
+            }
+          </div>
+          } @else {
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            Movimentacoes apos este horario vao para D+1
+          </div>
+          }
+        </div>
+      </div>
+
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Fuso Horario (RF-04: Select com busca) -->
+        <div class="step-field">
+          <label for="fusoHorario" class="step-field__label">
+            <span class="step-field__label-text">Fuso Horario</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <div class="input-group">
+            <span class="input-group-text step-input-prefix">
+              <i class="bi bi-globe2" aria-hidden="true"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control step-field__input"
+              [class.is-invalid]="isInvalid('fusoHorario')"
+              [class.is-valid]="isValid('fusoHorario')"
+              id="fusoHorario"
+              formControlName="fusoHorario"
+              [ngbTypeahead]="searchFusoHorario"
+              [inputFormatter]="formatFusoHorario"
+              [resultFormatter]="formatFusoHorario"
+              [editable]="false"
+              [focusFirst]="true"
+              (focus)="onFusoHorarioFocus()"
+              placeholder="Buscar fuso horario..."
+              aria-label="Fuso horario"
+            />
+          </div>
+          @if (isInvalid('fusoHorario')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Fuso horario e obrigatorio
+          </div>
+          } @else {
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            Para fundos com ativos no exterior
+          </div>
+          }
+        </div>
+
+        <!-- Permite Cota Estimada -->
+        <div class="step-field">
+          <label class="step-field__label step-field__label--spacer">
+            <span class="step-field__label-text">Opcoes Adicionais</span>
+          </label>
+          <div class="step-checkbox">
+            <input
+              type="checkbox"
+              class="form-check-input step-checkbox__input"
+              id="permiteCotaEstimada"
+              formControlName="permiteCotaEstimada"
+            />
+            <label class="step-checkbox__label" for="permiteCotaEstimada">
+              <span class="step-checkbox__label-text">Permite Cota Estimada</span>
+              <span class="step-checkbox__tooltip" title="Permite divulgar cota estimada antes do fechamento oficial">
+                <i class="bi bi-info-circle" aria-hidden="true"></i>
+              </span>
+            </label>
+          </div>
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            Permite divulgar cota antes do fechamento
+          </div>
+        </div>
+      </div>
+
+      <!-- Info: Cota Estimada enabled -->
+      @if (showCotaEstimadaInfo()) {
+      <div class="step-alert step-alert--info">
+        <i class="bi bi-info-circle step-alert__icon" aria-hidden="true"></i>
+        <span class="step-alert__text">
+          A cota estimada podera ser divulgada antes do fechamento oficial. Esta opcao e util para fundos que precisam informar valores preliminares aos cotistas.
+        </span>
+      </div>
+      }
+    </div>
+
+    <!-- Form Footer -->
+    <div class="step-form__footer">
+      <div class="step-hint">
+        <i class="bi bi-lightbulb step-hint__icon" aria-hidden="true"></i>
+        <span class="step-hint__text">
+          Preencha todos os campos obrigatorios (<span class="text-danger">*</span>) para habilitar o botao "Proximo"
+        </span>
+      </div>
+    </div>
+  </form>
+</div>

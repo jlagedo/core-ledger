@@ -1,0 +1,465 @@
+<div class="fidc-step">
+  <form [formGroup]="form" class="step-form" novalidate>
+    <!-- Section: Tipo FIDC -->
+    <div class="step-form__section">
+      <div class="form-section-title">
+        <i class="bi bi-bank" aria-hidden="true"></i>
+        Tipo de FIDC
+      </div>
+
+      <div class="step-form__grid step-form__grid--1-col">
+        <div class="step-field">
+          <label for="tipoFidc" class="step-field__label">
+            <span class="step-field__label-text">Tipo do FIDC</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <select
+            class="form-select step-field__input"
+            [class.is-invalid]="isFieldInvalid('tipoFidc')"
+            [class.is-valid]="isFieldValid('tipoFidc')"
+            id="tipoFidc"
+            formControlName="tipoFidc"
+          >
+            <option [ngValue]="null">Selecione o tipo</option>
+            @for (option of tipoFidcOptions; track option.value) {
+              <option [ngValue]="option.value">{{ option.label }}</option>
+            }
+          </select>
+          @if (isFieldInvalid('tipoFidc')) {
+            <div class="step-field__error">
+              <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+              Tipo do FIDC e obrigatorio
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Tipos de Recebiveis (RF-03) -->
+    <div class="step-form__section">
+      <div class="form-section-title">
+        <i class="bi bi-receipt" aria-hidden="true"></i>
+        Tipos de Recebiveis
+        <span class="recebiveis-count font-monospace">
+          {{ recebiveisSelecionados() }}/{{ tipoRecebiveisOptions.length }}
+        </span>
+      </div>
+
+      @if (recebiveisSelecionados() === 0) {
+        <div class="recebiveis-warning">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          Selecione pelo menos um tipo de recebivel
+        </div>
+      }
+
+      <div class="recebiveis-grid" formArrayName="tipoRecebiveis">
+        @for (option of tipoRecebiveisOptions; track option.value; let i = $index) {
+          <div
+            class="recebiveis-item"
+            [class.recebiveis-item--selected]="isRecebiveisSelected(i)"
+            (click)="toggleRecebiveis(i)"
+            (keydown.enter)="toggleRecebiveis(i)"
+            (keydown.space)="toggleRecebiveis(i); $event.preventDefault()"
+            role="checkbox"
+            [attr.aria-checked]="isRecebiveisSelected(i)"
+            tabindex="0"
+          >
+            <input
+              type="checkbox"
+              class="form-check-input recebiveis-item__checkbox"
+              [id]="'recebiveis-' + i"
+              [formControlName]="i"
+              (click)="$event.stopPropagation()"
+              tabindex="-1"
+            />
+            <label class="recebiveis-item__label" [for]="'recebiveis-' + i">
+              {{ option.label }}
+            </label>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Section: Parametros da Carteira -->
+    <div class="step-form__section">
+      <div class="form-section-title">
+        <i class="bi bi-briefcase" aria-hidden="true"></i>
+        Parametros da Carteira
+      </div>
+
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Prazo Medio Carteira -->
+        <div class="step-field">
+          <label for="prazoMedioCarteira" class="step-field__label">
+            <span class="step-field__label-text">Prazo Medio da Carteira</span>
+            <span class="step-field__optional">(opcional)</span>
+          </label>
+          <div class="input-group">
+            <input
+              type="number"
+              class="form-control step-field__input font-monospace"
+              [class.is-invalid]="isFieldInvalid('prazoMedioCarteira')"
+              [class.is-valid]="isFieldValid('prazoMedioCarteira')"
+              id="prazoMedioCarteira"
+              formControlName="prazoMedioCarteira"
+              placeholder="360"
+              min="1"
+              [max]="maxPrazoDias"
+            />
+            <span class="input-group-text step-input-suffix">dias</span>
+          </div>
+          @if (isFieldInvalid('prazoMedioCarteira')) {
+            <div class="step-field__error">
+              <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+              @if (getFieldError('prazoMedioCarteira', 'min')) {
+                Valor minimo: 1 dia
+              } @else if (getFieldError('prazoMedioCarteira', 'max')) {
+                Valor maximo: {{ maxPrazoDias }} dias
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Indice Subordinacao Alvo (RF-08) -->
+        <div class="step-field">
+          <label for="indiceSubordinacaoAlvo" class="step-field__label">
+            <span class="step-field__label-text">Indice de Subordinacao Alvo</span>
+            <span class="step-field__optional">(opcional)</span>
+          </label>
+          <div class="input-group">
+            <input
+              type="number"
+              class="form-control step-field__input font-monospace"
+              [class.is-invalid]="isFieldInvalid('indiceSubordinacaoAlvo')"
+              [class.is-valid]="isFieldValid('indiceSubordinacaoAlvo')"
+              id="indiceSubordinacaoAlvo"
+              formControlName="indiceSubordinacaoAlvo"
+              placeholder="25.00"
+              step="0.01"
+              min="0"
+              [max]="maxPercentual"
+            />
+            <span class="input-group-text step-input-suffix">%</span>
+          </div>
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            Razao entre classes subordinadas e PL total
+          </div>
+        </div>
+
+        <!-- PDD -->
+        <div class="step-field">
+          <label for="provisaoDevedoresDuvidosos" class="step-field__label">
+            <span class="step-field__label-text">Provisao Dev. Duvidosos (PDD)</span>
+            <span class="step-field__optional">(opcional)</span>
+          </label>
+          <div class="input-group">
+            <input
+              type="number"
+              class="form-control step-field__input font-monospace"
+              [class.is-invalid]="isFieldInvalid('provisaoDevedoresDuvidosos')"
+              [class.is-valid]="isFieldValid('provisaoDevedoresDuvidosos')"
+              id="provisaoDevedoresDuvidosos"
+              formControlName="provisaoDevedoresDuvidosos"
+              placeholder="2.00"
+              step="0.01"
+              min="0"
+              [max]="maxPercentual"
+            />
+            <span class="input-group-text step-input-suffix">%</span>
+          </div>
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            % de PDD sobre carteira
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Limites de Concentracao (RF-05) -->
+    <div class="step-form__section">
+      <div class="form-section-title">
+        <i class="bi bi-pie-chart" aria-hidden="true"></i>
+        Limites de Concentracao
+      </div>
+
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Limite Cedente -->
+        <div class="step-field">
+          <label for="limiteConcentracaoCedente" class="step-field__label">
+            <span class="step-field__label-text">Limite por Cedente</span>
+            <span class="step-field__optional">(opcional)</span>
+          </label>
+          <div class="input-group">
+            <input
+              type="number"
+              class="form-control step-field__input font-monospace"
+              [class.is-invalid]="isFieldInvalid('limiteConcentracaoCedente')"
+              [class.is-valid]="isFieldValid('limiteConcentracaoCedente')"
+              id="limiteConcentracaoCedente"
+              formControlName="limiteConcentracaoCedente"
+              [placeholder]="defaultLimiteCedente"
+              step="0.01"
+              min="0"
+              [max]="maxPercentual"
+            />
+            <span class="input-group-text step-input-suffix">%</span>
+          </div>
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            Padrao mercado: {{ defaultLimiteCedente }}%
+          </div>
+        </div>
+
+        <!-- Limite Sacado -->
+        <div class="step-field">
+          <label for="limiteConcentracaoSacado" class="step-field__label">
+            <span class="step-field__label-text">Limite por Sacado</span>
+            <span class="step-field__optional">(opcional)</span>
+          </label>
+          <div class="input-group">
+            <input
+              type="number"
+              class="form-control step-field__input font-monospace"
+              [class.is-invalid]="isFieldInvalid('limiteConcentracaoSacado')"
+              [class.is-valid]="isFieldValid('limiteConcentracaoSacado')"
+              id="limiteConcentracaoSacado"
+              formControlName="limiteConcentracaoSacado"
+              [placeholder]="defaultLimiteSacado"
+              step="0.01"
+              min="0"
+              [max]="maxPercentual"
+            />
+            <span class="input-group-text step-input-suffix">%</span>
+          </div>
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            Padrao mercado: {{ defaultLimiteSacado }}%
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Coobrigacao (RF-04) -->
+    <div class="step-form__section">
+      <div class="form-section-title">
+        <i class="bi bi-shield-check" aria-hidden="true"></i>
+        Coobrigacao
+      </div>
+
+      <div class="step-form__grid step-form__grid--1-col">
+        <!-- Possui Coobrigacao -->
+        <div class="step-field">
+          <div class="step-checkbox">
+            <input
+              type="checkbox"
+              class="form-check-input step-checkbox__input"
+              id="possuiCoobrigacao"
+              formControlName="possuiCoobrigacao"
+            />
+            <label class="step-checkbox__label" for="possuiCoobrigacao">
+              <span class="step-checkbox__label-text">Cedente possui coobrigacao</span>
+            </label>
+          </div>
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            Percentual de garantia prestada pelo cedente
+          </div>
+        </div>
+
+        <!-- Percentual Coobrigacao (conditional) -->
+        @if (possuiCoobrigacao()) {
+          <div class="step-field step-field--conditional">
+            <label for="percentualCoobrigacao" class="step-field__label">
+              <span class="step-field__label-text">Percentual de Coobrigacao</span>
+              <span class="step-field__required" aria-label="obrigatorio">*</span>
+            </label>
+            <div class="input-group">
+              <input
+                type="number"
+                class="form-control step-field__input font-monospace"
+                [class.is-invalid]="isFieldInvalid('percentualCoobrigacao')"
+                [class.is-valid]="isFieldValid('percentualCoobrigacao')"
+                id="percentualCoobrigacao"
+                formControlName="percentualCoobrigacao"
+                placeholder="10.00"
+                step="0.01"
+                min="0"
+                [max]="maxPercentual"
+              />
+              <span class="input-group-text step-input-suffix">%</span>
+            </div>
+            @if (isFieldInvalid('percentualCoobrigacao')) {
+              <div class="step-field__error">
+                <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                @if (getFieldError('percentualCoobrigacao', 'required')) {
+                  Percentual de coobrigacao e obrigatorio
+                } @else if (getFieldError('percentualCoobrigacao', 'min')) {
+                  Valor minimo: 0%
+                } @else if (getFieldError('percentualCoobrigacao', 'max')) {
+                  Valor maximo: {{ maxPercentual }}%
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Permite Cessao Parcial -->
+        <div class="step-field">
+          <div class="step-checkbox">
+            <input
+              type="checkbox"
+              class="form-check-input step-checkbox__input"
+              id="permiteCessaoParcial"
+              formControlName="permiteCessaoParcial"
+            />
+            <label class="step-checkbox__label" for="permiteCessaoParcial">
+              <span class="step-checkbox__label-text">Permite cessao parcial</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Rating (RF-06) -->
+    <div class="step-form__section">
+      <div class="form-section-title">
+        <i class="bi bi-star" aria-hidden="true"></i>
+        Rating
+        <span class="step-field__optional">(opcional)</span>
+      </div>
+
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Rating Minimo -->
+        <div class="step-field">
+          <label for="ratingMinimo" class="step-field__label">
+            <span class="step-field__label-text">Rating Minimo</span>
+          </label>
+          <input
+            type="text"
+            class="form-control step-field__input font-monospace"
+            [class.is-invalid]="isFieldInvalid('ratingMinimo') || form.hasError('agenciaObrigatoria')"
+            [class.is-valid]="isFieldValid('ratingMinimo') && !form.hasError('agenciaObrigatoria')"
+            id="ratingMinimo"
+            formControlName="ratingMinimo"
+            placeholder="BBB"
+            maxlength="10"
+          />
+          @if (form.hasError('agenciaObrigatoria')) {
+            <div class="step-field__error">
+              <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+              Agencia de rating e obrigatoria quando rating minimo e informado
+            </div>
+          }
+        </div>
+
+        <!-- Agencia Rating -->
+        <div class="step-field">
+          <label for="agenciaRating" class="step-field__label">
+            <span class="step-field__label-text">Agencia de Rating</span>
+            @if (hasRating()) {
+              <span class="step-field__required" aria-label="obrigatorio">*</span>
+            }
+          </label>
+          <select
+            class="form-select step-field__input"
+            [class.is-invalid]="form.hasError('agenciaObrigatoria')"
+            [class.is-valid]="isFieldValid('agenciaRating') && !form.hasError('agenciaObrigatoria')"
+            id="agenciaRating"
+            formControlName="agenciaRating"
+          >
+            <option [ngValue]="null">Selecione a agencia</option>
+            @for (option of agenciaRatingOptions; track option.value) {
+              <option [ngValue]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Registradora de Recebiveis (RF-07) -->
+    <div class="step-form__section">
+      <div class="form-section-title">
+        <i class="bi bi-building" aria-hidden="true"></i>
+        Registradora de Recebiveis
+      </div>
+
+      <div class="step-form__grid step-form__grid--1-col">
+        <!-- Registradora -->
+        <div class="step-field">
+          <label for="registradoraRecebiveis" class="step-field__label">
+            <span class="step-field__label-text">Registradora</span>
+            <span class="step-field__optional">(opcional)</span>
+          </label>
+          <select
+            class="form-select step-field__input"
+            [class.is-invalid]="isFieldInvalid('registradoraRecebiveis')"
+            [class.is-valid]="isFieldValid('registradoraRecebiveis')"
+            id="registradoraRecebiveis"
+            formControlName="registradoraRecebiveis"
+          >
+            <option [ngValue]="null">Selecione a registradora</option>
+            @for (option of registradoraOptions; track option.value) {
+              <option [ngValue]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Registradora Fields (conditional) -->
+        @if (hasRegistradora()) {
+          <div class="registradora-fields step-field--conditional">
+            <div class="step-form__grid step-form__grid--2-cols">
+              <!-- Conta Registradora -->
+              <div class="step-field">
+                <label for="contaRegistradora" class="step-field__label">
+                  <span class="step-field__label-text">Conta na Registradora</span>
+                  <span class="step-field__optional">(opcional)</span>
+                </label>
+                <input
+                  type="text"
+                  class="form-control step-field__input font-monospace"
+                  [class.is-invalid]="isFieldInvalid('contaRegistradora')"
+                  [class.is-valid]="isFieldValid('contaRegistradora')"
+                  id="contaRegistradora"
+                  formControlName="contaRegistradora"
+                  placeholder="FIDC-2024-001"
+                  maxlength="50"
+                />
+              </div>
+
+              <!-- Integracao Registradora -->
+              <div class="step-field">
+                <div class="step-checkbox step-checkbox--integration">
+                  <input
+                    type="checkbox"
+                    class="form-check-input step-checkbox__input"
+                    id="integracaoRegistradora"
+                    formControlName="integracaoRegistradora"
+                  />
+                  <label class="step-checkbox__label" for="integracaoRegistradora">
+                    <span class="step-checkbox__label-text">Integracao automatica</span>
+                  </label>
+                </div>
+                <div class="step-field__hint">
+                  <i class="bi bi-lightbulb" aria-hidden="true"></i>
+                  Sincronizacao automatica com registradora
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Form Footer -->
+    <div class="step-form__footer">
+      <div class="step-hint">
+        <i class="bi bi-lightbulb step-hint__icon" aria-hidden="true"></i>
+        <span class="step-hint__text">
+          Preencha os parametros especificos do FIDC. Campos marcados com
+          (<span class="text-danger">*</span>) sao obrigatorios.
+        </span>
+      </div>
+    </div>
+  </form>
+</div>

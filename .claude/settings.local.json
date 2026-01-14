@@ -59,7 +59,17 @@
       "Bash(npx nx show:*)",
       "Bash(npx nx lint:*)",
       "Bash(nx lint:*)",
-      "Skill(commit)"
+      "Skill(commit)",
+      "Skill(specimplement)",
+      "Skill(specreview)",
+      "Bash(git show:*)",
+      "Bash(sort:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_install",
+      "Skill(frontend-design)",
+      "Bash(npx tsc:*)",
+      "WebFetch(domain:ng-bootstrap.github.io)",
+      "Bash(npx nx affected:*)"
     ]
   },
   "enabledMcpjsonServers": [

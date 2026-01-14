@@ -7,6 +7,7 @@ import {
   WIZARD_STEPS,
   WizardStepConfig,
 } from './models/wizard.model';
+import { IdentificacaoFormData, TipoFundo } from './models/identificacao.model';
 
 /**
  * Estado inicial do wizard
@@ -31,6 +32,7 @@ const initialState: WizardState = {
     8: { ...initialStepValidation },
     9: { ...initialStepValidation },
     10: { ...initialStepValidation },
+    11: { ...initialStepValidation },
   },
   completedSteps: new Set<WizardStepId>(),
   isSubmitting: false,
@@ -38,99 +40,204 @@ const initialState: WizardState = {
   isDirty: false,
 };
 
+/** Step ID do Parâmetros FIDC (condicional) */
+const FIDC_STEP_ID: WizardStepId = 8;
+
+/** Último step do wizard */
+const LAST_STEP_ID: WizardStepId = 11;
+
 /**
  * Wizard Store - Gerencia o estado do wizard de cadastro de fundo
  */
 export const WizardStore = signalStore(
   withState(initialState),
-  withComputed((store) => ({
+  withComputed((store) => {
     /**
-     * Configuração do passo atual
+     * Verifica se o fundo é do tipo FIDC ou FIDC_NP
+     * Usado para determinar visibilidade do step condicional
      */
-    currentStepConfig: computed<WizardStepConfig | undefined>(() => {
-      return WIZARD_STEPS.find((s) => s.id === store.currentStep());
-    }),
+    const isFidc = computed<boolean>(() => {
+      const identificacaoData = store.stepData()['identificacao'] as IdentificacaoFormData | undefined;
+      const tipoFundo = identificacaoData?.tipoFundo;
+      return tipoFundo === TipoFundo.FIDC || tipoFundo === TipoFundo.FIDC_NP;
+    });
 
     /**
-     * Percentual de progresso (0-100)
+     * Lista de steps visíveis (filtra condicionais não aplicáveis)
      */
-    progressPercentage: computed<number>(() => {
-      const completed = store.completedSteps().size;
-      const total = WIZARD_STEPS.length;
-      return Math.round((completed / total) * 100);
-    }),
+    const visibleSteps = computed<WizardStepConfig[]>(() => {
+      const isFidcFund = isFidc();
+      return WIZARD_STEPS.filter((step) => {
+        if (step.conditional === 'fidc') {
+          return isFidcFund;
+        }
+        return true;
+      });
+    });
 
     /**
-     * Pode avançar para o próximo passo?
+     * Set de IDs de steps visíveis para lookup rápido
      */
-    canGoNext: computed<boolean>(() => {
-      const currentStepId = store.currentStep();
-      const validation = store.stepValidation()[currentStepId];
-      return validation?.isValid ?? false;
-    }),
+    const visibleStepIds = computed<Set<WizardStepId>>(() => {
+      return new Set(visibleSteps().map((s) => s.id));
+    });
 
     /**
-     * Pode voltar para o passo anterior?
+     * Total de steps visíveis
      */
-    canGoPrevious: computed<boolean>(() => {
-      return store.currentStep() > 1;
-    }),
+    const totalVisibleSteps = computed<number>(() => visibleSteps().length);
 
-    /**
-     * É o primeiro passo?
-     */
-    isFirstStep: computed<boolean>(() => {
-      return store.currentStep() === 1;
-    }),
+    return {
+      /**
+       * Flag indicando se fundo é FIDC/FIDC_NP
+       */
+      isFidc,
 
-    /**
-     * É o último passo?
-     */
-    isLastStep: computed<boolean>(() => {
-      return store.currentStep() === 10;
-    }),
+      /**
+       * Lista de steps visíveis (sem condicionais não aplicáveis)
+       */
+      visibleSteps,
 
-    /**
-     * Pode submeter o wizard?
-     * Todos os passos devem estar válidos
-     */
-    canSubmit: computed<boolean>(() => {
-      const validation = store.stepValidation();
-      return Object.values(validation).every((v) => v.isValid);
-    }),
+      /**
+       * Set de IDs de steps visíveis
+       */
+      visibleStepIds,
 
-    /**
-     * Número de passos concluídos
-     */
-    completedStepsCount: computed<number>(() => {
-      return store.completedSteps().size;
-    }),
+      /**
+       * Total de steps visíveis
+       */
+      totalVisibleSteps,
 
-    /**
-     * Lista de passos concluídos (IDs ordenados)
-     */
-    completedStepsList: computed<WizardStepId[]>(() => {
-      return Array.from(store.completedSteps()).sort((a, b) => a - b);
-    }),
+      /**
+       * Configuração do passo atual
+       */
+      currentStepConfig: computed<WizardStepConfig | undefined>(() => {
+        return WIZARD_STEPS.find((s) => s.id === store.currentStep());
+      }),
 
-    /**
-     * Validação do passo atual
-     */
-    currentStepValidation: computed<StepValidation>(() => {
-      const currentStepId = store.currentStep();
-      return store.stepValidation()[currentStepId] || initialStepValidation;
-    }),
-  })),
+      /**
+       * Percentual de progresso (0-100)
+       * Considera apenas steps visíveis
+       */
+      progressPercentage: computed<number>(() => {
+        const visibleIds = visibleStepIds();
+        const completedVisible = Array.from(store.completedSteps()).filter((id) =>
+          visibleIds.has(id)
+        ).length;
+        const total = totalVisibleSteps();
+        return total > 0 ? Math.round((completedVisible / total) * 100) : 0;
+      }),
+
+      /**
+       * Pode avançar para o próximo passo?
+       */
+      canGoNext: computed<boolean>(() => {
+        const currentStepId = store.currentStep();
+        const validation = store.stepValidation()[currentStepId];
+        return validation?.isValid ?? false;
+      }),
+
+      /**
+       * Pode voltar para o passo anterior?
+       */
+      canGoPrevious: computed<boolean>(() => {
+        return store.currentStep() > 1;
+      }),
+
+      /**
+       * É o primeiro passo?
+       */
+      isFirstStep: computed<boolean>(() => {
+        return store.currentStep() === 1;
+      }),
+
+      /**
+       * É o último passo?
+       */
+      isLastStep: computed<boolean>(() => {
+        return store.currentStep() === LAST_STEP_ID;
+      }),
+
+      /**
+       * Pode submeter o wizard?
+       * Apenas steps visíveis devem estar válidos
+       */
+      canSubmit: computed<boolean>(() => {
+        const validation = store.stepValidation();
+        const visibleIds = visibleStepIds();
+        return Array.from(visibleIds).every((id) => validation[id]?.isValid ?? false);
+      }),
+
+      /**
+       * Número de passos concluídos (apenas visíveis)
+       */
+      completedStepsCount: computed<number>(() => {
+        const visibleIds = visibleStepIds();
+        return Array.from(store.completedSteps()).filter((id) => visibleIds.has(id)).length;
+      }),
+
+      /**
+       * Lista de passos concluídos (IDs ordenados)
+       */
+      completedStepsList: computed<WizardStepId[]>(() => {
+        return Array.from(store.completedSteps()).sort((a, b) => a - b);
+      }),
+
+      /**
+       * Validação do passo atual
+       */
+      currentStepValidation: computed<StepValidation>(() => {
+        const currentStepId = store.currentStep();
+        return store.stepValidation()[currentStepId] || initialStepValidation;
+      }),
+    };
+  }),
   withMethods((store) => {
+    /**
+     * Encontra o próximo step visível a partir de um ID
+     */
+    function findNextVisibleStep(fromStepId: WizardStepId): WizardStepId | null {
+      const visibleIds = store.visibleStepIds();
+      let nextId = (fromStepId + 1) as WizardStepId;
+      while (nextId <= LAST_STEP_ID) {
+        if (visibleIds.has(nextId)) {
+          return nextId;
+        }
+        nextId = (nextId + 1) as WizardStepId;
+      }
+      return null;
+    }
+
+    /**
+     * Encontra o step anterior visível a partir de um ID
+     */
+    function findPreviousVisibleStep(fromStepId: WizardStepId): WizardStepId | null {
+      const visibleIds = store.visibleStepIds();
+      let prevId = (fromStepId - 1) as WizardStepId;
+      while (prevId >= 1) {
+        if (visibleIds.has(prevId)) {
+          return prevId;
+        }
+        prevId = (prevId - 1) as WizardStepId;
+      }
+      return null;
+    }
+
     return {
       /**
        * Navega para um passo específico
        * Permite navegar livremente para passos já concluídos
        * ou para o próximo passo se o atual estiver válido
+       * Só permite navegação para steps visíveis
        */
       goToStep(stepId: WizardStepId): void {
+        // Não permite navegar para step não visível
+        if (!store.visibleStepIds().has(stepId)) {
+          return;
+        }
+
         const isCompleted = store.completedSteps().has(stepId);
-        const isNext = stepId === store.currentStep() + 1;
+        const isNext = stepId === findNextVisibleStep(store.currentStep());
         const canGoToNext = isNext && store.canGoNext();
 
         if (isCompleted || canGoToNext || stepId === store.currentStep()) {
@@ -139,22 +246,28 @@ export const WizardStore = signalStore(
       },
 
       /**
-       * Avança para o próximo passo
+       * Avança para o próximo passo visível
+       * Pula automaticamente steps condicionais não aplicáveis
        */
       goNext(): void {
         if (store.canGoNext() && !store.isLastStep()) {
-          const nextStep = (store.currentStep() + 1) as WizardStepId;
-          patchState(store, { currentStep: nextStep });
+          const nextStep = findNextVisibleStep(store.currentStep());
+          if (nextStep !== null) {
+            patchState(store, { currentStep: nextStep });
+          }
         }
       },
 
       /**
-       * Volta para o passo anterior
+       * Volta para o passo anterior visível
+       * Pula automaticamente steps condicionais não aplicáveis
        */
       goPrevious(): void {
         if (store.canGoPrevious()) {
-          const previousStep = (store.currentStep() - 1) as WizardStepId;
-          patchState(store, { currentStep: previousStep });
+          const previousStep = findPreviousVisibleStep(store.currentStep());
+          if (previousStep !== null) {
+            patchState(store, { currentStep: previousStep });
+          }
         }
       },
 

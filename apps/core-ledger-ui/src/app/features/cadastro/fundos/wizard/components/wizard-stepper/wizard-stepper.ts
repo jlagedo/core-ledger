@@ -103,4 +103,14 @@ export class WizardStepper {
     const clickable = this.isStepClickable(stepId);
     return `wizard-step wizard-step--${status} ${clickable ? 'wizard-step--clickable' : ''}`;
   }
+
+  /**
+   * Retorna o label do step atual
+   * Necessário porque steps condicionais podem alterar a ordem
+   */
+  getCurrentStepLabel(): string {
+    const currentId = this.currentStep();
+    const step = this.steps().find((s) => s.id === currentId);
+    return step?.label ?? '';
+  }
 }

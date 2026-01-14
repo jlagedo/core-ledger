@@ -8,6 +8,11 @@ import { PlaceholderStep } from './steps/placeholder-step/placeholder-step';
 import { IdentificacaoStep } from './steps/identificacao-step/identificacao-step';
 import { ClassificacaoStep } from './steps/classificacao-step/classificacao-step';
 import { CaracteristicasStep } from './steps/caracteristicas-step/caracteristicas-step';
+import { ParametrosCotaStep } from './steps/parametros-cota-step/parametros-cota-step';
+import { TaxasStep } from './steps/taxas-step/taxas-step';
+import { PrazosStep } from './steps/prazos-step/prazos-step';
+import { ParametrosFidcStep } from './steps/parametros-fidc-step/parametros-fidc-step';
+import { ClassesStep } from './steps/classes-step/classes-step';
 import { PageHeader } from '../../../../layout/page-header/page-header';
 import { ToastService } from '../../../../services/toast-service';
 
@@ -21,6 +26,11 @@ import { ToastService } from '../../../../services/toast-service';
     IdentificacaoStep,
     ClassificacaoStep,
     CaracteristicasStep,
+    ParametrosCotaStep,
+    TaxasStep,
+    PrazosStep,
+    ParametrosFidcStep,
+    ClassesStep,
   ],
   providers: [WizardStore], // Store com escopo do componente
   templateUrl: './wizard-container.html',
@@ -34,8 +44,14 @@ export class WizardContainer {
   // Wizard Store
   readonly store = inject(WizardStore);
 
-  // Lista de passos
+  // Lista de passos (todos os passos, para referência)
   readonly steps = WIZARD_STEPS;
+
+  // Lista de passos visíveis (filtra condicionais não aplicáveis)
+  readonly visibleSteps = this.store.visibleSteps;
+
+  // Computed: Check if fund is FIDC type (delegado ao store)
+  readonly isFidc = this.store.isFidc;
 
   // Signals públicos para template
   readonly currentStep = this.store.currentStep;
