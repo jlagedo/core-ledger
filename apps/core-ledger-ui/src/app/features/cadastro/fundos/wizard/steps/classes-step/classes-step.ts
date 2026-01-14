@@ -198,6 +198,14 @@ export class ClassesStep {
           stepData.classes.forEach((classe) => {
             classesArray.push(this.createClasseFormGroup(classe, isFidc), { emitEvent: false });
           });
+
+          // Re-apply FIDC validators and tipoClasse defaults for each restored classe
+          // (valueChanges subscriptions don't fire with emitEvent: false)
+          classesArray.controls.forEach((group) => {
+            const tipoClasse = group.get('tipoClasseFidc')?.value;
+            // Apply defaults but skip setting responsabilidadeLimitada since data is restored
+            this.applyTipoClasseDefaults(group as FormGroup, tipoClasse, true);
+          });
         }
       } else if (isFidc) {
         // RF-02: For FIDC, pre-create SENIOR class and enable multiclasse
@@ -205,6 +213,10 @@ export class ClassesStep {
         this.isMulticlasse.set(true);
         classesArray.push(this.createClasseFormGroup(this.getDefaultSeniorClasse(), true), { emitEvent: false });
       }
+
+      // Re-validate the entire FormArray and form
+      classesArray.updateValueAndValidity({ emitEvent: false });
+      this.form.updateValueAndValidity({ emitEvent: false });
 
       // Mark all fields as touched
       this.markAllAsTouched();
@@ -316,18 +328,33 @@ export class ClassesStep {
       .get('tipoClasseFidc')
       ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((tipoClasse: TipoClasseFidc | null) => {
-        if (tipoClasse) {
-          // Set default responsabilidade limitada based on tipo
-          const defaultResp = getDefaultResponsabilidadeLimitada(tipoClasse);
-          group.get('responsabilidadeLimitada')?.setValue(defaultResp, { emitEvent: false });
-
-          // Set default ordem subordinacao if not already set
-          if (!group.get('ordemSubordinacao')?.value) {
-            const defaultOrdem = getDefaultOrdemSubordinacao(tipoClasse);
-            group.get('ordemSubordinacao')?.setValue(defaultOrdem, { emitEvent: false });
-          }
-        }
+        this.applyTipoClasseDefaults(group, tipoClasse, false);
       });
+  }
+
+  /**
+   * Apply defaults based on tipoClasseFidc value
+   * Called both from valueChanges subscription and after data restoration
+   * @param skipOrdemIfSet When restoring data, skip setting ordemSubordinacao if already set
+   */
+  private applyTipoClasseDefaults(group: FormGroup, tipoClasse: TipoClasseFidc | null, skipOrdemIfSet: boolean): void {
+    if (tipoClasse) {
+      // Set default responsabilidade limitada based on tipo (only if not restoring)
+      if (!skipOrdemIfSet) {
+        const defaultResp = getDefaultResponsabilidadeLimitada(tipoClasse);
+        group.get('responsabilidadeLimitada')?.setValue(defaultResp, { emitEvent: false });
+      }
+
+      // Set default ordem subordinacao if not already set
+      if (!group.get('ordemSubordinacao')?.value) {
+        const defaultOrdem = getDefaultOrdemSubordinacao(tipoClasse);
+        group.get('ordemSubordinacao')?.setValue(defaultOrdem, { emitEvent: false });
+      }
+    }
+
+    // Update validity
+    group.get('ordemSubordinacao')?.updateValueAndValidity({ emitEvent: false });
+    group.get('responsabilidadeLimitada')?.updateValueAndValidity({ emitEvent: false });
   }
 
   /**

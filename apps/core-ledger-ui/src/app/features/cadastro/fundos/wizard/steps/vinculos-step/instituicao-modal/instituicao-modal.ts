@@ -77,7 +77,7 @@ export class InstituicaoModal {
             cnpj: instituicao.cnpj,
             cnpjFormatado: formatCnpj(instituicao.cnpj),
             razaoSocial: instituicao.razaoSocial,
-            nomeFantasia: instituicao.nomeFantasia,
+            nomeFantasia: instituicao.nomeFantasia || '',
             displayName: instituicao.nomeFantasia
               ? `${instituicao.nomeFantasia} (${instituicao.razaoSocial})`
               : instituicao.razaoSocial,

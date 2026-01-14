@@ -172,6 +172,13 @@ export class TaxasStep {
         stepData.taxas.forEach((taxa) => {
           taxasArray.push(this.createTaxaFormGroup(taxa), { emitEvent: false });
         });
+
+        // Re-apply conditional validators for each restored taxa
+        // (valueChanges subscriptions don't fire with emitEvent: false)
+        taxasArray.controls.forEach((group) => {
+          const tipoTaxa = group.get('tipoTaxa')?.value;
+          this.applyTipoTaxaValidators(group as FormGroup, tipoTaxa);
+        });
       } else {
         // RF-01: Add default administracao tax
         taxasArray.push(
@@ -179,6 +186,10 @@ export class TaxasStep {
           { emitEvent: false }
         );
       }
+
+      // Re-validate the entire FormArray and form
+      taxasArray.updateValueAndValidity({ emitEvent: false });
+      this.form.updateValueAndValidity({ emitEvent: false });
 
       // Mark all fields as touched
       this.markAllAsTouched();
@@ -246,45 +257,53 @@ export class TaxasStep {
       .get('tipoTaxa')
       ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((tipoTaxa: TipoTaxa | null) => {
-        const percentualControl = group.get('percentual');
-        const benchmarkIdControl = group.get('benchmarkId');
-        const percentualBenchmarkControl = group.get('percentualBenchmark');
-
-        if (tipoTaxa) {
-          // RF-05: Apply max percentual based on tipo
-          const maxPercentual = LIMITES_PERCENTUAL[tipoTaxa];
-          percentualControl?.setValidators([
-            Validators.required,
-            Validators.min(0.000001),
-            Validators.max(maxPercentual),
-          ]);
-
-          // RF-03: Performance tax requires benchmark
-          if (tipoTaxa === TipoTaxa.PERFORMANCE) {
-            benchmarkIdControl?.setValidators([Validators.required]);
-            percentualBenchmarkControl?.setValidators([
-              Validators.min(0),
-              Validators.max(200),
-            ]);
-            // Set default base calculo for performance
-            if (!group.get('baseCalculo')?.value) {
-              group
-                .get('baseCalculo')
-                ?.setValue(BaseCalculo.RENDIMENTO_ACIMA_BENCHMARK, { emitEvent: false });
-            }
-          } else {
-            benchmarkIdControl?.clearValidators();
-            benchmarkIdControl?.setValue(null, { emitEvent: false });
-            percentualBenchmarkControl?.clearValidators();
-            group.get('possuiHurdle')?.setValue(false, { emitEvent: false });
-            group.get('possuiHighWaterMark')?.setValue(false, { emitEvent: false });
-          }
-        }
-
-        percentualControl?.updateValueAndValidity({ emitEvent: false });
-        benchmarkIdControl?.updateValueAndValidity({ emitEvent: false });
-        percentualBenchmarkControl?.updateValueAndValidity({ emitEvent: false });
+        this.applyTipoTaxaValidators(group, tipoTaxa);
       });
+  }
+
+  /**
+   * Apply validators based on tipoTaxa value
+   * Called both from valueChanges subscription and after data restoration
+   */
+  private applyTipoTaxaValidators(group: FormGroup, tipoTaxa: TipoTaxa | null): void {
+    const percentualControl = group.get('percentual');
+    const benchmarkIdControl = group.get('benchmarkId');
+    const percentualBenchmarkControl = group.get('percentualBenchmark');
+
+    if (tipoTaxa) {
+      // RF-05: Apply max percentual based on tipo
+      const maxPercentual = LIMITES_PERCENTUAL[tipoTaxa];
+      percentualControl?.setValidators([
+        Validators.required,
+        Validators.min(0.000001),
+        Validators.max(maxPercentual),
+      ]);
+
+      // RF-03: Performance tax requires benchmark
+      if (tipoTaxa === TipoTaxa.PERFORMANCE) {
+        benchmarkIdControl?.setValidators([Validators.required]);
+        percentualBenchmarkControl?.setValidators([
+          Validators.min(0),
+          Validators.max(200),
+        ]);
+        // Set default base calculo for performance
+        if (!group.get('baseCalculo')?.value) {
+          group
+            .get('baseCalculo')
+            ?.setValue(BaseCalculo.RENDIMENTO_ACIMA_BENCHMARK, { emitEvent: false });
+        }
+      } else {
+        benchmarkIdControl?.clearValidators();
+        benchmarkIdControl?.setValue(null, { emitEvent: false });
+        percentualBenchmarkControl?.clearValidators();
+        group.get('possuiHurdle')?.setValue(false, { emitEvent: false });
+        group.get('possuiHighWaterMark')?.setValue(false, { emitEvent: false });
+      }
+    }
+
+    percentualControl?.updateValueAndValidity({ emitEvent: false });
+    benchmarkIdControl?.updateValueAndValidity({ emitEvent: false });
+    percentualBenchmarkControl?.updateValueAndValidity({ emitEvent: false });
   }
 
   /**

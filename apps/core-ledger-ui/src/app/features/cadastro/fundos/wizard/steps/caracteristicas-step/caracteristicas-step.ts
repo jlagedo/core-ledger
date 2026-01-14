@@ -224,19 +224,8 @@ export class CaracteristicasStep {
     // Effect: Handle conditional fields (prazo)
     effect(
       () => {
-        const prazo = this.form.get('prazo')?.value;
-        const dataEncerramentoControl = this.form.get('dataEncerramento');
-
-        if (prazo === Prazo.DETERMINADO) {
-          // Make dataEncerramento required
-          dataEncerramentoControl?.setValidators([Validators.required, dataFuturaValidator]);
-        } else {
-          // Clear validators and value
-          dataEncerramentoControl?.clearValidators();
-          dataEncerramentoControl?.setValue(null);
-        }
-
-        dataEncerramentoControl?.updateValueAndValidity({ emitEvent: false });
+        const prazo = this.form.get('prazo')?.value ?? null;
+        this.applyPrazoValidators(prazo);
       },
       { allowSignalWrites: true }
     );
@@ -244,23 +233,8 @@ export class CaracteristicasStep {
     // Effect: Handle conditional fields (alavancagem)
     effect(
       () => {
-        const permiteAlavancagem = this.form.get('permiteAlavancagem')?.value;
-        const limiteAlavancagemControl = this.form.get('limiteAlavancagem');
-
-        if (permiteAlavancagem) {
-          // Make limiteAlavancagem required with range
-          limiteAlavancagemControl?.setValidators([
-            Validators.required,
-            Validators.min(1.01),
-            Validators.max(10.0),
-          ]);
-        } else {
-          // Clear validators and value
-          limiteAlavancagemControl?.clearValidators();
-          limiteAlavancagemControl?.setValue(null);
-        }
-
-        limiteAlavancagemControl?.updateValueAndValidity({ emitEvent: false });
+        const permiteAlavancagem = this.form.get('permiteAlavancagem')?.value ?? false;
+        this.applyAlavancagemValidators(permiteAlavancagem);
       },
       { allowSignalWrites: true }
     );
@@ -268,12 +242,8 @@ export class CaracteristicasStep {
     // Effect: Handle exclusivo => reservado
     effect(
       () => {
-        const exclusivo = this.form.get('exclusivo')?.value;
-        const reservadoControl = this.form.get('reservado');
-
-        if (exclusivo) {
-          reservadoControl?.setValue(true, { emitEvent: false });
-        }
+        const exclusivo = this.form.get('exclusivo')?.value ?? false;
+        this.applyExclusivoReservadoLogic(exclusivo);
       },
       { allowSignalWrites: true }
     );
@@ -323,6 +293,13 @@ export class CaracteristicasStep {
         const formValue = this.prepareDataForForm(stepData);
         this.form.patchValue(formValue, { emitEvent: false });
 
+        // Re-apply conditional validators after data restoration
+        // (effects read form values imperatively, so they won't re-run automatically)
+        this.reapplyConditionalValidators();
+
+        // Re-validate the entire form
+        this.form.updateValueAndValidity({ emitEvent: false });
+
         // Mark all fields as touched to show validation state
         Object.keys(this.form.controls).forEach((key) => {
           this.form.get(key)?.markAsTouched();
@@ -334,6 +311,73 @@ export class CaracteristicasStep {
 
       untracked(() => this.updateStepValidation());
     });
+  }
+
+  /**
+   * Apply validators based on prazo value
+   * Called both from effect and after data restoration
+   */
+  private applyPrazoValidators(prazo: Prazo | null): void {
+    const dataEncerramentoControl = this.form.get('dataEncerramento');
+
+    if (prazo === Prazo.DETERMINADO) {
+      // Make dataEncerramento required
+      dataEncerramentoControl?.setValidators([Validators.required, dataFuturaValidator]);
+    } else {
+      // Clear validators and value
+      dataEncerramentoControl?.clearValidators();
+      dataEncerramentoControl?.setValue(null, { emitEvent: false });
+    }
+
+    dataEncerramentoControl?.updateValueAndValidity({ emitEvent: false });
+  }
+
+  /**
+   * Apply validators based on permiteAlavancagem value
+   * Called both from effect and after data restoration
+   */
+  private applyAlavancagemValidators(permiteAlavancagem: boolean): void {
+    const limiteAlavancagemControl = this.form.get('limiteAlavancagem');
+
+    if (permiteAlavancagem) {
+      // Make limiteAlavancagem required with range
+      limiteAlavancagemControl?.setValidators([
+        Validators.required,
+        Validators.min(1.01),
+        Validators.max(10.0),
+      ]);
+    } else {
+      // Clear validators and value
+      limiteAlavancagemControl?.clearValidators();
+      limiteAlavancagemControl?.setValue(null, { emitEvent: false });
+    }
+
+    limiteAlavancagemControl?.updateValueAndValidity({ emitEvent: false });
+  }
+
+  /**
+   * Apply exclusivo => reservado logic
+   * Called both from effect and after data restoration
+   */
+  private applyExclusivoReservadoLogic(exclusivo: boolean): void {
+    const reservadoControl = this.form.get('reservado');
+
+    if (exclusivo) {
+      reservadoControl?.setValue(true, { emitEvent: false });
+    }
+  }
+
+  /**
+   * Re-apply all conditional validators after data restoration
+   */
+  private reapplyConditionalValidators(): void {
+    const prazo = this.form.get('prazo')?.value ?? null;
+    const permiteAlavancagem = this.form.get('permiteAlavancagem')?.value ?? false;
+    const exclusivo = this.form.get('exclusivo')?.value ?? false;
+
+    this.applyPrazoValidators(prazo);
+    this.applyAlavancagemValidators(permiteAlavancagem);
+    this.applyExclusivoReservadoLogic(exclusivo);
   }
 
   private prepareDataForStore(formValue: any): CaracteristicasFormData {

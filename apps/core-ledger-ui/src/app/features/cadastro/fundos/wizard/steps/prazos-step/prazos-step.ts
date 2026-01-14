@@ -145,6 +145,13 @@ export class PrazosStep {
         stepData.prazos.forEach((prazo) => {
           prazosArray.push(this.createPrazoFormGroup(prazo), { emitEvent: false });
         });
+
+        // Re-apply conditional validators for each restored prazo
+        // (valueChanges subscriptions don't fire with emitEvent: false)
+        prazosArray.controls.forEach((group) => {
+          const permiteProgramado = group.get('permiteResgateProgramado')?.value ?? false;
+          this.applyResgateProgramadoValidators(group as FormGroup, permiteProgramado);
+        });
       } else {
         // RF-01: Add default aplicacao and resgate prazos
         prazosArray.push(
@@ -156,6 +163,10 @@ export class PrazosStep {
           { emitEvent: false }
         );
       }
+
+      // Re-validate the entire FormArray and form
+      prazosArray.updateValueAndValidity({ emitEvent: false });
+      this.form.updateValueAndValidity({ emitEvent: false });
 
       // Mark all fields as touched
       this.markAllAsTouched();
@@ -209,20 +220,28 @@ export class PrazosStep {
       .get('permiteResgateProgramado')
       ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((permiteProgramado: boolean) => {
-        const prazoMaximoControl = group.get('prazoMaximoProgramacao');
-        if (permiteProgramado) {
-          prazoMaximoControl?.setValidators([
-            Validators.required,
-            Validators.min(1),
-            Validators.max(MAX_PRAZO_DIAS),
-          ]);
-        } else {
-          prazoMaximoControl?.clearValidators();
-          prazoMaximoControl?.setValidators([Validators.min(1), Validators.max(MAX_PRAZO_DIAS)]);
-          prazoMaximoControl?.setValue(null, { emitEvent: false });
-        }
-        prazoMaximoControl?.updateValueAndValidity({ emitEvent: false });
+        this.applyResgateProgramadoValidators(group, permiteProgramado);
       });
+  }
+
+  /**
+   * Apply validators based on permiteResgateProgramado value
+   * Called both from valueChanges subscription and after data restoration
+   */
+  private applyResgateProgramadoValidators(group: FormGroup, permiteProgramado: boolean): void {
+    const prazoMaximoControl = group.get('prazoMaximoProgramacao');
+    if (permiteProgramado) {
+      prazoMaximoControl?.setValidators([
+        Validators.required,
+        Validators.min(1),
+        Validators.max(MAX_PRAZO_DIAS),
+      ]);
+    } else {
+      prazoMaximoControl?.clearValidators();
+      prazoMaximoControl?.setValidators([Validators.min(1), Validators.max(MAX_PRAZO_DIAS)]);
+      prazoMaximoControl?.setValue(null, { emitEvent: false });
+    }
+    prazoMaximoControl?.updateValueAndValidity({ emitEvent: false });
   }
 
   /**

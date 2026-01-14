@@ -9,7 +9,6 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { JsonPipe } from '@angular/common';
 import {
   AbstractControl,
   FormArray,
@@ -74,7 +73,7 @@ function vinculosObrigatoriosValidator(formArray: AbstractControl): ValidationEr
  */
 @Component({
   selector: 'app-vinculos-step',
-  imports: [ReactiveFormsModule, JsonPipe],
+  imports: [ReactiveFormsModule],
   templateUrl: './vinculos-step.html',
   styleUrl: './vinculos-step.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -140,37 +139,6 @@ export class VinculosStep {
     return hasFidcRecommendedVinculos(vinculos);
   });
 
-  // DEBUG: Computed for validation debugging
-  readonly debugValidation = computed(() => {
-    const vinculosArray = this.form.get('vinculos') as FormArray;
-    const missing = this.missingVinculos();
-
-    const fieldErrors = vinculosArray.controls.map((ctrl, index) => {
-      const group = ctrl as FormGroup;
-      const errors: any = {};
-      const values: any = {};
-      Object.keys(group.controls).forEach((key) => {
-        const control = group.get(key);
-        values[key] = control?.value;
-        if (control?.invalid && control?.errors) {
-          errors[key] = control.errors;
-        }
-      });
-      return { index, errors, valid: ctrl.valid, values };
-    });
-
-    return {
-      formValid: this.form.valid,
-      formStatus: this.form.status,
-      arrayValid: vinculosArray.valid,
-      arrayErrors: vinculosArray.errors,
-      missingVinculos: missing,
-      fieldErrors: fieldErrors.filter(f => !f.valid),
-      allVinculos: fieldErrors,
-      totalVinculos: vinculosArray.length,
-    };
-  });
-
   // Computed: Get optional vinculo types available to add
   readonly availableOptionalVinculos = computed(() => {
     const vinculosArray = this.form.get('vinculos') as FormArray;
@@ -218,6 +186,12 @@ export class VinculosStep {
         stepData.vinculos.forEach((vinculo) => {
           vinculosArray.push(this.createVinculoFormGroup(vinculo), { emitEvent: false });
         });
+
+        // Re-apply date validations for each restored vinculo
+        // (valueChanges subscriptions don't fire with emitEvent: false)
+        vinculosArray.controls.forEach((group) => {
+          this.revalidateDates(group as FormGroup);
+        });
       } else {
         // Initialize with required vinculos (RF-01)
         VINCULOS_OBRIGATORIOS.forEach((tipo) => {
@@ -231,6 +205,10 @@ export class VinculosStep {
           );
         });
       }
+
+      // Re-validate the entire FormArray and form
+      vinculosArray.updateValueAndValidity({ emitEvent: false });
+      this.form.updateValueAndValidity({ emitEvent: false });
 
       // Mark all fields as touched
       this.markAllAsTouched();
@@ -289,7 +267,10 @@ export class VinculosStep {
           const index = this.getVinculoIndex(group);
           this.setAutocompleteLoading(index, true);
           return this.instituicoesService.search(term).pipe(
-            catchError(() => of([]))
+            catchError((err) => {
+              console.error('🔴 Autocomplete search error:', err);
+              return of([]);
+            })
           );
         })
       )
@@ -306,34 +287,59 @@ export class VinculosStep {
    */
   private setupDateValidation(group: FormGroup): void {
     group.get('dataFim')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      const dataInicio = group.get('dataInicio')?.value;
-      const dataFim = group.get('dataFim')?.value;
-      const dataFimControl = group.get('dataFim');
-
-      if (dataInicio && dataFim && dataFim < dataInicio) {
-        dataFimControl?.setErrors({ dataFimAnterior: true });
-      } else if (dataFimControl?.hasError('dataFimAnterior')) {
-        // Clear custom error if date is now valid
-        const errors = { ...dataFimControl.errors };
-        delete errors['dataFimAnterior'];
-        dataFimControl.setErrors(Object.keys(errors).length > 0 ? errors : null);
-      }
+      this.validateDataFim(group);
     });
 
     group.get('dataInicio')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      const dataInicio = group.get('dataInicio')?.value;
-      const today = this.getTodayISODate();
-      const dataInicioControl = group.get('dataInicio');
-
-      if (dataInicio && dataInicio > today) {
-        dataInicioControl?.setErrors({ dataInicioFutura: true });
-      } else if (dataInicioControl?.hasError('dataInicioFutura')) {
-        // Clear custom error if date is now valid
-        const errors = { ...dataInicioControl.errors };
-        delete errors['dataInicioFutura'];
-        dataInicioControl.setErrors(Object.keys(errors).length > 0 ? errors : null);
-      }
+      this.validateDataInicio(group);
     });
+  }
+
+  /**
+   * Validate dataFim is not before dataInicio
+   * Called both from valueChanges subscription and after data restoration
+   */
+  private validateDataFim(group: FormGroup): void {
+    const dataInicio = group.get('dataInicio')?.value;
+    const dataFim = group.get('dataFim')?.value;
+    const dataFimControl = group.get('dataFim');
+
+    if (dataInicio && dataFim && dataFim < dataInicio) {
+      dataFimControl?.setErrors({ dataFimAnterior: true });
+    } else if (dataFimControl?.hasError('dataFimAnterior')) {
+      // Clear custom error if date is now valid
+      const errors = { ...dataFimControl.errors };
+      delete errors['dataFimAnterior'];
+      dataFimControl.setErrors(Object.keys(errors).length > 0 ? errors : null);
+    }
+  }
+
+  /**
+   * Validate dataInicio is not in the future
+   * Called both from valueChanges subscription and after data restoration
+   */
+  private validateDataInicio(group: FormGroup): void {
+    const dataInicio = group.get('dataInicio')?.value;
+    const today = this.getTodayISODate();
+    const dataInicioControl = group.get('dataInicio');
+
+    if (dataInicio && dataInicio > today) {
+      dataInicioControl?.setErrors({ dataInicioFutura: true });
+    } else if (dataInicioControl?.hasError('dataInicioFutura')) {
+      // Clear custom error if date is now valid
+      const errors = { ...dataInicioControl.errors };
+      delete errors['dataInicioFutura'];
+      dataInicioControl.setErrors(Object.keys(errors).length > 0 ? errors : null);
+    }
+  }
+
+  /**
+   * Re-apply all date validations for a vinculo
+   * Called after data restoration
+   */
+  private revalidateDates(group: FormGroup): void {
+    this.validateDataInicio(group);
+    this.validateDataFim(group);
   }
 
   /**
@@ -402,15 +408,53 @@ export class VinculosStep {
    * Handle autocomplete item selection
    */
   selectInstituicao(index: number, item: InstituicaoAutocompleteItem): void {
+    if (!item || !item.id || !item.cnpj) {
+      return;
+    }
+
     const vinculosArray = this.form.get('vinculos') as FormArray;
     const group = vinculosArray.at(index) as FormGroup;
 
     group.patchValue({
       instituicaoId: item.id,
       cnpjInstituicao: item.cnpj,
-      nomeInstituicao: item.razaoSocial,
+      nomeInstituicao: item.razaoSocial || item.nomeFantasia || '',
       searchTerm: '',
     });
+
+    // Ensure form control is marked as touched and validated
+    const cnpjControl = group.get('cnpjInstituicao');
+    const nomeControl = group.get('nomeInstituicao');
+    const idControl = group.get('instituicaoId');
+
+    if (cnpjControl) {
+      cnpjControl.markAsTouched();
+      cnpjControl.markAsDirty();
+      cnpjControl.updateValueAndValidity();
+    }
+
+    if (nomeControl) {
+      nomeControl.markAsTouched();
+      nomeControl.markAsDirty();
+      nomeControl.updateValueAndValidity();
+    }
+
+    if (idControl) {
+      idControl.markAsTouched();
+      idControl.markAsDirty();
+      idControl.updateValueAndValidity();
+    }
+
+    group.markAsTouched();
+    group.markAsDirty();
+    group.updateValueAndValidity();
+
+    // Force form array to re-validate
+    vinculosArray.updateValueAndValidity();
+    this.form.updateValueAndValidity();
+
+    // Explicitly update wizard validation state
+    this.updateStepValidation();
 
     this.setAutocompleteVisible(index, false);
     this.setAutocompleteResults(index, []);
@@ -653,33 +697,32 @@ export class VinculosStep {
     const vinculosArray = this.form.get('vinculos') as FormArray;
 
     const errors: string[] = [];
-    let isValid = false;
 
-    // Check for missing required vinculos
-    const missing = this.missingVinculos();
-    if (missing.length > 0) {
-      const missingLabels = missing.map((t) => getTipoVinculoLabel(t)).join(', ');
-      errors.push(`Vínculos obrigatórios faltando: ${missingLabels}`);
-    }
+    // Use form's actual validity status (much more reliable)
+    const isValid = this.form.valid;
 
-    // Check for individual field errors
-    let hasFieldErrors = false;
-    vinculosArray.controls.forEach((ctrl) => {
-      if (ctrl.invalid) {
-        hasFieldErrors = true;
+    // If form is invalid, extract error messages
+    if (this.form.invalid) {
+      // Check FormArray errors from validator
+      if (vinculosArray.errors && vinculosArray.errors['vinculosFaltantes']) {
+        const faltantes = vinculosArray.errors['vinculosFaltantes'].tipos as TipoVinculo[];
+        const missingLabels = faltantes.map((t) => getTipoVinculoLabel(t)).join(', ');
+        errors.push(`Vínculos obrigatórios faltando: ${missingLabels}`);
       }
-    });
 
-    if (hasFieldErrors && errors.length === 0) {
-      errors.push('Preencha todos os campos obrigatórios');
+      // Check for individual field errors
+      vinculosArray.controls.forEach((ctrl) => {
+        if (ctrl.invalid) {
+          const group = ctrl as FormGroup;
+          Object.keys(group.controls).forEach((key) => {
+            const control = group.get(key);
+            if (control?.invalid && control?.errors && !errors.includes('Preencha todos os campos obrigatórios')) {
+              errors.push('Preencha todos os campos obrigatórios');
+            }
+          });
+        }
+      });
     }
-
-    // Check FIDC recommendation (RF-02) - warning only
-    if (this.isFidc() && !this.hasFidcRecommended()) {
-      // This is a warning, not an error - step is still valid
-    }
-
-    isValid = missing.length === 0 && !hasFieldErrors;
 
     this.wizardStore.setStepValidation(stepId, {
       isValid,
