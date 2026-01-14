@@ -1,4 +1,99 @@
 <div class="wizard-navigation">
+  <!-- Debug Panel (dev mode only) -->
+  @if (isDevMode) {
+    <div style="background:#1a1a2e;border:1px solid #4a4a6a;padding:12px;margin-bottom:12px;font-family:monospace;font-size:11px;color:#e0e0e0;border-radius:4px">
+      <div style="color:#ff6b6b;font-weight:bold;margin-bottom:8px">🔧 DEBUG: Por que o botão está desabilitado?</div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px">
+        <div>
+          <span style="color:#888">Step:</span>
+          <span style="color:#4ecdc4">{{ currentStep() }}</span>
+        </div>
+        <div>
+          <span style="color:#888">canGoNext:</span>
+          <span [style.color]="canGoNext() ? '#4ecdc4' : '#ff6b6b'">{{ canGoNext() }}</span>
+        </div>
+        <div>
+          <span style="color:#888">isSubmitting:</span>
+          <span [style.color]="isSubmitting() ? '#ff6b6b' : '#4ecdc4'">{{ isSubmitting() }}</span>
+        </div>
+      </div>
+
+      @if (currentStepValidation(); as validation) {
+        <div style="border-top:1px solid #4a4a6a;padding-top:8px;margin-top:8px">
+          <div style="color:#ffd93d;margin-bottom:4px">Step Validation:</div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4px">
+            <div>
+              <span style="color:#888">isValid:</span>
+              <span [style.color]="validation.isValid ? '#4ecdc4' : '#ff6b6b'">{{ validation.isValid }}</span>
+            </div>
+            <div>
+              <span style="color:#888">isDirty:</span>
+              <span style="color:#4ecdc4">{{ validation.isDirty }}</span>
+            </div>
+          </div>
+          @if (validation.errors.length > 0) {
+            <div style="margin-top:8px;color:#ff6b6b">
+              <div style="margin-bottom:4px">Errors:</div>
+              @for (error of validation.errors; track error) {
+                <div style="padding-left:8px">• {{ error }}</div>
+              }
+            </div>
+          }
+          @if (validation.invalidFields && validation.invalidFields.length > 0) {
+            <div style="margin-top:8px;border-top:1px solid #4a4a6a;padding-top:8px">
+              <div style="color:#ff6b6b;margin-bottom:4px">Invalid Fields ({{ validation.invalidFields.length }}):</div>
+              @for (field of validation.invalidFields; track field.field) {
+                <div style="padding-left:8px;margin-bottom:4px">
+                  <span style="color:#ffd93d">{{ field.field }}:</span>
+                  @for (err of field.errors; track err) {
+                    <span style="color:#ff6b6b;margin-left:4px">{{ err }}</span>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (!canGoNext() && !isSubmitting()) {
+        <div style="border-top:1px solid #4a4a6a;padding-top:8px;margin-top:8px;color:#ffd93d">
+          <div style="margin-bottom:4px">❌ Botão desabilitado porque:</div>
+          @if (currentStepValidation(); as v) {
+            @if (!v.isValid) {
+              <div style="padding-left:8px;color:#ff6b6b">• Step validation isValid = false</div>
+            }
+            @if (!v.isDirty) {
+              <div style="padding-left:8px;color:#ff6b6b">• Form não foi tocado (isDirty = false)</div>
+            }
+          }
+        </div>
+      }
+
+      @if (isLastStep()) {
+        <div style="border-top:1px solid #4a4a6a;padding-top:8px;margin-top:8px">
+          <div style="color:#ffd93d;margin-bottom:4px">All Steps Validation (for Submit):</div>
+          <div>
+            <span style="color:#888">canSubmit:</span>
+            <span [style.color]="canSubmit() ? '#4ecdc4' : '#ff6b6b'">{{ canSubmit() }}</span>
+          </div>
+          @if (allStepValidation(); as allValidation) {
+            <div style="margin-top:4px;font-size:10px">
+              @for (entry of allValidation | keyvalue; track entry.key) {
+                <div>
+                  <span style="color:#888">Step {{ entry.key }}:</span>
+                  <span [style.color]="entry.value.isValid ? '#4ecdc4' : '#ff6b6b'">
+                    {{ entry.value.isValid ? '✓' : '✗' }}
+                  </span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
   <div class="wizard-navigation__actions">
     <!-- Previous Button -->
     <button

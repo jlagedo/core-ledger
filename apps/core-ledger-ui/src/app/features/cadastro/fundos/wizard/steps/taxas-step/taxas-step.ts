@@ -19,10 +19,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, tap, catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
-import { WizardStepConfig, WizardStepId } from '../../models/wizard.model';
+import { Subject, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, startWith, switchMap, tap, catchError } from 'rxjs/operators';
+import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
 import {
   BaseCalculo,
@@ -92,6 +91,9 @@ export class TaxasStep {
   // Track step ID to avoid re-loading
   private lastLoadedStepId: WizardStepId | null = null;
 
+  // Flag to prevent store updates during data restoration
+  private isRestoring = false;
+
   // Main form with FormArray
   form = this.formBuilder.group({
     taxas: this.formBuilder.array<FormGroup>([]),
@@ -114,11 +116,16 @@ export class TaxasStep {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.updateStepValidation());
 
-    this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
-      const stepConfig = untracked(() => this.stepConfig());
-      const dataForStore = this.prepareDataForStore(value);
-      this.wizardStore.setStepData(stepConfig.key, dataForStore);
-    });
+    this.form.valueChanges
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        filter(() => !this.isRestoring)
+      )
+      .subscribe((value) => {
+        const stepConfig = untracked(() => this.stepConfig());
+        const dataForStore = this.prepareDataForStore(value);
+        this.wizardStore.setStepData(stepConfig.key, dataForStore);
+      });
 
     // Setup search subscription with debounce (RF-04)
     this.searchSubject
@@ -159,37 +166,33 @@ export class TaxasStep {
       }
       this.lastLoadedStepId = stepId;
 
-      // Reset form array
+      // Set restoration flag to prevent store updates
+      this.isRestoring = true;
+
+      // Reset form array - events can emit now (store updates are filtered)
       const taxasArray = this.form.get('taxas') as FormArray;
-      taxasArray.clear({ emitEvent: false });
+      taxasArray.clear();
 
       const stepData = untracked(
         () => this.wizardStore.stepData()[stepConfig.key] as TaxasFormData | undefined
       );
 
       if (stepData?.taxas && stepData.taxas.length > 0) {
-        // Restore saved data
+        // Restore saved data - setupConditionalValidators runs automatically via startWith
         stepData.taxas.forEach((taxa) => {
-          taxasArray.push(this.createTaxaFormGroup(taxa), { emitEvent: false });
-        });
-
-        // Re-apply conditional validators for each restored taxa
-        // (valueChanges subscriptions don't fire with emitEvent: false)
-        taxasArray.controls.forEach((group) => {
-          const tipoTaxa = group.get('tipoTaxa')?.value;
-          this.applyTipoTaxaValidators(group as FormGroup, tipoTaxa);
+          taxasArray.push(this.createTaxaFormGroup(taxa));
         });
       } else {
         // RF-01: Add default administracao tax
-        taxasArray.push(
-          this.createTaxaFormGroup(this.getDefaultAdministracaoTaxa()),
-          { emitEvent: false }
-        );
+        taxasArray.push(this.createTaxaFormGroup(this.getDefaultAdministracaoTaxa()));
       }
 
-      // Re-validate the entire FormArray and form
-      taxasArray.updateValueAndValidity({ emitEvent: false });
-      this.form.updateValueAndValidity({ emitEvent: false });
+      // Clear restoration flag
+      this.isRestoring = false;
+
+      // Final validation update
+      taxasArray.updateValueAndValidity();
+      this.form.updateValueAndValidity();
 
       // Mark all fields as touched
       this.markAllAsTouched();
@@ -250,20 +253,24 @@ export class TaxasStep {
   }
 
   /**
-   * Setup conditional validators when tipoTaxa changes
+   * Setup conditional validators when tipoTaxa changes.
+   * Uses startWith to apply validators immediately for initial value.
    */
   private setupConditionalValidators(group: FormGroup): void {
-    group
-      .get('tipoTaxa')
-      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+    const tipoTaxaControl = group.get('tipoTaxa');
+    tipoTaxaControl?.valueChanges
+      .pipe(
+        startWith(tipoTaxaControl.value),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe((tipoTaxa: TipoTaxa | null) => {
         this.applyTipoTaxaValidators(group, tipoTaxa);
       });
   }
 
   /**
-   * Apply validators based on tipoTaxa value
-   * Called both from valueChanges subscription and after data restoration
+   * Apply validators based on tipoTaxa value.
+   * Called from valueChanges subscription (including startWith for initial value).
    */
   private applyTipoTaxaValidators(group: FormGroup, tipoTaxa: TipoTaxa | null): void {
     const percentualControl = group.get('percentual');
@@ -449,11 +456,13 @@ export class TaxasStep {
     // Validate: at least one administracao tax
     const hasAdmin = this.hasAdministracao();
     const isValid = this.form.valid && hasAdmin;
+    const invalidFields = this.collectInvalidFields();
 
     this.wizardStore.setStepValidation(stepId, {
       isValid,
       isDirty: this.form.dirty || taxasArray.length > 0,
       errors: hasAdmin ? [] : ['Taxa de administracao e obrigatoria'],
+      invalidFields,
     });
 
     if (isValid && (this.form.dirty || taxasArray.length > 0)) {
@@ -461,6 +470,26 @@ export class TaxasStep {
     } else {
       this.wizardStore.markStepIncomplete(stepId);
     }
+  }
+
+  private collectInvalidFields(): InvalidFieldInfo[] {
+    const invalidFields: InvalidFieldInfo[] = [];
+    const taxasArray = this.form.get('taxas') as FormArray;
+    taxasArray.controls.forEach((group, index) => {
+      Object.keys((group as FormGroup).controls).forEach((key) => {
+        const control = group.get(key);
+        if (control && control.invalid) {
+          const fieldErrors: string[] = [];
+          if (control.errors) {
+            Object.keys(control.errors).forEach((errorKey) => {
+              fieldErrors.push(errorKey);
+            });
+          }
+          invalidFields.push({ field: `taxas[${index}].${key}`, errors: fieldErrors });
+        }
+      });
+    });
+    return invalidFields;
   }
 
   // Helper methods for template

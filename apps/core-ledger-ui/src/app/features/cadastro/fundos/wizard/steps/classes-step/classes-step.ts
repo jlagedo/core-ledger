@@ -19,7 +19,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { WizardStepConfig, WizardStepId } from '../../models/wizard.model';
+import { filter, startWith } from 'rxjs/operators';
+import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
 import { IdentificacaoFormData, TipoFundo } from '../../models/identificacao.model';
 import {
@@ -100,6 +101,9 @@ export class ClassesStep {
   // Track step ID to avoid re-loading
   private lastLoadedStepId: WizardStepId | null = null;
 
+  // Flag to prevent store updates during data restoration
+  private isRestoring = false;
+
   // Main form
   form = this.formBuilder.group({
     multiclasse: [false],
@@ -166,11 +170,16 @@ export class ClassesStep {
     // Setup form subscriptions
     this.form.statusChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.updateStepValidation());
 
-    this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
-      const stepConfig = untracked(() => this.stepConfig());
-      const dataForStore = this.prepareDataForStore(value);
-      this.wizardStore.setStepData(stepConfig.key, dataForStore);
-    });
+    this.form.valueChanges
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        filter(() => !this.isRestoring)
+      )
+      .subscribe((value) => {
+        const stepConfig = untracked(() => this.stepConfig());
+        const dataForStore = this.prepareDataForStore(value);
+        this.wizardStore.setStepData(stepConfig.key, dataForStore);
+      });
 
     // Effect: Load data when step changes
     effect(() => {
@@ -183,40 +192,39 @@ export class ClassesStep {
       }
       this.lastLoadedStepId = stepId;
 
-      // Reset form array
+      // Set restoration flag to prevent store updates
+      this.isRestoring = true;
+
+      // Reset form array - events can emit now (store updates are filtered)
       const classesArray = this.form.get('classes') as FormArray;
-      classesArray.clear({ emitEvent: false });
+      classesArray.clear();
 
       const stepData = untracked(() => this.wizardStore.stepData()[stepConfig.key] as ClassesFormData | undefined);
 
       if (stepData) {
         // Restore saved data
-        this.form.get('multiclasse')?.setValue(stepData.multiclasse, { emitEvent: false });
+        this.form.get('multiclasse')?.setValue(stepData.multiclasse);
         this.isMulticlasse.set(stepData.multiclasse);
 
         if (stepData.classes && stepData.classes.length > 0) {
+          // Restore saved data - setupTipoClasseChangeHandler runs automatically via startWith
           stepData.classes.forEach((classe) => {
-            classesArray.push(this.createClasseFormGroup(classe, isFidc), { emitEvent: false });
-          });
-
-          // Re-apply FIDC validators and tipoClasse defaults for each restored classe
-          // (valueChanges subscriptions don't fire with emitEvent: false)
-          classesArray.controls.forEach((group) => {
-            const tipoClasse = group.get('tipoClasseFidc')?.value;
-            // Apply defaults but skip setting responsabilidadeLimitada since data is restored
-            this.applyTipoClasseDefaults(group as FormGroup, tipoClasse, true);
+            classesArray.push(this.createClasseFormGroup(classe, isFidc));
           });
         }
       } else if (isFidc) {
         // RF-02: For FIDC, pre-create SENIOR class and enable multiclasse
-        this.form.get('multiclasse')?.setValue(true, { emitEvent: false });
+        this.form.get('multiclasse')?.setValue(true);
         this.isMulticlasse.set(true);
-        classesArray.push(this.createClasseFormGroup(this.getDefaultSeniorClasse(), true), { emitEvent: false });
+        classesArray.push(this.createClasseFormGroup(this.getDefaultSeniorClasse(), true));
       }
 
-      // Re-validate the entire FormArray and form
-      classesArray.updateValueAndValidity({ emitEvent: false });
-      this.form.updateValueAndValidity({ emitEvent: false });
+      // Clear restoration flag
+      this.isRestoring = false;
+
+      // Final validation update
+      classesArray.updateValueAndValidity();
+      this.form.updateValueAndValidity();
 
       // Mark all fields as touched
       this.markAllAsTouched();
@@ -321,29 +329,30 @@ export class ClassesStep {
   }
 
   /**
-   * Setup tipoClasseFidc change handler for automatic defaults (RF-06)
+   * Setup tipoClasseFidc change handler for automatic defaults (RF-06).
+   * Uses startWith to apply defaults immediately for initial value.
    */
   private setupTipoClasseChangeHandler(group: FormGroup): void {
-    group
-      .get('tipoClasseFidc')
-      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+    const tipoClasseControl = group.get('tipoClasseFidc');
+    tipoClasseControl?.valueChanges
+      .pipe(
+        startWith(tipoClasseControl.value),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe((tipoClasse: TipoClasseFidc | null) => {
-        this.applyTipoClasseDefaults(group, tipoClasse, false);
+        this.applyTipoClasseDefaults(group, tipoClasse);
       });
   }
 
   /**
-   * Apply defaults based on tipoClasseFidc value
-   * Called both from valueChanges subscription and after data restoration
-   * @param skipOrdemIfSet When restoring data, skip setting ordemSubordinacao if already set
+   * Apply defaults based on tipoClasseFidc value.
+   * Called from valueChanges subscription (including startWith for initial value).
    */
-  private applyTipoClasseDefaults(group: FormGroup, tipoClasse: TipoClasseFidc | null, skipOrdemIfSet: boolean): void {
+  private applyTipoClasseDefaults(group: FormGroup, tipoClasse: TipoClasseFidc | null): void {
     if (tipoClasse) {
-      // Set default responsabilidade limitada based on tipo (only if not restoring)
-      if (!skipOrdemIfSet) {
-        const defaultResp = getDefaultResponsabilidadeLimitada(tipoClasse);
-        group.get('responsabilidadeLimitada')?.setValue(defaultResp, { emitEvent: false });
-      }
+      // Set default responsabilidade limitada based on tipo
+      const defaultResp = getDefaultResponsabilidadeLimitada(tipoClasse);
+      group.get('responsabilidadeLimitada')?.setValue(defaultResp, { emitEvent: false });
 
       // Set default ordem subordinacao if not already set
       if (!group.get('ordemSubordinacao')?.value) {
@@ -512,10 +521,13 @@ export class ClassesStep {
       }
     }
 
+    const invalidFields = this.collectInvalidFields();
+
     this.wizardStore.setStepValidation(stepId, {
       isValid,
       isDirty: this.form.dirty || classesArray.length > 0,
       errors,
+      invalidFields,
     });
 
     if (isValid && (this.form.dirty || !multiclasse || classesArray.length > 0)) {
@@ -523,6 +535,26 @@ export class ClassesStep {
     } else {
       this.wizardStore.markStepIncomplete(stepId);
     }
+  }
+
+  private collectInvalidFields(): InvalidFieldInfo[] {
+    const invalidFields: InvalidFieldInfo[] = [];
+    const classesArray = this.form.get('classes') as FormArray;
+    classesArray.controls.forEach((group, index) => {
+      Object.keys((group as FormGroup).controls).forEach((key) => {
+        const control = group.get(key);
+        if (control && control.invalid) {
+          const fieldErrors: string[] = [];
+          if (control.errors) {
+            Object.keys(control.errors).forEach((errorKey) => {
+              fieldErrors.push(errorKey);
+            });
+          }
+          invalidFields.push({ field: `classes[${index}].${key}`, errors: fieldErrors });
+        }
+      });
+    });
+    return invalidFields;
   }
 
   // Helper methods for template

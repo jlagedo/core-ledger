@@ -13,8 +13,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { merge, Observable, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
-import { WizardStepConfig, WizardStepId } from '../../models/wizard.model';
+import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
 import { IdentificacaoFormData } from '../../models/identificacao.model';
 import {
@@ -59,6 +59,9 @@ export class ParametrosCotaStep {
 
   // Track step ID to avoid re-loading
   private lastLoadedStepId: WizardStepId | null = null;
+
+  // Loading flag to prevent store updates during restoration
+  private isRestoring = false;
 
   // Signals for computed previews
   private readonly casasDecimaisCotaValue = signal<number>(PARAMETROS_COTA_DEFAULTS.casasDecimaisCota);
@@ -132,22 +135,27 @@ export class ParametrosCotaStep {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.updateStepValidation());
 
-    this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
-      const stepConfig = untracked(() => this.stepConfig());
-      const dataForStore = this.prepareDataForStore(value);
-      this.wizardStore.setStepData(stepConfig.key, dataForStore);
+    this.form.valueChanges
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        filter(() => !this.isRestoring)
+      )
+      .subscribe((value) => {
+        const stepConfig = untracked(() => this.stepConfig());
+        const dataForStore = this.prepareDataForStore(value);
+        this.wizardStore.setStepData(stepConfig.key, dataForStore);
 
-      // Update preview signals
-      if (value.casasDecimaisCota != null) {
-        this.casasDecimaisCotaValue.set(value.casasDecimaisCota);
-      }
-      if (value.casasDecimaisQuantidade != null) {
-        this.casasDecimaisQuantidadeValue.set(value.casasDecimaisQuantidade);
-      }
-      if (value.casasDecimaisPl != null) {
-        this.casasDecimaisPlValue.set(value.casasDecimaisPl);
-      }
-    });
+        // Update preview signals
+        if (value.casasDecimaisCota != null) {
+          this.casasDecimaisCotaValue.set(value.casasDecimaisCota);
+        }
+        if (value.casasDecimaisQuantidade != null) {
+          this.casasDecimaisQuantidadeValue.set(value.casasDecimaisQuantidade);
+        }
+        if (value.casasDecimaisPl != null) {
+          this.casasDecimaisPlValue.set(value.casasDecimaisPl);
+        }
+      });
 
     // Effect: Handle permiteCotaEstimada info display (RF-05)
     effect(
@@ -168,26 +176,26 @@ export class ParametrosCotaStep {
       }
       this.lastLoadedStepId = stepId;
 
+      // Set restoration flag to prevent store updates
+      this.isRestoring = true;
+
       // Get identificacao data for default dataCotaInicial
       const identificacaoData = untracked(
         () => this.wizardStore.stepData()['identificacao'] as IdentificacaoFormData | undefined
       );
 
       // Reset form with defaults
-      this.form.reset(
-        {
-          casasDecimaisCota: PARAMETROS_COTA_DEFAULTS.casasDecimaisCota,
-          casasDecimaisQuantidade: PARAMETROS_COTA_DEFAULTS.casasDecimaisQuantidade,
-          casasDecimaisPl: PARAMETROS_COTA_DEFAULTS.casasDecimaisPl,
-          tipoCota: PARAMETROS_COTA_DEFAULTS.tipoCota,
-          horarioCorte: PARAMETROS_COTA_DEFAULTS.horarioCorte,
-          cotaInicial: PARAMETROS_COTA_DEFAULTS.cotaInicial,
-          dataCotaInicial: identificacaoData?.dataInicioAtividade ?? null,
-          fusoHorario: this.defaultFusoHorarioOption,
-          permiteCotaEstimada: PARAMETROS_COTA_DEFAULTS.permiteCotaEstimada,
-        },
-        { emitEvent: false }
-      );
+      this.form.reset({
+        casasDecimaisCota: PARAMETROS_COTA_DEFAULTS.casasDecimaisCota,
+        casasDecimaisQuantidade: PARAMETROS_COTA_DEFAULTS.casasDecimaisQuantidade,
+        casasDecimaisPl: PARAMETROS_COTA_DEFAULTS.casasDecimaisPl,
+        tipoCota: PARAMETROS_COTA_DEFAULTS.tipoCota,
+        horarioCorte: PARAMETROS_COTA_DEFAULTS.horarioCorte,
+        cotaInicial: PARAMETROS_COTA_DEFAULTS.cotaInicial,
+        dataCotaInicial: identificacaoData?.dataInicioAtividade ?? null,
+        fusoHorario: this.defaultFusoHorarioOption,
+        permiteCotaEstimada: PARAMETROS_COTA_DEFAULTS.permiteCotaEstimada,
+      });
 
       // Load existing step data if available
       const stepData = untracked(
@@ -199,7 +207,7 @@ export class ParametrosCotaStep {
 
       if (stepData) {
         const formValue = this.prepareDataForForm(stepData);
-        this.form.patchValue(formValue, { emitEvent: false });
+        this.form.patchValue(formValue);
 
         // Update preview signals
         if (stepData.casasDecimaisCota != null) {
@@ -212,15 +220,18 @@ export class ParametrosCotaStep {
           this.casasDecimaisPlValue.set(stepData.casasDecimaisPl);
         }
 
-        // Mark all fields as touched to show validation state
-        Object.keys(this.form.controls).forEach((key) => {
-          this.form.get(key)?.markAsTouched();
-        });
-
-        // Mark form as dirty since we have data
         this.form.markAsDirty();
       }
 
+      // Clear restoration flag
+      this.isRestoring = false;
+
+      // Mark all fields as touched to show validation state
+      Object.keys(this.form.controls).forEach((key) => {
+        this.form.get(key)?.markAsTouched();
+      });
+
+      this.form.updateValueAndValidity();
       untracked(() => this.updateStepValidation());
     });
   }
@@ -263,11 +274,13 @@ export class ParametrosCotaStep {
 
   private updateStepValidation(): void {
     const stepId = this.stepConfig().id;
+    const invalidFields = this.collectInvalidFields();
 
     this.wizardStore.setStepValidation(stepId, {
       isValid: this.form.valid,
       isDirty: this.form.dirty,
       errors: [],
+      invalidFields,
     });
 
     if (this.form.valid && this.form.dirty) {
@@ -275,6 +288,23 @@ export class ParametrosCotaStep {
     } else if (this.form.invalid && this.form.dirty) {
       this.wizardStore.markStepIncomplete(stepId);
     }
+  }
+
+  private collectInvalidFields(): InvalidFieldInfo[] {
+    const invalidFields: InvalidFieldInfo[] = [];
+    Object.keys(this.form.controls).forEach((key) => {
+      const control = this.form.get(key);
+      if (control && control.invalid) {
+        const fieldErrors: string[] = [];
+        if (control.errors) {
+          Object.keys(control.errors).forEach((errorKey) => {
+            fieldErrors.push(errorKey);
+          });
+        }
+        invalidFields.push({ field: key, errors: fieldErrors });
+      }
+    });
+    return invalidFields;
   }
 
   // Quick value setters for cota inicial (RF-03)

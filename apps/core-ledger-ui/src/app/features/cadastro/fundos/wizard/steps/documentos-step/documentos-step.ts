@@ -16,7 +16,7 @@ import {
   NgbDateStruct,
   NgbDateParserFormatter,
 } from '@ng-bootstrap/ng-bootstrap';
-import { WizardStepConfig, WizardStepId } from '../../models/wizard.model';
+import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
 import {
   DocumentoFundo,
   TipoDocumento,
@@ -272,17 +272,36 @@ export class DocumentosStep {
     // This step is always valid (optional step)
     // But we can mark as dirty if documents were added
     const isDirty = this.documentos().length > 0;
+    const invalidFields = this.collectInvalidFields();
 
     this.wizardStore.setStepValidation(stepId, {
       isValid: true,
       isDirty,
       errors,
+      invalidFields,
     });
 
     // Mark step complete if any documents added (but not required)
     if (isDirty) {
       this.wizardStore.markStepComplete(stepId);
     }
+  }
+
+  private collectInvalidFields(): InvalidFieldInfo[] {
+    const invalidFields: InvalidFieldInfo[] = [];
+    Object.keys(this.form.controls).forEach((key) => {
+      const control = this.form.get(key);
+      if (control && control.invalid) {
+        const fieldErrors: string[] = [];
+        if (control.errors) {
+          Object.keys(control.errors).forEach((errorKey) => {
+            fieldErrors.push(errorKey);
+          });
+        }
+        invalidFields.push({ field: key, errors: fieldErrors });
+      }
+    });
+    return invalidFields;
   }
 
   // Helper methods for template

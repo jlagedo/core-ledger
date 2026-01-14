@@ -19,8 +19,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter, startWith } from 'rxjs/operators';
 import { CurrencyMaskDirective } from '../../../../../../directives/currency-mask.directive';
-import { WizardStepConfig, WizardStepId } from '../../models/wizard.model';
+import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
 import { IdentificacaoFormData, TipoFundo } from '../../models/identificacao.model';
 import {
@@ -76,6 +77,9 @@ export class PrazosStep {
   // Track step ID to avoid re-loading
   private lastLoadedStepId: WizardStepId | null = null;
 
+  // Flag to prevent store updates during data restoration
+  private isRestoring = false;
+
   // Main form with FormArray
   form = this.formBuilder.group({
     prazos: this.formBuilder.array<FormGroup>([]),
@@ -109,11 +113,16 @@ export class PrazosStep {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.updateStepValidation());
 
-    this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
-      const stepConfig = untracked(() => this.stepConfig());
-      const dataForStore = this.prepareDataForStore(value as { prazos: Partial<FundoPrazo>[] });
-      this.wizardStore.setStepData(stepConfig.key, dataForStore);
-    });
+    this.form.valueChanges
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        filter(() => !this.isRestoring)
+      )
+      .subscribe((value) => {
+        const stepConfig = untracked(() => this.stepConfig());
+        const dataForStore = this.prepareDataForStore(value as { prazos: Partial<FundoPrazo>[] });
+        this.wizardStore.setStepData(stepConfig.key, dataForStore);
+      });
 
     // Effect: Load data when step changes
     effect(() => {
@@ -132,41 +141,34 @@ export class PrazosStep {
       const tipoFundo = identificacaoData?.tipoFundo ?? null;
       this.tipoFundoSignal.set(tipoFundo);
 
-      // Reset form array
+      // Set restoration flag to prevent store updates
+      this.isRestoring = true;
+
+      // Reset form array - events can emit now (store updates are filtered)
       const prazosArray = this.form.get('prazos') as FormArray;
-      prazosArray.clear({ emitEvent: false });
+      prazosArray.clear();
 
       const stepData = untracked(
         () => this.wizardStore.stepData()[stepConfig.key] as PrazosFormData | undefined
       );
 
       if (stepData?.prazos && stepData.prazos.length > 0) {
-        // Restore saved data
+        // Restore saved data - setupConditionalValidators runs automatically via startWith
         stepData.prazos.forEach((prazo) => {
-          prazosArray.push(this.createPrazoFormGroup(prazo), { emitEvent: false });
-        });
-
-        // Re-apply conditional validators for each restored prazo
-        // (valueChanges subscriptions don't fire with emitEvent: false)
-        prazosArray.controls.forEach((group) => {
-          const permiteProgramado = group.get('permiteResgateProgramado')?.value ?? false;
-          this.applyResgateProgramadoValidators(group as FormGroup, permiteProgramado);
+          prazosArray.push(this.createPrazoFormGroup(prazo));
         });
       } else {
         // RF-01: Add default aplicacao and resgate prazos
-        prazosArray.push(
-          this.createPrazoFormGroup(createPrazoAplicacao(tipoFundo)),
-          { emitEvent: false }
-        );
-        prazosArray.push(
-          this.createPrazoFormGroup(createPrazoResgate(tipoFundo)),
-          { emitEvent: false }
-        );
+        prazosArray.push(this.createPrazoFormGroup(createPrazoAplicacao(tipoFundo)));
+        prazosArray.push(this.createPrazoFormGroup(createPrazoResgate(tipoFundo)));
       }
 
-      // Re-validate the entire FormArray and form
-      prazosArray.updateValueAndValidity({ emitEvent: false });
-      this.form.updateValueAndValidity({ emitEvent: false });
+      // Clear restoration flag
+      this.isRestoring = false;
+
+      // Final validation update
+      prazosArray.updateValueAndValidity();
+      this.form.updateValueAndValidity();
 
       // Mark all fields as touched
       this.markAllAsTouched();
@@ -212,21 +214,25 @@ export class PrazosStep {
   }
 
   /**
-   * Setup conditional validators when fields change
+   * Setup conditional validators when fields change.
+   * Uses startWith to apply validators immediately for initial value.
    */
   private setupConditionalValidators(group: FormGroup): void {
     // RF-07: prazoMaximoProgramacao required when permiteResgateProgramado is true
-    group
-      .get('permiteResgateProgramado')
-      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+    const permiteControl = group.get('permiteResgateProgramado');
+    permiteControl?.valueChanges
+      .pipe(
+        startWith(permiteControl.value),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe((permiteProgramado: boolean) => {
         this.applyResgateProgramadoValidators(group, permiteProgramado);
       });
   }
 
   /**
-   * Apply validators based on permiteResgateProgramado value
-   * Called both from valueChanges subscription and after data restoration
+   * Apply validators based on permiteResgateProgramado value.
+   * Called from valueChanges subscription (including startWith for initial value).
    */
   private applyResgateProgramadoValidators(group: FormGroup, permiteProgramado: boolean): void {
     const prazoMaximoControl = group.get('prazoMaximoProgramacao');
@@ -377,6 +383,7 @@ export class PrazosStep {
     const hasBothRequired = hasAplicacao && hasResgate;
 
     const isValid = this.form.valid && hasBothRequired;
+    const invalidFields = this.collectInvalidFields();
 
     const errors: string[] = [];
     if (!hasAplicacao) errors.push('Prazo de aplicacao e obrigatorio');
@@ -386,6 +393,7 @@ export class PrazosStep {
       isValid,
       isDirty: this.form.dirty || prazosArray.length > 0,
       errors,
+      invalidFields,
     });
 
     if (isValid && (this.form.dirty || prazosArray.length > 0)) {
@@ -393,6 +401,26 @@ export class PrazosStep {
     } else {
       this.wizardStore.markStepIncomplete(stepId);
     }
+  }
+
+  private collectInvalidFields(): InvalidFieldInfo[] {
+    const invalidFields: InvalidFieldInfo[] = [];
+    const prazosArray = this.form.get('prazos') as FormArray;
+    prazosArray.controls.forEach((group, index) => {
+      Object.keys((group as FormGroup).controls).forEach((key) => {
+        const control = group.get(key);
+        if (control && control.invalid) {
+          const fieldErrors: string[] = [];
+          if (control.errors) {
+            Object.keys(control.errors).forEach((errorKey) => {
+              fieldErrors.push(errorKey);
+            });
+          }
+          invalidFields.push({ field: `prazos[${index}].${key}`, errors: fieldErrors });
+        }
+      });
+    });
+    return invalidFields;
   }
 
   // Helper methods for template

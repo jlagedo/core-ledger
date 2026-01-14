@@ -72,7 +72,9 @@
       "Bash(npx nx affected:*)",
       "WebSearch",
       "WebFetch(domain:en.bioerrorlog.work)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(chmod:*)",
+      "Bash(find:*)"
     ]
   },
   "enabledMcpjsonServers": [

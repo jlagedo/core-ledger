@@ -19,7 +19,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { WizardStepConfig, WizardStepId } from '../../models/wizard.model';
+import { filter } from 'rxjs/operators';
+import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
 import { IdentificacaoFormData, TipoFundo } from '../../models/identificacao.model';
 import {
@@ -84,6 +85,9 @@ export class ParametrosFidcStep {
   // Track step ID to avoid re-loading
   private lastLoadedStepId: WizardStepId | null = null;
 
+  // Loading flag to prevent store updates during restoration
+  private isRestoring = false;
+
   // Track current tipo fundo for defaults
   private readonly tipoFundoSignal = signal<TipoFundo | null>(null);
 
@@ -126,15 +130,20 @@ export class ParametrosFidcStep {
     // Setup form subscriptions
     this.form.statusChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.updateStepValidation());
 
-    this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
-      const stepConfig = untracked(() => this.stepConfig());
-      const dataForStore = this.prepareDataForStore(value);
-      this.wizardStore.setStepData(stepConfig.key, dataForStore);
+    this.form.valueChanges
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        filter(() => !this.isRestoring)
+      )
+      .subscribe((value) => {
+        const stepConfig = untracked(() => this.stepConfig());
+        const dataForStore = this.prepareDataForStore(value);
+        this.wizardStore.setStepData(stepConfig.key, dataForStore);
 
-      // Update recebiveis count
-      const recebiveis = this.getSelectedRecebiveis();
-      this.recebiveisSelecionados.set(recebiveis.length);
-    });
+        // Update recebiveis count
+        const recebiveis = this.getSelectedRecebiveis();
+        this.recebiveisSelecionados.set(recebiveis.length);
+      });
 
     // RF-04: Setup conditional validator for coobrigação percentual
     this.form
@@ -174,6 +183,9 @@ export class ParametrosFidcStep {
       }
       this.lastLoadedStepId = stepId;
 
+      // Set restoration flag to prevent store updates
+      this.isRestoring = true;
+
       // Get identificacao data for tipo fundo defaults (RF-02)
       const identificacaoData = untracked(
         () => this.wizardStore.stepData()['identificacao'] as IdentificacaoFormData | undefined
@@ -186,49 +198,48 @@ export class ParametrosFidcStep {
       );
 
       if (stepData && stepData.tipoFidc !== null) {
-        // Restore saved data
-        this.form.patchValue(
-          {
-            tipoFidc: stepData.tipoFidc,
-            prazoMedioCarteira: stepData.prazoMedioCarteira,
-            indiceSubordinacaoAlvo: stepData.indiceSubordinacaoAlvo,
-            provisaoDevedoresDuvidosos: stepData.provisaoDevedoresDuvidosos,
-            limiteConcentracaoCedente: stepData.limiteConcentracaoCedente,
-            limiteConcentracaoSacado: stepData.limiteConcentracaoSacado,
-            possuiCoobrigacao: stepData.possuiCoobrigacao,
-            percentualCoobrigacao: stepData.percentualCoobrigacao,
-            permiteCessaoParcial: stepData.permiteCessaoParcial,
-            ratingMinimo: stepData.ratingMinimo,
-            agenciaRating: stepData.agenciaRating,
-            registradoraRecebiveis: stepData.registradoraRecebiveis,
-            contaRegistradora: stepData.contaRegistradora,
-            integracaoRegistradora: stepData.integracaoRegistradora,
-          },
-          { emitEvent: false }
-        );
+        // Restore saved data - events fire naturally
+        this.form.patchValue({
+          tipoFidc: stepData.tipoFidc,
+          prazoMedioCarteira: stepData.prazoMedioCarteira,
+          indiceSubordinacaoAlvo: stepData.indiceSubordinacaoAlvo,
+          provisaoDevedoresDuvidosos: stepData.provisaoDevedoresDuvidosos,
+          limiteConcentracaoCedente: stepData.limiteConcentracaoCedente,
+          limiteConcentracaoSacado: stepData.limiteConcentracaoSacado,
+          possuiCoobrigacao: stepData.possuiCoobrigacao,
+          percentualCoobrigacao: stepData.percentualCoobrigacao,
+          permiteCessaoParcial: stepData.permiteCessaoParcial,
+          ratingMinimo: stepData.ratingMinimo,
+          agenciaRating: stepData.agenciaRating,
+          registradoraRecebiveis: stepData.registradoraRecebiveis,
+          contaRegistradora: stepData.contaRegistradora,
+          integracaoRegistradora: stepData.integracaoRegistradora,
+        });
 
         // Restore recebiveis selection
         this.setRecebiveisFromArray(stepData.tipoRecebiveis);
+        this.form.markAsDirty();
       } else {
         // RF-02: Set default tipo based on tipo_fundo
         const isFidcNp = tipoFundo === TipoFundo.FIDC_NP;
         const defaults = createDefaultFidcParametros(isFidcNp);
-        this.form.patchValue(
-          {
-            tipoFidc: defaults.tipoFidc,
-            limiteConcentracaoCedente: defaults.limiteConcentracaoCedente,
-            limiteConcentracaoSacado: defaults.limiteConcentracaoSacado,
-            possuiCoobrigacao: defaults.possuiCoobrigacao,
-            permiteCessaoParcial: defaults.permiteCessaoParcial,
-            integracaoRegistradora: defaults.integracaoRegistradora,
-          },
-          { emitEvent: false }
-        );
+        this.form.patchValue({
+          tipoFidc: defaults.tipoFidc,
+          limiteConcentracaoCedente: defaults.limiteConcentracaoCedente,
+          limiteConcentracaoSacado: defaults.limiteConcentracaoSacado,
+          possuiCoobrigacao: defaults.possuiCoobrigacao,
+          permiteCessaoParcial: defaults.permiteCessaoParcial,
+          integracaoRegistradora: defaults.integracaoRegistradora,
+        });
       }
+
+      // Clear restoration flag
+      this.isRestoring = false;
 
       // Mark all fields as touched
       this.markAllAsTouched();
 
+      this.form.updateValueAndValidity();
       untracked(() => this.updateStepValidation());
     });
   }
@@ -328,10 +339,13 @@ export class ParametrosFidcStep {
       errors.push('Agencia de rating e obrigatoria quando rating minimo e informado');
     }
 
+    const invalidFields = this.collectInvalidFields();
+
     this.wizardStore.setStepValidation(stepId, {
       isValid,
       isDirty: this.form.dirty,
       errors,
+      invalidFields,
     });
 
     if (isValid && this.form.dirty) {
@@ -339,6 +353,23 @@ export class ParametrosFidcStep {
     } else {
       this.wizardStore.markStepIncomplete(stepId);
     }
+  }
+
+  private collectInvalidFields(): InvalidFieldInfo[] {
+    const invalidFields: InvalidFieldInfo[] = [];
+    Object.keys(this.form.controls).forEach((key) => {
+      const control = this.form.get(key);
+      if (control && control.invalid && key !== 'tipoRecebiveis') {
+        const fieldErrors: string[] = [];
+        if (control.errors) {
+          Object.keys(control.errors).forEach((errorKey) => {
+            fieldErrors.push(errorKey);
+          });
+        }
+        invalidFields.push({ field: key, errors: fieldErrors });
+      }
+    });
+    return invalidFields;
   }
 
   // Helper methods for template

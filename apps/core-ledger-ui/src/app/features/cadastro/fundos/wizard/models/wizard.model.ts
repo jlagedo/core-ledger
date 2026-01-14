@@ -25,12 +25,21 @@ export interface WizardStepConfig {
 }
 
 /**
+ * Info de campo inválido para debug
+ */
+export interface InvalidFieldInfo {
+  field: string;
+  errors: string[];
+}
+
+/**
  * Estado de validação de um passo
  */
 export interface StepValidation {
   isValid: boolean;
   isDirty: boolean;
   errors: string[];
+  invalidFields?: InvalidFieldInfo[];
 }
 
 /**

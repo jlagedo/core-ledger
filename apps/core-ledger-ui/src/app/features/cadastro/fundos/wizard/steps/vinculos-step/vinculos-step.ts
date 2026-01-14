@@ -20,9 +20,9 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged, filter, switchMap, catchError, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, startWith, switchMap, catchError, of } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { WizardStepConfig, WizardStepId } from '../../models/wizard.model';
+import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
 import { IdentificacaoFormData, TipoFundo } from '../../models/identificacao.model';
 import {
@@ -91,6 +91,9 @@ export class VinculosStep {
   // Track step ID to avoid re-loading
   private lastLoadedStepId: WizardStepId | null = null;
 
+  // Flag to prevent store updates during data restoration
+  private isRestoring = false;
+
   // Enum options for template
   readonly tipoVinculoOptions = TIPO_VINCULO_OPTIONS;
   readonly vinculosObrigatorios = VINCULOS_OBRIGATORIOS;
@@ -157,11 +160,16 @@ export class VinculosStep {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.updateStepValidation());
 
-    this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
-      const stepConfig = untracked(() => this.stepConfig());
-      const dataForStore = this.prepareDataForStore(value);
-      this.wizardStore.setStepData(stepConfig.key, dataForStore);
-    });
+    this.form.valueChanges
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        filter(() => !this.isRestoring)
+      )
+      .subscribe((value) => {
+        const stepConfig = untracked(() => this.stepConfig());
+        const dataForStore = this.prepareDataForStore(value);
+        this.wizardStore.setStepData(stepConfig.key, dataForStore);
+      });
 
     // Effect: Load data when step changes
     effect(() => {
@@ -173,24 +181,21 @@ export class VinculosStep {
       }
       this.lastLoadedStepId = stepId;
 
-      // Reset form array
+      // Set restoration flag to prevent store updates
+      this.isRestoring = true;
+
+      // Reset form array - events can emit now (store updates are filtered)
       const vinculosArray = this.form.get('vinculos') as FormArray;
-      vinculosArray.clear({ emitEvent: false });
+      vinculosArray.clear();
 
       const stepData = untracked(
         () => this.wizardStore.stepData()[stepConfig.key] as VinculosFormData | undefined
       );
 
       if (stepData && stepData.vinculos && stepData.vinculos.length > 0) {
-        // Restore saved data
+        // Restore saved data - setupDateValidation runs automatically via startWith
         stepData.vinculos.forEach((vinculo) => {
-          vinculosArray.push(this.createVinculoFormGroup(vinculo), { emitEvent: false });
-        });
-
-        // Re-apply date validations for each restored vinculo
-        // (valueChanges subscriptions don't fire with emitEvent: false)
-        vinculosArray.controls.forEach((group) => {
-          this.revalidateDates(group as FormGroup);
+          vinculosArray.push(this.createVinculoFormGroup(vinculo));
         });
       } else {
         // Initialize with required vinculos (RF-01)
@@ -200,15 +205,17 @@ export class VinculosStep {
               ...VINCULO_DEFAULT,
               tipoVinculo: tipo,
               dataInicio: this.getTodayISODate(),
-            } as VinculoFormData),
-            { emitEvent: false }
+            } as VinculoFormData)
           );
         });
       }
 
-      // Re-validate the entire FormArray and form
-      vinculosArray.updateValueAndValidity({ emitEvent: false });
-      this.form.updateValueAndValidity({ emitEvent: false });
+      // Clear restoration flag
+      this.isRestoring = false;
+
+      // Final validation update
+      vinculosArray.updateValueAndValidity();
+      this.form.updateValueAndValidity();
 
       // Mark all fields as touched
       this.markAllAsTouched();
@@ -283,21 +290,34 @@ export class VinculosStep {
   }
 
   /**
-   * Setup cross-field date validation (RF-07)
+   * Setup cross-field date validation (RF-07).
+   * Uses startWith to apply validation immediately for initial values.
    */
   private setupDateValidation(group: FormGroup): void {
-    group.get('dataFim')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      this.validateDataFim(group);
-    });
+    const dataFimControl = group.get('dataFim');
+    dataFimControl?.valueChanges
+      .pipe(
+        startWith(dataFimControl.value),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => {
+        this.validateDataFim(group);
+      });
 
-    group.get('dataInicio')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      this.validateDataInicio(group);
-    });
+    const dataInicioControl = group.get('dataInicio');
+    dataInicioControl?.valueChanges
+      .pipe(
+        startWith(dataInicioControl.value),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => {
+        this.validateDataInicio(group);
+      });
   }
 
   /**
-   * Validate dataFim is not before dataInicio
-   * Called both from valueChanges subscription and after data restoration
+   * Validate dataFim is not before dataInicio.
+   * Called from valueChanges subscription (including startWith for initial value).
    */
   private validateDataFim(group: FormGroup): void {
     const dataInicio = group.get('dataInicio')?.value;
@@ -315,8 +335,8 @@ export class VinculosStep {
   }
 
   /**
-   * Validate dataInicio is not in the future
-   * Called both from valueChanges subscription and after data restoration
+   * Validate dataInicio is not in the future.
+   * Called from valueChanges subscription (including startWith for initial value).
    */
   private validateDataInicio(group: FormGroup): void {
     const dataInicio = group.get('dataInicio')?.value;
@@ -331,15 +351,6 @@ export class VinculosStep {
       delete errors['dataInicioFutura'];
       dataInicioControl.setErrors(Object.keys(errors).length > 0 ? errors : null);
     }
-  }
-
-  /**
-   * Re-apply all date validations for a vinculo
-   * Called after data restoration
-   */
-  private revalidateDates(group: FormGroup): void {
-    this.validateDataInicio(group);
-    this.validateDataFim(group);
   }
 
   /**
@@ -724,10 +735,13 @@ export class VinculosStep {
       });
     }
 
+    const invalidFields = this.collectInvalidFields();
+
     this.wizardStore.setStepValidation(stepId, {
       isValid,
       isDirty: this.form.dirty || vinculosArray.length > 0,
       errors,
+      invalidFields,
     });
 
     if (isValid && (this.form.dirty || vinculosArray.length > 0)) {
@@ -735,5 +749,25 @@ export class VinculosStep {
     } else {
       this.wizardStore.markStepIncomplete(stepId);
     }
+  }
+
+  private collectInvalidFields(): InvalidFieldInfo[] {
+    const invalidFields: InvalidFieldInfo[] = [];
+    const vinculosArray = this.form.get('vinculos') as FormArray;
+    vinculosArray.controls.forEach((group, index) => {
+      Object.keys((group as FormGroup).controls).forEach((key) => {
+        const control = group.get(key);
+        if (control && control.invalid && key !== 'searchTerm') {
+          const fieldErrors: string[] = [];
+          if (control.errors) {
+            Object.keys(control.errors).forEach((errorKey) => {
+              fieldErrors.push(errorKey);
+            });
+          }
+          invalidFields.push({ field: `vinculos[${index}].${key}`, errors: fieldErrors });
+        }
+      });
+    });
+    return invalidFields;
   }
 }

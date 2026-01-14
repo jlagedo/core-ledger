@@ -17,7 +17,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { WizardStepConfig, WizardStepId } from '../../models/wizard.model';
+import { filter, startWith } from 'rxjs/operators';
+import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
 import { IdentificacaoFormData } from '../../models/identificacao.model';
 import {
@@ -85,6 +86,9 @@ export class CaracteristicasStep {
   // Track step ID to avoid re-loading
   private lastLoadedStepId: WizardStepId | null = null;
 
+  // Flag to prevent store updates during data restoration
+  private isRestoring = false;
+
   // Computed signals for conditional fields
   readonly showDataEncerramento = computed(() => {
     return this.form.get('prazo')?.value === Prazo.DETERMINADO;
@@ -111,16 +115,24 @@ export class CaracteristicasStep {
   });
 
   constructor() {
-    // Setup form subscriptions (outside of effect)
+    // Setup form subscriptions
     this.form.statusChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.updateStepValidation());
 
-    this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
-      const stepConfig = untracked(() => this.stepConfig());
-      const dataForStore = this.prepareDataForStore(value);
-      this.wizardStore.setStepData(stepConfig.key, dataForStore);
-    });
+    this.form.valueChanges
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        filter(() => !this.isRestoring)
+      )
+      .subscribe((value) => {
+        const stepConfig = untracked(() => this.stepConfig());
+        const dataForStore = this.prepareDataForStore(value);
+        this.wizardStore.setStepData(stepConfig.key, dataForStore);
+      });
+
+    // Setup conditional validators using valueChanges with startWith
+    this.setupConditionalValidators();
 
     // Effect: Apply rules based on tipo_fundo and classificacao from previous steps
     effect(
@@ -221,42 +233,6 @@ export class CaracteristicasStep {
       { allowSignalWrites: true }
     );
 
-    // Effect: Handle conditional fields (prazo)
-    effect(
-      () => {
-        const prazo = this.form.get('prazo')?.value ?? null;
-        this.applyPrazoValidators(prazo);
-      },
-      { allowSignalWrites: true }
-    );
-
-    // Effect: Handle conditional fields (alavancagem)
-    effect(
-      () => {
-        const permiteAlavancagem = this.form.get('permiteAlavancagem')?.value ?? false;
-        this.applyAlavancagemValidators(permiteAlavancagem);
-      },
-      { allowSignalWrites: true }
-    );
-
-    // Effect: Handle exclusivo => reservado
-    effect(
-      () => {
-        const exclusivo = this.form.get('exclusivo')?.value ?? false;
-        this.applyExclusivoReservadoLogic(exclusivo);
-      },
-      { allowSignalWrites: true }
-    );
-
-    // Effect: Show cripto info
-    effect(
-      () => {
-        const aceitaCripto = this.form.get('aceitaCripto')?.value;
-        this.showCriptoInfo.set(aceitaCripto === true);
-      },
-      { allowSignalWrites: true }
-    );
-
     // Effect: Load data when step changes
     effect(() => {
       const stepConfig = this.stepConfig();
@@ -267,20 +243,20 @@ export class CaracteristicasStep {
       }
       this.lastLoadedStepId = stepId;
 
-      this.form.reset(
-        {
-          condominio: null,
-          prazo: null,
-          dataEncerramento: null,
-          exclusivo: false,
-          reservado: false,
-          permiteAlavancagem: false,
-          limiteAlavancagem: null,
-          aceitaCripto: false,
-          percentualExterior: null,
-        },
-        { emitEvent: false }
-      );
+      // Set restoration flag to prevent store updates
+      this.isRestoring = true;
+
+      this.form.reset({
+        condominio: null,
+        prazo: null,
+        dataEncerramento: null,
+        exclusivo: false,
+        reservado: false,
+        permiteAlavancagem: false,
+        limiteAlavancagem: null,
+        aceitaCripto: false,
+        percentualExterior: null,
+      });
 
       const stepData = untracked(
         () =>
@@ -291,93 +267,97 @@ export class CaracteristicasStep {
 
       if (stepData) {
         const formValue = this.prepareDataForForm(stepData);
-        this.form.patchValue(formValue, { emitEvent: false });
-
-        // Re-apply conditional validators after data restoration
-        // (effects read form values imperatively, so they won't re-run automatically)
-        this.reapplyConditionalValidators();
-
-        // Re-validate the entire form
-        this.form.updateValueAndValidity({ emitEvent: false });
-
-        // Mark all fields as touched to show validation state
-        Object.keys(this.form.controls).forEach((key) => {
-          this.form.get(key)?.markAsTouched();
-        });
-
-        // Mark form as dirty since we have data
+        // Events fire, validators run automatically via startWith subscriptions
+        this.form.patchValue(formValue);
         this.form.markAsDirty();
       }
 
+      // Clear restoration flag
+      this.isRestoring = false;
+
+      // Mark all fields as touched to show validation state
+      Object.keys(this.form.controls).forEach((key) => {
+        this.form.get(key)?.markAsTouched();
+      });
+
+      this.form.updateValueAndValidity();
       untracked(() => this.updateStepValidation());
     });
   }
 
   /**
-   * Apply validators based on prazo value
-   * Called both from effect and after data restoration
+   * Setup conditional validators using valueChanges with startWith.
+   * This ensures validators are applied immediately for initial values and on changes.
    */
-  private applyPrazoValidators(prazo: Prazo | null): void {
-    const dataEncerramentoControl = this.form.get('dataEncerramento');
+  private setupConditionalValidators(): void {
+    // Handle prazo -> dataEncerramento validation
+    const prazoControl = this.form.get('prazo');
+    prazoControl?.valueChanges
+      .pipe(
+        startWith(prazoControl.value),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((prazo: Prazo | null) => {
+        const dataEncerramentoControl = this.form.get('dataEncerramento');
 
-    if (prazo === Prazo.DETERMINADO) {
-      // Make dataEncerramento required
-      dataEncerramentoControl?.setValidators([Validators.required, dataFuturaValidator]);
-    } else {
-      // Clear validators and value
-      dataEncerramentoControl?.clearValidators();
-      dataEncerramentoControl?.setValue(null, { emitEvent: false });
-    }
+        if (prazo === Prazo.DETERMINADO) {
+          dataEncerramentoControl?.setValidators([Validators.required, dataFuturaValidator]);
+        } else {
+          dataEncerramentoControl?.clearValidators();
+          dataEncerramentoControl?.setValue(null, { emitEvent: false });
+        }
 
-    dataEncerramentoControl?.updateValueAndValidity({ emitEvent: false });
-  }
+        dataEncerramentoControl?.updateValueAndValidity({ emitEvent: false });
+      });
 
-  /**
-   * Apply validators based on permiteAlavancagem value
-   * Called both from effect and after data restoration
-   */
-  private applyAlavancagemValidators(permiteAlavancagem: boolean): void {
-    const limiteAlavancagemControl = this.form.get('limiteAlavancagem');
+    // Handle permiteAlavancagem -> limiteAlavancagem validation
+    const alavancagemControl = this.form.get('permiteAlavancagem');
+    alavancagemControl?.valueChanges
+      .pipe(
+        startWith(alavancagemControl.value),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((permiteAlavancagem) => {
+        const limiteAlavancagemControl = this.form.get('limiteAlavancagem');
 
-    if (permiteAlavancagem) {
-      // Make limiteAlavancagem required with range
-      limiteAlavancagemControl?.setValidators([
-        Validators.required,
-        Validators.min(1.01),
-        Validators.max(10.0),
-      ]);
-    } else {
-      // Clear validators and value
-      limiteAlavancagemControl?.clearValidators();
-      limiteAlavancagemControl?.setValue(null, { emitEvent: false });
-    }
+        if (permiteAlavancagem) {
+          limiteAlavancagemControl?.setValidators([
+            Validators.required,
+            Validators.min(1.01),
+            Validators.max(10.0),
+          ]);
+        } else {
+          limiteAlavancagemControl?.clearValidators();
+          limiteAlavancagemControl?.setValue(null, { emitEvent: false });
+        }
 
-    limiteAlavancagemControl?.updateValueAndValidity({ emitEvent: false });
-  }
+        limiteAlavancagemControl?.updateValueAndValidity({ emitEvent: false });
+      });
 
-  /**
-   * Apply exclusivo => reservado logic
-   * Called both from effect and after data restoration
-   */
-  private applyExclusivoReservadoLogic(exclusivo: boolean): void {
-    const reservadoControl = this.form.get('reservado');
+    // Handle exclusivo -> reservado logic
+    const exclusivoControl = this.form.get('exclusivo');
+    exclusivoControl?.valueChanges
+      .pipe(
+        startWith(exclusivoControl.value),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((exclusivo) => {
+        const reservadoControl = this.form.get('reservado');
+        if (exclusivo) {
+          reservadoControl?.setValue(true, { emitEvent: false });
+        }
+      });
 
-    if (exclusivo) {
-      reservadoControl?.setValue(true, { emitEvent: false });
-    }
-  }
-
-  /**
-   * Re-apply all conditional validators after data restoration
-   */
-  private reapplyConditionalValidators(): void {
-    const prazo = this.form.get('prazo')?.value ?? null;
-    const permiteAlavancagem = this.form.get('permiteAlavancagem')?.value ?? false;
-    const exclusivo = this.form.get('exclusivo')?.value ?? false;
-
-    this.applyPrazoValidators(prazo);
-    this.applyAlavancagemValidators(permiteAlavancagem);
-    this.applyExclusivoReservadoLogic(exclusivo);
+    // Handle aceitaCripto -> showCriptoInfo
+    const criptoControl = this.form.get('aceitaCripto');
+    criptoControl?.valueChanges
+      .pipe(
+        startWith(criptoControl.value),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((aceitaCripto) => {
+        this.showCriptoInfo.set(aceitaCripto === true);
+      });
   }
 
   private prepareDataForStore(formValue: any): CaracteristicasFormData {
@@ -410,11 +390,13 @@ export class CaracteristicasStep {
 
   private updateStepValidation(): void {
     const stepId = this.stepConfig().id;
+    const invalidFields = this.collectInvalidFields();
 
     this.wizardStore.setStepValidation(stepId, {
       isValid: this.form.valid,
       isDirty: this.form.dirty,
       errors: [],
+      invalidFields,
     });
 
     if (this.form.valid && this.form.dirty) {
@@ -422,6 +404,23 @@ export class CaracteristicasStep {
     } else if (this.form.invalid && this.form.dirty) {
       this.wizardStore.markStepIncomplete(stepId);
     }
+  }
+
+  private collectInvalidFields(): InvalidFieldInfo[] {
+    const invalidFields: InvalidFieldInfo[] = [];
+    Object.keys(this.form.controls).forEach((key) => {
+      const control = this.form.get(key);
+      if (control && control.invalid) {
+        const fieldErrors: string[] = [];
+        if (control.errors) {
+          Object.keys(control.errors).forEach((errorKey) => {
+            fieldErrors.push(errorKey);
+          });
+        }
+        invalidFields.push({ field: key, errors: fieldErrors });
+      }
+    });
+    return invalidFields;
   }
 
   // Helper methods for template

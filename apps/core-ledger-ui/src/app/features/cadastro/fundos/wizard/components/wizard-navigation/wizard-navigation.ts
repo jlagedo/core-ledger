@@ -1,7 +1,10 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output, isDevMode } from '@angular/core';
+import { KeyValuePipe } from '@angular/common';
+import { StepValidation, WizardStepId } from '../../models/wizard.model';
 
 @Component({
   selector: 'app-wizard-navigation',
+  imports: [KeyValuePipe],
   templateUrl: './wizard-navigation.html',
   styleUrl: './wizard-navigation.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -14,6 +17,13 @@ export class WizardNavigation {
   isSubmitting = input.required<boolean>();
   isFirstStep = input.required<boolean>();
   isLastStep = input.required<boolean>();
+
+  // Debug inputs
+  currentStep = input<WizardStepId>();
+  currentStepValidation = input<StepValidation>();
+  allStepValidation = input<Record<WizardStepId, StepValidation>>();
+
+  readonly isDevMode = isDevMode();
 
   // Outputs
   previous = output<void>();
