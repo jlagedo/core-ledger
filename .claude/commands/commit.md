@@ -12,7 +12,7 @@ You are helping the user commit their changes quickly while ensuring code qualit
 
 The user wants to commit with this message: **$ARGUMENTS**
 
-If no message was provided, ask the user for a commit message before proceeding.
+If no message was provided, you MUST auto-generate an appropriate commit message based on the changes. Analyze the diff and create a concise, descriptive message following conventional commit style. Do NOT ask the user for a message.
 
 ## Current State
 
