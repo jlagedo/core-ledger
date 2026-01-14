@@ -13,6 +13,7 @@ import { TaxasStep } from './steps/taxas-step/taxas-step';
 import { PrazosStep } from './steps/prazos-step/prazos-step';
 import { ParametrosFidcStep } from './steps/parametros-fidc-step/parametros-fidc-step';
 import { ClassesStep } from './steps/classes-step/classes-step';
+import { VinculosStep } from './steps/vinculos-step/vinculos-step';
 import { PageHeader } from '../../../../layout/page-header/page-header';
 import { ToastService } from '../../../../services/toast-service';
 
@@ -31,6 +32,7 @@ import { ToastService } from '../../../../services/toast-service';
     PrazosStep,
     ParametrosFidcStep,
     ClassesStep,
+    VinculosStep,
   ],
   providers: [WizardStore], // Store com escopo do componente
   templateUrl: './wizard-container.html',

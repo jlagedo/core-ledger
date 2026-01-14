@@ -1,73 +1,11 @@
 // ============================================================
 // CLASSIFICACAO STEP — Fund Classification Form
 // Terminal-style form with Bloomberg aesthetic
-// Reuses styles from identificacao-step with additions for info messages
+// Uses shared wizard styles from _components.scss
 // ============================================================
 
-// Reuse all base step form styles from identificacao-step
-// Instead of @import, we extend the .identificacao-step class
 .classificacao-step {
   animation: step-enter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes step-enter {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// ============================================================
-// ADDITIONAL STYLES FOR CLASSIFICACAO STEP
-// ============================================================
-
-// Info message style (for ANBIMA not applicable messages)
-.step-field__info {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.625rem;
-  color: var(--accent-blue, #0068ff);
-  font-weight: 600;
-  animation: feedback-enter 0.2s ease;
-
-  i {
-    font-size: 0.6875rem;
-  }
-}
-
-@keyframes feedback-enter {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// Disabled select styling
-.step-field__input.is-disabled,
-.step-field__input:disabled {
-  background-color: var(--bs-secondary-bg);
-  color: var(--terminal-text-muted);
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-// ============================================================
-// LIGHT MODE OVERRIDES
-// ============================================================
-
-[data-bs-theme='light'] {
-  .step-field__info {
-    color: #0369a1;
-  }
 }
 
 // ============================================================
@@ -75,8 +13,7 @@
 // ============================================================
 
 @media (prefers-reduced-motion: reduce) {
-  .classificacao-step,
-  .step-field__info {
+  .classificacao-step {
     animation: none;
   }
 }

@@ -4,8 +4,6 @@
 // ============================================================
 
 // --- Design Tokens ---
-$stepper-bg: rgba(0, 0, 0, 0.6);
-$stepper-border: rgba(255, 160, 40, 0.15);
 $scanline-opacity: 0.03;
 $glow-spread: 12px;
 
@@ -39,7 +37,7 @@ $glow-spread: 12px;
     content: '';
     position: absolute;
     inset: 0;
-    border: 1px solid rgba(255, 160, 40, 0.08);
+    border: 1px solid var(--amber-8);
     border-radius: 2px;
     pointer-events: none;
   }
@@ -54,11 +52,7 @@ $glow-spread: 12px;
   justify-content: space-between;
   align-items: center;
   padding: 0.625rem 1rem;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 160, 40, 0.08) 0%,
-    transparent 100%
-  );
+  background: linear-gradient(180deg, var(--amber-8) 0%, transparent 100%);
   border-bottom: 1px solid var(--table-border-color);
   gap: 1rem;
 }
@@ -77,7 +71,7 @@ $glow-spread: 12px;
   &::before {
     content: '▸';
     font-size: 0.5rem;
-    color: var(--accent-amber, #FFA028);
+    color: var(--accent-amber);
     animation: prompt-blink 1.2s step-end infinite;
   }
 }
@@ -93,17 +87,17 @@ $glow-spread: 12px;
 }
 
 .wizard-stepper__progress-bar {
-  color: var(--accent-amber, #FFA028);
-  text-shadow: 0 0 8px rgba(255, 160, 40, 0.6);
+  color: var(--accent-amber);
+  text-shadow: 0 0 8px var(--amber-60);
 }
 
 .wizard-stepper__progress-percent {
   min-width: 2.5rem;
   padding: 0.125rem 0.375rem;
-  background: rgba(255, 160, 40, 0.12);
-  border: 1px solid rgba(255, 160, 40, 0.25);
+  background: var(--amber-12);
+  border: 1px solid var(--amber-25);
   border-radius: 2px;
-  color: var(--accent-amber, #FFA028);
+  color: var(--accent-amber);
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
@@ -165,8 +159,8 @@ $glow-spread: 12px;
   cursor: pointer;
 
   &:hover {
-    background: rgba(255, 160, 40, 0.06);
-    border-color: rgba(255, 160, 40, 0.2);
+    background: var(--amber-6);
+    border-color: var(--amber-20);
 
     .wizard-step__label {
       color: var(--bs-emphasis-color);
@@ -175,8 +169,8 @@ $glow-spread: 12px;
 
   &:focus-visible {
     outline: none;
-    border-color: var(--accent-amber, #FFA028);
-    box-shadow: 0 0 0 2px rgba(255, 160, 40, 0.25);
+    border-color: var(--accent-amber);
+    box-shadow: 0 0 0 2px var(--amber-25);
   }
 
   &:active {
@@ -226,11 +220,9 @@ $glow-spread: 12px;
   gap: 0.375rem;
   padding: 0.5rem 0.75rem;
   background: var(--bs-body-bg);
-  border: 1px solid var(--accent-amber, #FFA028);
+  border: 1px solid var(--accent-amber);
   border-radius: 2px;
-  box-shadow:
-    0 0 20px rgba(255, 160, 40, 0.2),
-    0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 20px var(--amber-20), 0 8px 24px rgba(0, 0, 0, 0.4);
   white-space: nowrap;
   z-index: 100;
   pointer-events: none;
@@ -246,7 +238,7 @@ $glow-spread: 12px;
     left: 50%;
     transform: translateX(-50%);
     border: 5px solid transparent;
-    border-top-color: var(--accent-amber, #FFA028);
+    border-top-color: var(--accent-amber);
   }
 }
 
@@ -254,9 +246,9 @@ $glow-spread: 12px;
   font-size: 0.5625rem;
   font-weight: 700;
   padding: 0.125rem 0.25rem;
-  background: rgba(255, 160, 40, 0.15);
+  background: var(--amber-15);
   border-radius: 2px;
-  color: var(--accent-amber, #FFA028);
+  color: var(--accent-amber);
 }
 
 .wizard-step__tooltip-name {
@@ -279,36 +271,30 @@ $glow-spread: 12px;
 
 // --- COMPLETED: Phosphor Green Glow ---
 .wizard-step--completed {
-  background: rgba(74, 246, 195, 0.04);
-  border-color: rgba(74, 246, 195, 0.2);
+  background: var(--teal-4);
+  border-color: var(--teal-20);
 
   .wizard-step__label {
-    color: var(--accent-teal, #4af6c3);
-    text-shadow: 0 0 $glow-spread rgba(74, 246, 195, 0.5);
+    color: var(--accent-teal);
+    text-shadow: 0 0 $glow-spread var(--teal-30);
   }
 
   .wizard-step__status {
-    color: var(--accent-teal, #4af6c3);
+    color: var(--accent-teal);
     opacity: 1;
   }
 
   &.wizard-step--clickable:hover {
-    background: rgba(74, 246, 195, 0.08);
-    border-color: rgba(74, 246, 195, 0.35);
+    background: var(--teal-8);
+    border-color: var(--teal-35);
   }
 }
 
 // --- CURRENT: Amber Pulse with Scan Effect ---
 .wizard-step--current {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 160, 40, 0.12) 0%,
-    rgba(255, 160, 40, 0.06) 100%
-  );
-  border-color: var(--accent-amber, #FFA028);
-  box-shadow:
-    0 0 16px rgba(255, 160, 40, 0.15),
-    inset 0 0 20px rgba(255, 160, 40, 0.05);
+  background: linear-gradient(135deg, var(--amber-12) 0%, var(--amber-6) 100%);
+  border-color: var(--accent-amber);
+  box-shadow: 0 0 16px var(--amber-15), inset 0 0 20px var(--amber-5);
 
   // Active scan line
   &::after {
@@ -318,12 +304,7 @@ $glow-spread: 12px;
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      var(--accent-amber, #FFA028) 50%,
-      transparent 100%
-    );
+    background: linear-gradient(90deg, transparent 0%, var(--accent-amber) 50%, transparent 100%);
     animation: scan-horizontal 2s ease-in-out infinite;
   }
 
@@ -335,18 +316,18 @@ $glow-spread: 12px;
     transform: translateY(-50%);
     font-size: 0.5rem;
     font-weight: 700;
-    color: var(--accent-amber, #FFA028);
+    color: var(--accent-amber);
     animation: arrow-pulse 1s ease-in-out infinite;
   }
 
   .wizard-step__label {
-    color: var(--accent-amber, #FFA028);
-    text-shadow: 0 0 $glow-spread rgba(255, 160, 40, 0.6);
+    color: var(--accent-amber);
+    text-shadow: 0 0 $glow-spread var(--amber-60);
     animation: text-glow 2s ease-in-out infinite;
   }
 
   .wizard-step__status {
-    color: var(--accent-amber, #FFA028);
+    color: var(--accent-amber);
     opacity: 1;
     animation: status-blink 1.5s step-end infinite;
   }
@@ -354,22 +335,22 @@ $glow-spread: 12px;
 
 // --- ERROR: Red Alert State ---
 .wizard-step--error {
-  background: rgba(255, 67, 61, 0.06);
-  border-color: rgba(255, 67, 61, 0.4);
+  background: var(--coral-6);
+  border-color: var(--coral-40);
 
   .wizard-step__label {
-    color: var(--accent-coral, #ff433d);
+    color: var(--accent-coral);
   }
 
   .wizard-step__status {
-    color: var(--accent-coral, #ff433d);
+    color: var(--accent-coral);
     opacity: 1;
     animation: error-flash 0.6s ease-in-out;
   }
 
   &.wizard-step--clickable:hover {
-    background: rgba(255, 67, 61, 0.1);
-    border-color: rgba(255, 67, 61, 0.5);
+    background: var(--coral-10);
+    border-color: var(--coral-50);
   }
 }
 
@@ -387,7 +368,7 @@ $glow-spread: 12px;
 
 .wizard-stepper__current-step {
   padding: 0.5rem 1rem;
-  background: rgba(255, 160, 40, 0.04);
+  background: var(--amber-4);
   border-top: 1px solid var(--table-border-color);
   font-size: 0.625rem;
   font-weight: 600;
@@ -411,13 +392,11 @@ $glow-spread: 12px;
 
 @keyframes text-glow {
   0%, 100% {
-    text-shadow: 0 0 $glow-spread rgba(255, 160, 40, 0.5);
+    text-shadow: 0 0 $glow-spread var(--amber-50);
     filter: brightness(1);
   }
   50% {
-    text-shadow:
-      0 0 $glow-spread rgba(255, 160, 40, 0.7),
-      0 0 20px rgba(255, 160, 40, 0.3);
+    text-shadow: 0 0 $glow-spread var(--amber-70), 0 0 20px var(--amber-30);
     filter: brightness(1.1);
   }
 }
@@ -465,122 +444,109 @@ $glow-spread: 12px;
 [data-bs-theme="light"] {
   .wizard-stepper {
     background: var(--surface-light-muted);
-    border-color: rgba(180, 83, 9, 0.15);
+    border-color: var(--amber-15);
 
     &::before {
       background: repeating-linear-gradient(
         0deg,
         transparent,
         transparent 2px,
-        rgba(180, 83, 9, 0.02) 2px,
-        rgba(180, 83, 9, 0.02) 4px
+        var(--amber-2) 2px,
+        var(--amber-2) 4px
       );
     }
   }
 
   .wizard-stepper__header {
-    background: linear-gradient(
-      180deg,
-      rgba(180, 83, 9, 0.06) 0%,
-      transparent 100%
-    );
-    border-bottom-color: rgba(180, 83, 9, 0.12);
+    background: linear-gradient(180deg, var(--amber-6) 0%, transparent 100%);
+    border-bottom-color: var(--amber-12);
   }
 
   .wizard-stepper__title {
     color: var(--daylight-text);
 
     &::before {
-      color: var(--daylight-amber, #B45309);
+      color: var(--daylight-amber);
     }
   }
 
   .wizard-stepper__progress-bar {
-    color: var(--daylight-amber, #B45309);
+    color: var(--daylight-amber);
     text-shadow: none;
   }
 
   .wizard-stepper__progress-percent {
-    background: rgba(180, 83, 9, 0.08);
-    border-color: rgba(180, 83, 9, 0.2);
-    color: var(--daylight-amber, #B45309);
+    background: var(--amber-8);
+    border-color: var(--amber-20);
+    color: var(--daylight-amber);
   }
 
   .wizard-step {
     background: rgba(255, 255, 255, 0.5);
-    border-color: rgba(180, 83, 9, 0.08);
+    border-color: var(--amber-8);
   }
 
   .wizard-step--clickable:hover {
-    background: rgba(180, 83, 9, 0.05);
-    border-color: rgba(180, 83, 9, 0.2);
+    background: var(--amber-5);
+    border-color: var(--amber-20);
   }
 
   .wizard-step--completed {
-    background: rgba(5, 150, 105, 0.06);
-    border-color: rgba(5, 150, 105, 0.25);
+    background: var(--teal-6);
+    border-color: var(--teal-25);
 
     .wizard-step__label,
     .wizard-step__status {
-      color: #059669;
+      color: var(--daylight-teal);
       text-shadow: none;
     }
   }
 
   .wizard-step--current {
-    background: linear-gradient(
-      135deg,
-      rgba(180, 83, 9, 0.1) 0%,
-      rgba(180, 83, 9, 0.04) 100%
-    );
-    border-color: var(--daylight-amber, #B45309);
-    box-shadow: 0 0 12px rgba(180, 83, 9, 0.1);
+    background: linear-gradient(135deg, var(--amber-10) 0%, var(--amber-4) 100%);
+    border-color: var(--daylight-amber);
+    box-shadow: 0 0 12px var(--amber-10);
 
     .wizard-step__arrow,
     .wizard-step__label,
     .wizard-step__status {
-      color: var(--daylight-amber, #B45309);
+      color: var(--daylight-amber);
       text-shadow: none;
     }
 
     &::after {
-      background: linear-gradient(
-        90deg,
-        transparent 0%,
-        var(--daylight-amber, #B45309) 50%,
-        transparent 100%
-      );
+      background: linear-gradient(90deg, transparent 0%, var(--daylight-amber) 50%, transparent 100%);
     }
   }
 
   .wizard-step--error {
-    background: rgba(220, 38, 38, 0.05);
-    border-color: rgba(220, 38, 38, 0.3);
+    background: var(--coral-5);
+    border-color: var(--coral-30);
 
     .wizard-step__label,
     .wizard-step__status {
-      color: #DC2626;
+      color: var(--daylight-coral);
     }
   }
 
   .wizard-step__tooltip {
     background: var(--surface-white);
-    border-color: var(--daylight-amber, #B45309);
+    border-color: var(--daylight-amber);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 
     &::after {
-      border-top-color: var(--daylight-amber, #B45309);
+      border-top-color: var(--daylight-amber);
     }
   }
 
   .wizard-step__tooltip-number {
-    background: rgba(180, 83, 9, 0.1);
-    color: var(--daylight-amber, #B45309);
+    background: var(--amber-10);
+    color: var(--daylight-amber);
   }
 
   .wizard-stepper__current-step {
-    background: rgba(180, 83, 9, 0.03);
-    border-top-color: rgba(180, 83, 9, 0.1);
+    background: var(--amber-4);
+    border-top-color: var(--amber-10);
   }
 }
 

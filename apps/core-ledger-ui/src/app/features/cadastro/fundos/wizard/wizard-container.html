@@ -78,6 +78,10 @@
                 <!-- Step 8: Parâmetros FIDC (Condicional - só aparece para FIDC/FIDC_NP) -->
                 <app-parametros-fidc-step [stepConfig]="stepConfig" />
               }
+              @case (9) {
+                <!-- Step 9: Vínculos Institucionais -->
+                <app-vinculos-step [stepConfig]="stepConfig" />
+              }
               @default {
                 <app-placeholder-step [stepConfig]="stepConfig" />
               }

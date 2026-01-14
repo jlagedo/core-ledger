@@ -1,0 +1,136 @@
+<div class="modal-header">
+  <h5 class="modal-title" id="modal-title">
+    <i class="bi bi-building-add me-2" aria-hidden="true"></i>
+    Cadastro Rapido de Instituicao
+  </h5>
+  <button
+    type="button"
+    class="btn-close"
+    (click)="cancel()"
+    [disabled]="isSubmitting()"
+    aria-label="Fechar"
+  ></button>
+</div>
+
+<div class="modal-body">
+  <!-- Info Alert -->
+  <div class="alert alert-info d-flex align-items-start mb-4" role="alert">
+    <i class="bi bi-info-circle-fill me-2 mt-1" aria-hidden="true"></i>
+    <div>
+      <strong>Cadastro rapido</strong>
+      <p class="mb-0 small">
+        Preencha os dados minimos para criar a instituicao. Para um cadastro completo,
+        <button
+          type="button"
+          class="btn btn-link btn-sm p-0 align-baseline"
+          (click)="goToFullRegistration()"
+        >
+          acesse a pagina de instituicoes
+        </button>.
+      </p>
+    </div>
+  </div>
+
+  @if (errorMessage(); as error) {
+    <div class="alert alert-danger d-flex align-items-center" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i>
+      {{ error }}
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <!-- CNPJ -->
+    <div class="mb-3">
+      <label for="cnpj" class="form-label">
+        CNPJ <span class="text-danger">*</span>
+      </label>
+      <input
+        type="text"
+        class="form-control font-monospace"
+        id="cnpj"
+        formControlName="cnpj"
+        appCnpjMask
+        placeholder="00.000.000/0000-00"
+        [class.is-invalid]="isInvalid('cnpj')"
+        autocomplete="off"
+      />
+      @if (isInvalid('cnpj')) {
+        <div class="invalid-feedback">
+          @if (getFieldError('cnpj', 'required')) {
+            CNPJ e obrigatorio
+          } @else if (getFieldError('cnpj', 'cnpjInvalid')) {
+            CNPJ invalido
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Razao Social -->
+    <div class="mb-3">
+      <label for="razaoSocial" class="form-label">
+        Razao Social <span class="text-danger">*</span>
+      </label>
+      <input
+        type="text"
+        class="form-control"
+        id="razaoSocial"
+        formControlName="razaoSocial"
+        placeholder="Nome completo da instituicao"
+        [class.is-invalid]="isInvalid('razaoSocial')"
+        maxlength="200"
+      />
+      @if (isInvalid('razaoSocial')) {
+        <div class="invalid-feedback">
+          @if (getFieldError('razaoSocial', 'required')) {
+            Razao Social e obrigatoria
+          } @else if (getFieldError('razaoSocial', 'minlength')) {
+            Minimo de 3 caracteres
+          }
+        </div>
+      }
+      <div class="form-text">Nome juridico completo da instituicao</div>
+    </div>
+
+    <!-- Nome Fantasia -->
+    <div class="mb-3">
+      <label for="nomeFantasia" class="form-label">
+        Nome Fantasia <span class="text-muted">(opcional)</span>
+      </label>
+      <input
+        type="text"
+        class="form-control"
+        id="nomeFantasia"
+        formControlName="nomeFantasia"
+        placeholder="Nome comercial"
+        [class.is-invalid]="isInvalid('nomeFantasia')"
+        maxlength="100"
+      />
+      <div class="form-text">Nome comercial ou marca da instituicao</div>
+    </div>
+  </form>
+</div>
+
+<div class="modal-footer">
+  <button
+    type="button"
+    class="btn btn-secondary"
+    (click)="cancel()"
+    [disabled]="isSubmitting()"
+  >
+    Cancelar
+  </button>
+  <button
+    type="button"
+    class="btn btn-primary"
+    (click)="submit()"
+    [disabled]="form.invalid || isSubmitting()"
+  >
+    @if (isSubmitting()) {
+      <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+      Cadastrando...
+    } @else {
+      <i class="bi bi-check-lg me-1" aria-hidden="true"></i>
+      Cadastrar
+    }
+  </button>
+</div>

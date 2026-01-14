@@ -120,16 +120,65 @@ $theme-tokens: (
 
     // --- Amber Opacity Scale (for consistent usage) ---
     amber-4: rgba($daylight-amber, 0.04),
+    amber-5: rgba($daylight-amber, 0.05),
     amber-6: rgba($daylight-amber, 0.06),
     amber-8: rgba($daylight-amber, 0.08),
     amber-10: rgba($daylight-amber, 0.10),
     amber-12: rgba($daylight-amber, 0.12),
     amber-15: rgba($daylight-amber, 0.15),
+    amber-18: rgba($daylight-amber, 0.18),
     amber-20: rgba($daylight-amber, 0.20),
     amber-25: rgba($daylight-amber, 0.25),
     amber-30: rgba($daylight-amber, 0.30),
     amber-40: rgba($daylight-amber, 0.40),
     amber-50: rgba($daylight-amber, 0.50),
+    amber-60: rgba($daylight-amber, 0.60),
+    amber-70: rgba($daylight-amber, 0.70),
+
+    // --- Teal Opacity Scale (using daylight-teal) ---
+    teal-2: rgba($daylight-teal, 0.02),
+    teal-4: rgba($daylight-teal, 0.04),
+    teal-5: rgba($daylight-teal, 0.05),
+    teal-6: rgba($daylight-teal, 0.06),
+    teal-8: rgba($daylight-teal, 0.08),
+    teal-10: rgba($daylight-teal, 0.10),
+    teal-12: rgba($daylight-teal, 0.12),
+    teal-15: rgba($daylight-teal, 0.15),
+    teal-18: rgba($daylight-teal, 0.18),
+    teal-20: rgba($daylight-teal, 0.20),
+    teal-25: rgba($daylight-teal, 0.25),
+    teal-30: rgba($daylight-teal, 0.30),
+    teal-35: rgba($daylight-teal, 0.35),
+
+    // --- Coral Opacity Scale (using daylight-coral) ---
+    coral-2: rgba($daylight-coral, 0.02),
+    coral-5: rgba($daylight-coral, 0.05),
+    coral-6: rgba($daylight-coral, 0.06),
+    coral-8: rgba($daylight-coral, 0.08),
+    coral-10: rgba($daylight-coral, 0.10),
+    coral-15: rgba($daylight-coral, 0.15),
+    coral-20: rgba($daylight-coral, 0.20),
+    coral-30: rgba($daylight-coral, 0.30),
+    coral-40: rgba($daylight-coral, 0.40),
+    coral-50: rgba($daylight-coral, 0.50),
+
+    // --- Blue Opacity Scale (for notices) ---
+    blue-4: rgba($accent-blue, 0.04),
+    blue-6: rgba($accent-blue, 0.06),
+    blue-15: rgba($accent-blue, 0.15),
+    blue-20: rgba($accent-blue, 0.20),
+
+    // --- Indigo Opacity Scale (using daylight-indigo) ---
+    indigo-2: rgba($daylight-indigo, 0.02),
+    indigo-3: rgba($daylight-indigo, 0.03),
+    indigo-4: rgba($daylight-indigo, 0.04),
+    indigo-5: rgba($daylight-indigo, 0.05),
+    indigo-8: rgba($daylight-indigo, 0.08),
+    indigo-10: rgba($daylight-indigo, 0.10),
+    indigo-15: rgba($daylight-indigo, 0.15),
+    indigo-20: rgba($daylight-indigo, 0.20),
+    indigo-25: rgba($daylight-indigo, 0.25),
+    indigo-30: rgba($daylight-indigo, 0.30),
 
     // --- Status Indicators (ticker, alerts) ---
     status-safe: $daylight-amber,
@@ -276,16 +325,65 @@ $theme-tokens: (
 
     // --- Amber Opacity Scale (for consistent usage) ---
     amber-4: rgba($accent-amber, 0.04),
+    amber-5: rgba($accent-amber, 0.05),
     amber-6: rgba($accent-amber, 0.06),
     amber-8: rgba($accent-amber, 0.08),
     amber-10: rgba($accent-amber, 0.10),
     amber-12: rgba($accent-amber, 0.12),
     amber-15: rgba($accent-amber, 0.15),
+    amber-18: rgba($accent-amber, 0.18),
     amber-20: rgba($accent-amber, 0.20),
     amber-25: rgba($accent-amber, 0.25),
     amber-30: rgba($accent-amber, 0.30),
     amber-40: rgba($accent-amber, 0.40),
     amber-50: rgba($accent-amber, 0.50),
+    amber-60: rgba($accent-amber, 0.60),
+    amber-70: rgba($accent-amber, 0.70),
+
+    // --- Teal Opacity Scale ---
+    teal-2: rgba($accent-teal, 0.02),
+    teal-4: rgba($accent-teal, 0.04),
+    teal-5: rgba($accent-teal, 0.05),
+    teal-6: rgba($accent-teal, 0.06),
+    teal-8: rgba($accent-teal, 0.08),
+    teal-10: rgba($accent-teal, 0.10),
+    teal-12: rgba($accent-teal, 0.12),
+    teal-15: rgba($accent-teal, 0.15),
+    teal-18: rgba($accent-teal, 0.18),
+    teal-20: rgba($accent-teal, 0.20),
+    teal-25: rgba($accent-teal, 0.25),
+    teal-30: rgba($accent-teal, 0.30),
+    teal-35: rgba($accent-teal, 0.35),
+
+    // --- Coral Opacity Scale ---
+    coral-2: rgba($accent-coral, 0.02),
+    coral-5: rgba($accent-coral, 0.05),
+    coral-6: rgba($accent-coral, 0.06),
+    coral-8: rgba($accent-coral, 0.08),
+    coral-10: rgba($accent-coral, 0.10),
+    coral-15: rgba($accent-coral, 0.15),
+    coral-20: rgba($accent-coral, 0.20),
+    coral-30: rgba($accent-coral, 0.30),
+    coral-40: rgba($accent-coral, 0.40),
+    coral-50: rgba($accent-coral, 0.50),
+
+    // --- Blue Opacity Scale (for notices) ---
+    blue-4: rgba($accent-blue, 0.04),
+    blue-6: rgba($accent-blue, 0.06),
+    blue-15: rgba($accent-blue, 0.15),
+    blue-20: rgba($accent-blue, 0.20),
+
+    // --- Indigo Opacity Scale ---
+    indigo-2: rgba($accent-indigo, 0.02),
+    indigo-3: rgba($accent-indigo, 0.03),
+    indigo-4: rgba($accent-indigo, 0.04),
+    indigo-5: rgba($accent-indigo, 0.05),
+    indigo-8: rgba($accent-indigo, 0.08),
+    indigo-10: rgba($accent-indigo, 0.10),
+    indigo-15: rgba($accent-indigo, 0.15),
+    indigo-20: rgba($accent-indigo, 0.20),
+    indigo-25: rgba($accent-indigo, 0.25),
+    indigo-30: rgba($accent-indigo, 0.30),
 
     // --- Status Indicators (ticker, alerts) ---
     status-safe: $terminal-text-secondary,

@@ -5,8 +5,6 @@
 
 // --- Design Tokens ---
 $field-radius: 2px;
-$glow-amber: rgba(255, 160, 40, 0.5);
-$glow-teal: rgba(74, 246, 195, 0.5);
 
 .placeholder-step {
   animation: step-enter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -33,16 +31,16 @@ $glow-teal: rgba(74, 246, 195, 0.5);
   gap: 0.75rem;
   padding: 0.875rem 1rem;
   margin-bottom: 1.5rem;
-  background: rgba(0, 104, 255, 0.06);
-  border: 1px solid rgba(0, 104, 255, 0.2);
-  border-left: 3px solid var(--accent-blue, #0068ff);
+  background: var(--blue-6);
+  border: 1px solid var(--blue-20);
+  border-left: 3px solid var(--accent-blue);
   border-radius: $field-radius;
 }
 
 .placeholder-notice__icon {
   flex-shrink: 0;
   font-size: 1.125rem;
-  color: var(--accent-blue, #0068ff);
+  color: var(--accent-blue);
   opacity: 0.8;
 }
 
@@ -55,7 +53,7 @@ $glow-teal: rgba(74, 246, 195, 0.5);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--accent-blue, #0068ff);
+  color: var(--accent-blue);
   margin-bottom: 0.25rem;
 }
 
@@ -132,7 +130,7 @@ $glow-teal: rgba(74, 246, 195, 0.5);
 }
 
 .placeholder-field__required {
-  color: var(--accent-coral, #ff433d);
+  color: var(--accent-coral);
   font-weight: 700;
 }
 
@@ -156,20 +154,20 @@ $glow-teal: rgba(74, 246, 195, 0.5);
   }
 
   &:focus {
-    border-color: var(--accent-amber, #FFA028);
-    box-shadow: 0 0 0 2px rgba(255, 160, 40, 0.15);
+    border-color: var(--accent-amber);
+    box-shadow: 0 0 0 2px var(--amber-15);
   }
 
   // Valid state
   &.is-valid {
-    border-color: var(--accent-teal, #4af6c3);
-    box-shadow: 0 0 0 2px rgba(74, 246, 195, 0.1);
+    border-color: var(--accent-teal);
+    box-shadow: 0 0 0 2px var(--teal-10);
   }
 
   // Invalid state
   &.is-invalid {
-    border-color: var(--accent-coral, #ff433d);
-    box-shadow: 0 0 0 2px rgba(255, 67, 61, 0.1);
+    border-color: var(--accent-coral);
+    box-shadow: 0 0 0 2px var(--coral-10);
   }
 }
 
@@ -189,11 +187,11 @@ $glow-teal: rgba(74, 246, 195, 0.5);
 }
 
 .placeholder-field__error {
-  color: var(--accent-coral, #ff433d);
+  color: var(--accent-coral);
 }
 
 .placeholder-field__success {
-  color: var(--accent-teal, #4af6c3);
+  color: var(--accent-teal);
 }
 
 @keyframes feedback-enter {
@@ -216,15 +214,15 @@ $glow-teal: rgba(74, 246, 195, 0.5);
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 0.875rem;
-  background: rgba(255, 160, 40, 0.04);
-  border: 1px dashed rgba(255, 160, 40, 0.2);
+  background: var(--amber-4);
+  border: 1px dashed var(--amber-20);
   border-radius: $field-radius;
 }
 
 .placeholder-hint__icon {
   font-size: 0.625rem;
   font-weight: 700;
-  color: var(--accent-amber, #FFA028);
+  color: var(--accent-amber);
   animation: hint-pulse 1.5s ease-in-out infinite;
 }
 
@@ -233,7 +231,7 @@ $glow-teal: rgba(74, 246, 195, 0.5);
   color: var(--bs-secondary-color);
 
   strong {
-    color: var(--accent-amber, #FFA028);
+    color: var(--accent-amber);
   }
 }
 
@@ -248,47 +246,47 @@ $glow-teal: rgba(74, 246, 195, 0.5);
 
 [data-bs-theme="light"] {
   .placeholder-notice {
-    background: rgba(0, 104, 255, 0.04);
-    border-color: rgba(0, 104, 255, 0.15);
-    border-left-color: var(--accent-blue, #0068ff);
+    background: var(--blue-4);
+    border-color: var(--blue-15);
+    border-left-color: var(--accent-blue);
   }
 
   .placeholder-field__input {
     &:focus {
-      border-color: var(--daylight-amber, #B45309);
-      box-shadow: 0 0 0 2px rgba(180, 83, 9, 0.1);
+      border-color: var(--daylight-amber);
+      box-shadow: 0 0 0 2px var(--amber-10);
     }
 
     &.is-valid {
-      border-color: #059669;
-      box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.1);
+      border-color: var(--daylight-teal);
+      box-shadow: 0 0 0 2px var(--teal-10);
     }
 
     &.is-invalid {
-      border-color: #DC2626;
-      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+      border-color: var(--daylight-coral);
+      box-shadow: 0 0 0 2px var(--coral-10);
     }
   }
 
   .placeholder-field__error {
-    color: #DC2626;
+    color: var(--daylight-coral);
   }
 
   .placeholder-field__success {
-    color: #059669;
+    color: var(--daylight-teal);
   }
 
   .placeholder-hint {
-    background: rgba(180, 83, 9, 0.03);
-    border-color: rgba(180, 83, 9, 0.15);
+    background: var(--amber-4);
+    border-color: var(--amber-15);
   }
 
   .placeholder-hint__icon {
-    color: var(--daylight-amber, #B45309);
+    color: var(--daylight-amber);
   }
 
   .placeholder-hint__text strong {
-    color: var(--daylight-amber, #B45309);
+    color: var(--daylight-amber);
   }
 }
 

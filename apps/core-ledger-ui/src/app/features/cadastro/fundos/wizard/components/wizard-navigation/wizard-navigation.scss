@@ -7,8 +7,6 @@
 $btn-height: 2.25rem;
 $btn-radius: 2px;
 $transition-duration: 0.2s;
-$glow-amber: rgba(255, 160, 40, 0.5);
-$glow-teal: rgba(74, 246, 195, 0.5);
 
 .wizard-navigation {
   padding: 1rem 1.25rem;
@@ -67,7 +65,7 @@ $glow-teal: rgba(74, 246, 195, 0.5);
   background: none;
 
   &:focus-visible {
-    outline: 2px solid var(--accent-amber, #FFA028);
+    outline: 2px solid var(--accent-amber);
     outline-offset: 2px;
   }
 
@@ -97,23 +95,15 @@ $glow-teal: rgba(74, 246, 195, 0.5);
 
 // --- Primary: Amber Accent ---
 .wizard-btn--primary {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 160, 40, 0.2) 0%,
-    rgba(255, 160, 40, 0.12) 100%
-  );
-  border-color: var(--accent-amber, #FFA028);
-  color: var(--accent-amber, #FFA028);
-  text-shadow: 0 0 8px $glow-amber;
-  box-shadow: 0 0 12px rgba(255, 160, 40, 0.1);
+  background: linear-gradient(180deg, var(--amber-20) 0%, var(--amber-12) 100%);
+  border-color: var(--accent-amber);
+  color: var(--accent-amber);
+  text-shadow: 0 0 8px var(--amber-50);
+  box-shadow: 0 0 12px var(--amber-10);
 
   &:hover:not(:disabled) {
-    background: linear-gradient(
-      180deg,
-      rgba(255, 160, 40, 0.3) 0%,
-      rgba(255, 160, 40, 0.2) 100%
-    );
-    box-shadow: 0 0 20px rgba(255, 160, 40, 0.2);
+    background: linear-gradient(180deg, var(--amber-30) 0%, var(--amber-20) 100%);
+    box-shadow: 0 0 20px var(--amber-20);
 
     .wizard-btn__icon:last-child {
       transform: translateX(2px);
@@ -128,8 +118,8 @@ $glow-teal: rgba(74, 246, 195, 0.5);
   color: var(--bs-secondary-color);
 
   &:hover:not(:disabled) {
-    background: rgba(255, 160, 40, 0.08);
-    border-color: rgba(255, 160, 40, 0.3);
+    background: var(--amber-8);
+    border-color: var(--amber-30);
     color: var(--bs-emphasis-color);
 
     .wizard-btn__icon:first-child {
@@ -145,31 +135,23 @@ $glow-teal: rgba(74, 246, 195, 0.5);
   color: var(--terminal-text-muted);
 
   &:hover:not(:disabled) {
-    background: rgba(255, 67, 61, 0.08);
-    border-color: rgba(255, 67, 61, 0.2);
-    color: var(--accent-coral, #ff433d);
+    background: var(--coral-8);
+    border-color: var(--coral-20);
+    color: var(--accent-coral);
   }
 }
 
 // --- Submit: Success/Teal ---
 .wizard-btn--submit {
-  background: linear-gradient(
-    180deg,
-    rgba(74, 246, 195, 0.2) 0%,
-    rgba(74, 246, 195, 0.12) 100%
-  );
-  border-color: var(--accent-teal, #4af6c3);
-  color: var(--accent-teal, #4af6c3);
-  text-shadow: 0 0 8px $glow-teal;
-  box-shadow: 0 0 12px rgba(74, 246, 195, 0.1);
+  background: linear-gradient(180deg, var(--teal-20) 0%, var(--teal-12) 100%);
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+  text-shadow: 0 0 8px var(--teal-30);
+  box-shadow: 0 0 12px var(--teal-10);
 
   &:hover:not(:disabled) {
-    background: linear-gradient(
-      180deg,
-      rgba(74, 246, 195, 0.3) 0%,
-      rgba(74, 246, 195, 0.2) 100%
-    );
-    box-shadow: 0 0 20px rgba(74, 246, 195, 0.2);
+    background: linear-gradient(180deg, var(--teal-30) 0%, var(--teal-20) 100%);
+    box-shadow: 0 0 20px var(--teal-20);
   }
 }
 
@@ -212,64 +194,48 @@ $glow-teal: rgba(74, 246, 195, 0.5);
 
 [data-bs-theme="light"] {
   .wizard-btn--primary {
-    background: linear-gradient(
-      180deg,
-      rgba(180, 83, 9, 0.12) 0%,
-      rgba(180, 83, 9, 0.06) 100%
-    );
-    border-color: var(--daylight-amber, #B45309);
-    color: var(--daylight-amber, #B45309);
+    background: linear-gradient(180deg, var(--amber-12) 0%, var(--amber-6) 100%);
+    border-color: var(--daylight-amber);
+    color: var(--daylight-amber);
     text-shadow: none;
-    box-shadow: 0 2px 8px rgba(180, 83, 9, 0.1);
+    box-shadow: 0 2px 8px var(--amber-10);
 
     &:hover:not(:disabled) {
-      background: linear-gradient(
-        180deg,
-        rgba(180, 83, 9, 0.18) 0%,
-        rgba(180, 83, 9, 0.1) 100%
-      );
-      box-shadow: 0 4px 12px rgba(180, 83, 9, 0.15);
+      background: linear-gradient(180deg, var(--amber-18) 0%, var(--amber-10) 100%);
+      box-shadow: 0 4px 12px var(--amber-15);
     }
   }
 
   .wizard-btn--secondary {
     background: rgba(0, 0, 0, 0.02);
-    border-color: rgba(180, 83, 9, 0.15);
+    border-color: var(--amber-15);
     color: var(--bs-secondary-color);
 
     &:hover:not(:disabled) {
-      background: rgba(180, 83, 9, 0.06);
-      border-color: rgba(180, 83, 9, 0.25);
+      background: var(--amber-6);
+      border-color: var(--amber-25);
       color: var(--daylight-text);
     }
   }
 
   .wizard-btn--ghost {
     &:hover:not(:disabled) {
-      background: rgba(220, 38, 38, 0.06);
-      border-color: rgba(220, 38, 38, 0.15);
-      color: #DC2626;
+      background: var(--coral-6);
+      border-color: var(--coral-15);
+      color: var(--daylight-coral);
     }
   }
 
   .wizard-btn--submit {
-    background: linear-gradient(
-      180deg,
-      rgba(5, 150, 105, 0.12) 0%,
-      rgba(5, 150, 105, 0.06) 100%
-    );
-    border-color: #059669;
-    color: #059669;
+    background: linear-gradient(180deg, var(--teal-12) 0%, var(--teal-6) 100%);
+    border-color: var(--daylight-teal);
+    color: var(--daylight-teal);
     text-shadow: none;
-    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.1);
+    box-shadow: 0 2px 8px var(--teal-10);
 
     &:hover:not(:disabled) {
-      background: linear-gradient(
-        180deg,
-        rgba(5, 150, 105, 0.18) 0%,
-        rgba(5, 150, 105, 0.1) 100%
-      );
-      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15);
+      background: linear-gradient(180deg, var(--teal-18) 0%, var(--teal-10) 100%);
+      box-shadow: 0 4px 12px var(--teal-15);
     }
   }
 }

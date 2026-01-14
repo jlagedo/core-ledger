@@ -1,0 +1,398 @@
+<div class="vinculos-step">
+  <form [formGroup]="form" class="step-form" novalidate>
+    <!-- Section Header -->
+    <div class="vinculos-header">
+      <div class="vinculos-header__icon">
+        <i class="bi bi-link-45deg" aria-hidden="true"></i>
+      </div>
+      <div class="vinculos-header__text">
+        <h6 class="vinculos-header__title">Vínculos Institucionais</h6>
+        <p class="vinculos-header__subtitle">
+          Configure os prestadores de serviço do fundo
+        </p>
+      </div>
+    </div>
+
+    <!-- Missing Required Vinculos Warning -->
+    @if (missingVinculos().length > 0) {
+      <div class="vinculos-warning">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+        <span>
+          Preencha os vínculos obrigatórios:
+          @for (tipo of missingVinculos(); track tipo; let last = $last) {
+            <strong>{{ getTipoVinculoLabel(tipo) }}</strong>@if (!last) {, }
+          }
+        </span>
+      </div>
+    }
+
+    <!-- FIDC Recommendation Warning (RF-02) -->
+    @if (isFidc() && !hasFidcRecommended()) {
+      <div class="vinculos-info">
+        <i class="bi bi-info-circle" aria-hidden="true"></i>
+        <span>
+          Para FIDCs, é recomendado cadastrar um <strong>Agente de Cobrança</strong>.
+        </span>
+      </div>
+    }
+
+    <!-- Vinculos List -->
+    <div class="vinculos-list" formArrayName="vinculos">
+      @for (vinculo of vinculosArray().controls; track $index; let i = $index) {
+        <div
+          class="vinculo-card"
+          [formGroupName]="i"
+          [class.vinculo-card--obrigatorio]="isObrigatorio(getVinculoGroup(i).get('tipoVinculo')?.value)"
+          [class.vinculo-card--fidc]="isFidcRecomendado(getVinculoGroup(i).get('tipoVinculo')?.value)"
+          [class.vinculo-card--preenchido]="hasInstituicaoSelected(i)"
+        >
+          <!-- Card Header -->
+          <div class="vinculo-card__header">
+            <div class="vinculo-card__tipo">
+              <span class="vinculo-card__tipo-label">
+                {{ getTipoVinculoLabel(getVinculoGroup(i).get('tipoVinculo')?.value) }}
+              </span>
+              @if (isObrigatorio(getVinculoGroup(i).get('tipoVinculo')?.value)) {
+                <span class="vinculo-card__badge vinculo-card__badge--obrigatorio">
+                  obrigatório
+                </span>
+              }
+              @if (isFidcRecomendado(getVinculoGroup(i).get('tipoVinculo')?.value)) {
+                <span class="vinculo-card__badge vinculo-card__badge--fidc">
+                  FIDC
+                </span>
+              }
+            </div>
+            <div class="vinculo-card__actions">
+              @if (canRemoveVinculo(i)) {
+                <button
+                  type="button"
+                  class="btn btn-sm btn-link vinculo-card__remove"
+                  (click)="removeVinculo(i)"
+                  aria-label="Remover vínculo"
+                >
+                  <i class="bi bi-trash" aria-hidden="true"></i>
+                </button>
+              } @else {
+                <span class="vinculo-card__locked" title="Vínculo obrigatório">
+                  <i class="bi bi-lock-fill" aria-hidden="true"></i>
+                </span>
+              }
+            </div>
+          </div>
+
+          <!-- Card Body -->
+          <div class="vinculo-card__body">
+            <!-- Instituição Search / Display -->
+            <div class="step-field">
+              <label [for]="'instituicao-' + i" class="step-field__label">
+                <span class="step-field__label-text">Instituição</span>
+                <span class="step-field__required" aria-label="obrigatório">*</span>
+              </label>
+
+              @if (hasInstituicaoSelected(i)) {
+                <!-- Selected Instituicao Display -->
+                <div class="instituicao-selected">
+                  <div class="instituicao-selected__info">
+                    <span class="instituicao-selected__nome">
+                      {{ getVinculoGroup(i).get('nomeInstituicao')?.value }}
+                    </span>
+                    <span class="instituicao-selected__cnpj font-monospace">
+                      CNPJ: {{ formatCnpj(getVinculoGroup(i).get('cnpjInstituicao')?.value) }}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-link instituicao-selected__clear"
+                    (click)="clearInstituicao(i)"
+                    aria-label="Limpar seleção"
+                  >
+                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                  </button>
+                </div>
+              } @else {
+                <!-- Autocomplete Search -->
+                <div class="autocomplete-wrapper">
+                  <div class="input-group">
+                    <span class="input-group-text step-input-prefix">
+                      <i class="bi bi-search" aria-hidden="true"></i>
+                    </span>
+                    <input
+                      type="text"
+                      class="form-control step-field__input"
+                      [class.is-invalid]="isFieldInvalid(i, 'cnpjInstituicao')"
+                      [id]="'instituicao-' + i"
+                      formControlName="searchTerm"
+                      placeholder="Buscar por nome ou CNPJ..."
+                      autocomplete="off"
+                      (focus)="showAutocomplete(i)"
+                      (blur)="hideAutocomplete(i)"
+                    />
+                    @if (isAutocompleteLoading(i)) {
+                      <span class="input-group-text step-input-suffix">
+                        <span class="spinner-border spinner-border-sm" role="status">
+                          <span class="visually-hidden">Buscando...</span>
+                        </span>
+                      </span>
+                    }
+                    <button
+                      type="button"
+                      class="btn btn-outline-primary step-input-suffix"
+                      (click)="openInstituicaoModal(i)"
+                      title="Cadastrar nova instituicao"
+                    >
+                      <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                      <span class="d-none d-md-inline ms-1">Nova</span>
+                    </button>
+                  </div>
+
+                  <!-- Autocomplete Dropdown -->
+                  @if (isAutocompleteVisible(i)) {
+                    <div class="autocomplete-dropdown">
+                      @for (item of getAutocompleteResults(i); track item.id) {
+                        <button
+                          type="button"
+                          class="autocomplete-item"
+                          (mousedown)="selectInstituicao(i, item)"
+                        >
+                          <span class="autocomplete-item__nome">{{ item.razaoSocial }}</span>
+                          <span class="autocomplete-item__cnpj font-monospace">
+                            {{ item.cnpjFormatado }}
+                          </span>
+                        </button>
+                      } @empty {
+                        <div class="autocomplete-empty">
+                          <i class="bi bi-building-x" aria-hidden="true"></i>
+                          <span>Nenhuma instituicao encontrada</span>
+                          <div class="autocomplete-empty__actions">
+                            <button
+                              type="button"
+                              class="btn btn-sm btn-primary"
+                              (mousedown)="openInstituicaoModal(i)"
+                            >
+                              <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>
+                              Cadastrar nova
+                            </button>
+                            <button
+                              type="button"
+                              class="btn btn-sm btn-outline-secondary"
+                              (mousedown)="goToFullRegistration()"
+                            >
+                              Cadastro completo
+                            </button>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+
+                @if (isFieldInvalid(i, 'cnpjInstituicao')) {
+                  <div class="step-field__error">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    Selecione uma instituição
+                  </div>
+                }
+
+                <div class="step-field__hint">
+                  <i class="bi bi-lightbulb" aria-hidden="true"></i>
+                  Digite pelo menos 3 caracteres para buscar
+                </div>
+              }
+            </div>
+
+            <!-- Data Início -->
+            <div class="step-form__grid step-form__grid--2-cols">
+              <div class="step-field">
+                <label [for]="'dataInicio-' + i" class="step-field__label">
+                  <span class="step-field__label-text">Data de Início</span>
+                  <span class="step-field__required" aria-label="obrigatório">*</span>
+                </label>
+                <input
+                  type="date"
+                  class="form-control step-field__input"
+                  [class.is-invalid]="isFieldInvalid(i, 'dataInicio')"
+                  [class.is-valid]="isFieldValid(i, 'dataInicio')"
+                  [id]="'dataInicio-' + i"
+                  formControlName="dataInicio"
+                />
+                @if (isFieldInvalid(i, 'dataInicio')) {
+                  <div class="step-field__error">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    @if (getFieldError(i, 'dataInicio', 'required')) {
+                      Data de início é obrigatória
+                    } @else if (getFieldError(i, 'dataInicio', 'dataInicioFutura')) {
+                      Data de início não pode ser futura
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="step-field">
+                <label [for]="'dataFim-' + i" class="step-field__label">
+                  <span class="step-field__label-text">Data de Término</span>
+                  <span class="step-field__optional">(opcional)</span>
+                </label>
+                <input
+                  type="date"
+                  class="form-control step-field__input"
+                  [class.is-invalid]="isFieldInvalid(i, 'dataFim')"
+                  [class.is-valid]="isFieldValid(i, 'dataFim')"
+                  [id]="'dataFim-' + i"
+                  formControlName="dataFim"
+                />
+                @if (isFieldInvalid(i, 'dataFim')) {
+                  <div class="step-field__error">
+                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                    @if (getFieldError(i, 'dataFim', 'dataFimAnterior')) {
+                      Data de término deve ser posterior ao início
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Expandable Details Section -->
+            <details
+              class="vinculo-details"
+              [attr.open]="isDetailsExpanded(i) ? '' : null"
+            >
+              <summary
+                class="vinculo-details__toggle"
+                (click)="$event.preventDefault(); toggleDetails(i)"
+              >
+                <i class="bi bi-chevron-right vinculo-details__icon" aria-hidden="true"></i>
+                <span>Informações do Responsável</span>
+                <span class="vinculo-details__hint">(opcional)</span>
+              </summary>
+
+              @if (isDetailsExpanded(i)) {
+                <div class="vinculo-details__content">
+                  <!-- Responsável Nome -->
+                  <div class="step-field">
+                    <label [for]="'responsavelNome-' + i" class="step-field__label">
+                      <span class="step-field__label-text">Nome do Responsável</span>
+                      <span class="step-field__optional">(opcional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control step-field__input"
+                      [class.is-invalid]="isFieldInvalid(i, 'responsavelNome')"
+                      [class.is-valid]="isFieldValid(i, 'responsavelNome')"
+                      [id]="'responsavelNome-' + i"
+                      formControlName="responsavelNome"
+                      placeholder="Nome completo"
+                      maxlength="100"
+                    />
+                  </div>
+
+                  <div class="step-form__grid step-form__grid--2-cols">
+                    <!-- Responsável Email -->
+                    <div class="step-field">
+                      <label [for]="'responsavelEmail-' + i" class="step-field__label">
+                        <span class="step-field__label-text">E-mail</span>
+                        <span class="step-field__optional">(opcional)</span>
+                      </label>
+                      <input
+                        type="email"
+                        class="form-control step-field__input"
+                        [class.is-invalid]="isFieldInvalid(i, 'responsavelEmail')"
+                        [class.is-valid]="isFieldValid(i, 'responsavelEmail')"
+                        [id]="'responsavelEmail-' + i"
+                        formControlName="responsavelEmail"
+                        placeholder="email@exemplo.com"
+                        maxlength="100"
+                      />
+                      @if (isFieldInvalid(i, 'responsavelEmail')) {
+                        <div class="step-field__error">
+                          <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                          E-mail inválido
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Responsável Telefone -->
+                    <div class="step-field">
+                      <label [for]="'responsavelTelefone-' + i" class="step-field__label">
+                        <span class="step-field__label-text">Telefone</span>
+                        <span class="step-field__optional">(opcional)</span>
+                      </label>
+                      <input
+                        type="tel"
+                        class="form-control step-field__input"
+                        [class.is-invalid]="isFieldInvalid(i, 'responsavelTelefone')"
+                        [class.is-valid]="isFieldValid(i, 'responsavelTelefone')"
+                        [id]="'responsavelTelefone-' + i"
+                        formControlName="responsavelTelefone"
+                        placeholder="(11) 99999-9999"
+                        maxlength="20"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Motivo Fim (only if dataFim is set) -->
+                  @if (getVinculoGroup(i).get('dataFim')?.value) {
+                    <div class="step-field step-field--conditional">
+                      <label [for]="'motivoFim-' + i" class="step-field__label">
+                        <span class="step-field__label-text">Motivo do Término</span>
+                        <span class="step-field__optional">(opcional)</span>
+                      </label>
+                      <textarea
+                        class="form-control step-field__input"
+                        [id]="'motivoFim-' + i"
+                        formControlName="motivoFim"
+                        placeholder="Descreva o motivo do término do vínculo..."
+                        rows="2"
+                      ></textarea>
+                    </div>
+                  }
+                </div>
+              }
+            </details>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Add Optional Vinculo Section -->
+    @if (availableOptionalVinculos().length > 0) {
+      <div class="vinculos-add-section">
+        <div class="vinculos-add-section__header">
+          <i class="bi bi-plus-circle" aria-hidden="true"></i>
+          <span>Adicionar Vínculo Opcional</span>
+        </div>
+        <div class="vinculos-add-section__options">
+          @for (option of availableOptionalVinculos(); track option.value) {
+            <button
+              type="button"
+              class="vinculos-add-option"
+              [class.vinculos-add-option--fidc]="option.fidcRecomendado"
+              (click)="addOptionalVinculo(option.value)"
+            >
+              <span class="vinculos-add-option__label">{{ option.label }}</span>
+              @if (option.fidcRecomendado && isFidc()) {
+                <span class="vinculos-add-option__badge">recomendado</span>
+              }
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Form Footer -->
+    <div class="step-form__footer">
+      <div class="step-hint">
+        <i class="bi bi-lightbulb step-hint__icon" aria-hidden="true"></i>
+        <span class="step-hint__text">
+          @if (isFidc()) {
+            Para FIDCs, além dos vínculos obrigatórios, é recomendado cadastrar
+            <strong>Agente de Cobrança</strong> e <strong>Consultoria de Crédito</strong>.
+          } @else {
+            Os vínculos de <strong>Administrador</strong>, <strong>Gestor</strong> e
+            <strong>Custodiante</strong> são obrigatórios para todos os fundos.
+          }
+        </span>
+      </div>
+    </div>
+  </form>
+</div>

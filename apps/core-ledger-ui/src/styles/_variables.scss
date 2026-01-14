@@ -108,6 +108,16 @@ $accent-red:       #ff433d !default;   // Bloomberg danger
 $accent-red-light: #ff6b6b !default;   // Lighter red variant
 $accent-blue:      #0068ff !default;   // Bloomberg info/links
 
+// --- Accent Indigo (for multi-class/vinculos features) ---
+$accent-indigo:      #6366f1 !default;   // Primary indigo
+$accent-indigo-dark: #4f46e5 !default;   // Darker variant
+
+// --- Daylight Accent Colors (Light mode variants) ---
+$daylight-indigo:    #4f46e5 !default;   // Light mode indigo
+$daylight-teal:      #059669 !default;   // Light mode teal (emerald-600)
+$daylight-coral:     #dc2626 !default;   // Light mode coral (red-600)
+$daylight-amber:     #B45309 !default;   // Light mode amber (already exists, explicit)
+
 // --- Bloomberg Terminal Text Hierarchy (Dark Mode) ---
 // Distinct colors instead of opacity variations for better contrast
 $terminal-text-emphasis: #FFFFFF !default;   // Headers, emphasis (pure white)

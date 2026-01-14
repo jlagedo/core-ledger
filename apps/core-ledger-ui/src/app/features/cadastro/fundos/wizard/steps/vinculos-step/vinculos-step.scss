@@ -1,0 +1,666 @@
+// ============================================================
+// VINCULOS STEP — Institutional Links Configuration
+// Terminal-style form with dynamic vinculo cards and autocomplete
+// Uses shared wizard styles from _components.scss
+// ============================================================
+
+.vinculos-step {
+  animation: step-enter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ============================================================
+// VINCULOS HEADER
+// ============================================================
+
+.vinculos-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--indigo-2);
+  border: 1px solid var(--table-border-color);
+  border-radius: 2px;
+}
+
+.vinculos-header__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.25rem;
+  background: var(--indigo-10);
+  border-radius: 2px;
+  color: var(--accent-indigo);
+}
+
+.vinculos-header__text {
+  flex: 1;
+}
+
+.vinculos-header__title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bs-body-color);
+}
+
+.vinculos-header__subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: var(--bs-secondary-color);
+}
+
+// ============================================================
+// WARNING & INFO MESSAGES
+// ============================================================
+
+.vinculos-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--coral-5);
+  border: 1px solid var(--coral-20);
+  border-radius: 2px;
+  color: var(--accent-coral);
+  animation: pulse 2s ease-in-out infinite;
+
+  i {
+    font-size: 1rem;
+  }
+}
+
+.vinculos-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  background: var(--indigo-5);
+  border: 1px solid var(--indigo-20);
+  border-radius: 2px;
+  color: var(--accent-indigo);
+
+  i {
+    font-size: 1rem;
+  }
+}
+
+// ============================================================
+// VINCULOS LIST
+// ============================================================
+
+.vinculos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+// ============================================================
+// VINCULO CARD
+// ============================================================
+
+.vinculo-card {
+  background: var(--bs-secondary-bg);
+  border: 1px solid var(--table-border-color);
+  border-radius: 2px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--indigo-30);
+  }
+
+  &--obrigatorio {
+    border-left: 3px solid var(--accent-coral);
+
+    .vinculo-card__header {
+      background: var(--coral-2);
+    }
+  }
+
+  &--fidc {
+    border-left: 3px solid var(--accent-indigo);
+
+    .vinculo-card__header {
+      background: var(--indigo-2);
+    }
+  }
+
+  &--preenchido {
+    border-color: var(--accent-teal);
+
+    .vinculo-card__header {
+      background: var(--teal-2);
+    }
+  }
+}
+
+.vinculo-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.625rem 0.875rem;
+  background: var(--indigo-2);
+  border-bottom: 1px solid var(--table-border-color);
+}
+
+.vinculo-card__tipo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.vinculo-card__tipo-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bs-body-color);
+}
+
+.vinculo-card__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 2px;
+
+  &--obrigatorio {
+    background: var(--coral-10);
+    color: var(--accent-coral);
+  }
+
+  &--fidc {
+    background: var(--indigo-10);
+    color: var(--accent-indigo);
+  }
+}
+
+.vinculo-card__actions {
+  display: flex;
+  align-items: center;
+}
+
+.vinculo-card__remove {
+  padding: 0.25rem;
+  color: var(--accent-coral);
+  opacity: 0.7;
+  transition: all 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+    background: var(--coral-10);
+  }
+}
+
+.vinculo-card__locked {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--bs-secondary-color);
+  opacity: 0.5;
+}
+
+.vinculo-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+// ============================================================
+// INSTITUICAO SELECTED
+// ============================================================
+
+.instituicao-selected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--teal-5);
+  border: 1px solid var(--accent-teal);
+  border-radius: 2px;
+}
+
+.instituicao-selected__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.instituicao-selected__nome {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+}
+
+.instituicao-selected__cnpj {
+  font-size: 0.6875rem;
+  color: var(--bs-secondary-color);
+}
+
+.instituicao-selected__clear {
+  padding: 0.25rem 0.5rem;
+  color: var(--bs-secondary-color);
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: var(--accent-coral);
+    background: var(--coral-10);
+  }
+}
+
+// ============================================================
+// AUTOCOMPLETE
+// ============================================================
+
+.autocomplete-wrapper {
+  position: relative;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--bs-body-bg);
+  border: 1px solid var(--table-border-color);
+  border-top: none;
+  border-radius: 0 0 2px 2px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: dropdown-enter 0.2s ease;
+}
+
+@keyframes dropdown-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.autocomplete-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--table-border-color);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: var(--indigo-5);
+  }
+}
+
+.autocomplete-item__nome {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--bs-body-color);
+}
+
+.autocomplete-item__cnpj {
+  font-size: 0.6875rem;
+  color: var(--bs-secondary-color);
+}
+
+.autocomplete-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.25rem 1rem;
+  font-size: 0.75rem;
+  color: var(--bs-secondary-color);
+  text-align: center;
+
+  i {
+    font-size: 1.5rem;
+    opacity: 0.4;
+  }
+}
+
+.autocomplete-empty__actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+
+  .btn {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    padding: 0.375rem 0.75rem;
+    border-radius: 2px;
+  }
+
+  .btn-primary {
+    background: var(--accent-indigo);
+    border-color: var(--accent-indigo);
+
+    &:hover {
+      background: color-mix(in srgb, var(--accent-indigo) 85%, black);
+      border-color: color-mix(in srgb, var(--accent-indigo) 85%, black);
+    }
+  }
+}
+
+// ============================================================
+// VINCULO DETAILS (Expandable)
+// ============================================================
+
+.vinculo-details {
+  margin-top: 0.5rem;
+  border: 1px dashed var(--table-border-color);
+  border-radius: 2px;
+
+  &[open] {
+    .vinculo-details__toggle {
+      border-bottom: 1px dashed var(--table-border-color);
+    }
+
+    .vinculo-details__icon {
+      transform: rotate(90deg);
+    }
+  }
+}
+
+.vinculo-details__toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bs-secondary-color);
+  cursor: pointer;
+  list-style: none;
+  transition: all 0.2s ease;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &:hover {
+    color: var(--bs-body-color);
+    background: var(--indigo-2);
+  }
+}
+
+.vinculo-details__icon {
+  font-size: 0.625rem;
+  transition: transform 0.2s ease;
+}
+
+.vinculo-details__hint {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--terminal-text-muted);
+}
+
+.vinculo-details__content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--indigo-2);
+  animation: field-slide-down 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ============================================================
+// ADD VINCULO SECTION
+// ============================================================
+
+.vinculos-add-section {
+  padding: 1rem;
+  background: var(--indigo-2);
+  border: 1px dashed var(--table-border-color);
+  border-radius: 2px;
+}
+
+.vinculos-add-section__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bs-secondary-color);
+
+  i {
+    font-size: 0.875rem;
+    color: var(--accent-indigo);
+  }
+}
+
+.vinculos-add-section__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.vinculos-add-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  background: var(--bs-secondary-bg);
+  border: 1px solid var(--table-border-color);
+  border-radius: 2px;
+  color: var(--bs-body-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--accent-indigo);
+    background: var(--indigo-5);
+  }
+
+  &--fidc {
+    border-color: var(--indigo-30);
+
+    &:hover {
+      border-color: var(--accent-indigo);
+    }
+  }
+}
+
+.vinculos-add-option__label {
+  white-space: nowrap;
+}
+
+.vinculos-add-option__badge {
+  padding: 0.125rem 0.375rem;
+  font-size: 0.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--teal-15);
+  border-radius: 2px;
+  color: var(--accent-teal);
+}
+
+// ============================================================
+// LIGHT MODE OVERRIDES
+// ============================================================
+
+[data-bs-theme='light'] {
+  .vinculos-header {
+    background: var(--indigo-2);
+  }
+
+  .vinculos-header__icon {
+    background: var(--indigo-10);
+    color: var(--daylight-indigo);
+  }
+
+  .vinculos-warning {
+    background: var(--coral-5);
+    border-color: var(--coral-20);
+    color: var(--daylight-coral);
+  }
+
+  .vinculos-info {
+    background: var(--indigo-5);
+    border-color: var(--indigo-20);
+    color: var(--daylight-indigo);
+  }
+
+  .vinculo-card {
+    &:hover {
+      border-color: var(--indigo-30);
+    }
+
+    &--obrigatorio {
+      border-left-color: var(--daylight-coral);
+
+      .vinculo-card__header {
+        background: var(--coral-2);
+      }
+    }
+
+    &--fidc {
+      border-left-color: var(--daylight-indigo);
+
+      .vinculo-card__header {
+        background: var(--indigo-2);
+      }
+    }
+
+    &--preenchido {
+      border-color: var(--daylight-teal);
+
+      .vinculo-card__header {
+        background: var(--teal-2);
+      }
+    }
+  }
+
+  .vinculo-card__header {
+    background: var(--indigo-2);
+  }
+
+  .vinculo-card__badge {
+    &--obrigatorio {
+      background: var(--coral-10);
+      color: var(--daylight-coral);
+    }
+
+    &--fidc {
+      background: var(--indigo-10);
+      color: var(--daylight-indigo);
+    }
+  }
+
+  .vinculo-card__remove {
+    color: var(--daylight-coral);
+
+    &:hover {
+      background: var(--coral-10);
+    }
+  }
+
+  .instituicao-selected {
+    background: var(--teal-5);
+    border-color: var(--daylight-teal);
+  }
+
+  .instituicao-selected__clear:hover {
+    color: var(--daylight-coral);
+    background: var(--coral-10);
+  }
+
+  .autocomplete-item:hover {
+    background: var(--indigo-5);
+  }
+
+  .autocomplete-empty__actions {
+    .btn-primary {
+      background: var(--daylight-indigo);
+      border-color: var(--daylight-indigo);
+
+      &:hover {
+        background: #4338ca;
+        border-color: #4338ca;
+      }
+    }
+  }
+
+  .vinculo-details__toggle:hover {
+    background: var(--indigo-2);
+  }
+
+  .vinculo-details__content {
+    background: var(--indigo-2);
+  }
+
+  .vinculos-add-section {
+    background: var(--indigo-2);
+  }
+
+  .vinculos-add-section__header i {
+    color: var(--daylight-indigo);
+  }
+
+  .vinculos-add-option {
+    &:hover {
+      border-color: var(--daylight-indigo);
+      background: var(--indigo-5);
+    }
+
+    &--fidc {
+      border-color: var(--indigo-30);
+    }
+  }
+
+  .vinculos-add-option__badge {
+    background: var(--teal-15);
+    color: var(--daylight-teal);
+  }
+}
+
+// ============================================================
+// REDUCED MOTION
+// ============================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .vinculos-step,
+  .vinculo-details__content,
+  .autocomplete-dropdown,
+  .vinculos-warning {
+    animation: none;
+  }
+}
