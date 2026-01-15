@@ -157,43 +157,71 @@ export class IdentificacaoStep {
             | undefined
       );
 
-      // Check if step was already validated (user navigating back)
-      const storedValidation = untracked(() => this.wizardStore.stepValidation()[stepId]);
-      const wasAlreadyValidated = storedValidation?.isValid && storedValidation?.isDirty;
+      // Check if step was already validated (user navigating back or restoring draft)
+      // We check completedSteps because stepValidation is not persisted in drafts
+      const completedSteps = untracked(() => this.wizardStore.completedSteps());
+      const wasAlreadyCompleted = completedSteps.has(stepId);
+      const hasStepData = !!stepData;
 
       if (stepData) {
         const formValue = this.prepareDataForForm(stepData);
 
-        // For CNPJ: handle async validator specially to avoid re-running when navigating back
-        if (wasAlreadyValidated && formValue.cnpj) {
-          // Clear async validators temporarily during restoration
+        // Patch form without emitting events during restoration
+        // Following wizard_research.md pattern: avoid triggering watchers during restore
+        this.form.patchValue(formValue, { emitEvent: false });
+        this.form.markAsDirty();
+
+        // Mark all fields as touched to show validation state
+        Object.keys(this.form.controls).forEach((key) => {
+          this.form.get(key)?.markAsTouched();
+        });
+
+        // If step was already completed (from draft or previous navigation), bypass async validation
+        // Per Angular docs: clearAsyncValidators() + updateValueAndValidity() removes async validators
+        if (wasAlreadyCompleted && hasStepData) {
           const cnpjControl = this.form.get('cnpj')!;
-          const asyncValidators = cnpjControl.asyncValidator;
+          const originalAsyncValidators = cnpjControl.asyncValidator;
+
+          // Step 1: Clear async validators
           cnpjControl.clearAsyncValidators();
 
-          // Patch form - events fire naturally
-          this.form.patchValue(formValue);
+          // Step 2: Apply the validator removal by calling updateValueAndValidity on the control
+          // Per Angular docs: "you must call updateValueAndValidity() for the new validation to take effect"
+          cnpjControl.updateValueAndValidity({ emitEvent: false });
 
-          // Restore async validators without triggering
-          cnpjControl.setAsyncValidators(asyncValidators);
+          // Step 3: Now update the entire form (sync validators only since async are cleared)
+          this.form.updateValueAndValidity({ emitEvent: false });
+
+          // Step 4: Restore async validators for future user interactions (when they edit the field)
+          if (originalAsyncValidators) {
+            cnpjControl.setAsyncValidators(originalAsyncValidators);
+            // IMPORTANT: Don't call updateValueAndValidity() after restoring!
+            // This keeps the control VALID without triggering async validators
+          }
+
+          // Directly set the store validation state
+          this.wizardStore.setStepValidation(stepId, {
+            isValid: this.form.valid,
+            isDirty: true,
+            errors: [],
+            invalidFields: [],
+          });
+
+          if (this.form.valid) {
+            this.wizardStore.markStepComplete(stepId);
+          }
         } else {
-          // Fresh validation or no CNPJ - patch normally
-          this.form.patchValue(formValue);
+          // Fresh load or incomplete data - run all validators normally
+          this.form.updateValueAndValidity();
+          // updateStepValidation will be called by statusChanges subscription
         }
-
-        this.form.markAsDirty();
+      } else {
+        // No data to restore - run validators
+        this.form.updateValueAndValidity();
       }
 
       // Clear restoration flag
       this.isRestoring = false;
-
-      // Mark all fields as touched to show validation state
-      Object.keys(this.form.controls).forEach((key) => {
-        this.form.get(key)?.markAsTouched();
-      });
-
-      this.form.updateValueAndValidity();
-      untracked(() => this.updateStepValidation());
     });
   }
 

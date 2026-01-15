@@ -24,7 +24,7 @@ export const environment = {
 
   // API Mock Configuration
   api: {
-    useMock: false, // Enable mock API for local development
+    useMock: true, // Enable mock API for local development
     mockDelayMs: 300, // Simulate network latency (300ms)
     mockErrorRate: 0, // Probability of random errors (0 = none, 0.1 = 10%)
   },

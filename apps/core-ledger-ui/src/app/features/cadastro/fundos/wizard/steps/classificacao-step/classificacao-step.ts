@@ -116,7 +116,7 @@ export class ClassificacaoStep {
           this.classificacoesAnbimaOptions.set([]);
           this.anbimaDisabled.set(true);
           this.anbimaMessage.set('Esta classificacao CVM nao possui subclassificacoes ANBIMA');
-          this.form.get('classificacaoAnbima')?.setValue(null);
+          this.form.get('classificacaoAnbima')?.setValue(null, { emitEvent: false });
           return;
         }
 
@@ -143,19 +143,21 @@ export class ClassificacaoStep {
           const currentPublicoAlvo = this.form.get('publicoAlvo')?.value;
 
           // Set minimum requirement if not already set
+          // Use emitEvent: false to avoid triggering valueChanges and overwriting store data
           if (!currentPublicoAlvo) {
-            this.form.get('publicoAlvo')?.setValue(restriction);
+            this.form.get('publicoAlvo')?.setValue(restriction, { emitEvent: false });
           }
         } else {
           this.restrictedPublicoAlvo.set(null);
         }
 
         // Apply tributacao suggestion (only if not already set)
+        // Use emitEvent: false to avoid triggering valueChanges and overwriting store data
         const currentTributacao = this.form.get('tributacao')?.value;
         if (!currentTributacao) {
           const suggestedTributacao = TIPO_FUNDO_TRIBUTACAO_SUGGESTION[tipoFundo];
           if (suggestedTributacao) {
-            this.form.get('tributacao')?.setValue(suggestedTributacao);
+            this.form.get('tributacao')?.setValue(suggestedTributacao, { emitEvent: false });
           }
         }
       });

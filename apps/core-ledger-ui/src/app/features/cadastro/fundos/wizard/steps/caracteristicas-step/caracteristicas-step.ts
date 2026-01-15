@@ -16,7 +16,7 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { filter, startWith } from 'rxjs/operators';
 import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
@@ -90,19 +90,7 @@ export class CaracteristicasStep {
   // Flag to prevent store updates during data restoration
   private isRestoring = false;
 
-  // Computed signals for conditional fields
-  readonly showDataEncerramento = computed(() => {
-    return this.form.get('prazo')?.value === Prazo.DETERMINADO;
-  });
-
-  readonly showLimiteAlavancagem = computed(() => {
-    return this.form.get('permiteAlavancagem')?.value === true;
-  });
-
-  readonly reservadoDisabled = computed(() => {
-    return this.form.get('exclusivo')?.value === true;
-  });
-
+  // Form must be defined first for toSignal() to work
   form = this.formBuilder.group({
     condominio: [null as Condominio | null, [Validators.required]],
     prazo: [null as Prazo | null, [Validators.required]],
@@ -114,6 +102,27 @@ export class CaracteristicasStep {
     aceitaCripto: [false, [Validators.required]],
     percentualExterior: [null as number | null, [Validators.min(0), Validators.max(100)]],
   });
+
+  // Convert form control valueChanges to signals using toSignal()
+  private readonly prazoValue = toSignal(
+    this.form.get('prazo')!.valueChanges.pipe(startWith(this.form.get('prazo')!.value)),
+    { initialValue: null as Prazo | null }
+  );
+
+  private readonly permiteAlavancagemValue = toSignal(
+    this.form.get('permiteAlavancagem')!.valueChanges.pipe(startWith(this.form.get('permiteAlavancagem')!.value)),
+    { initialValue: false }
+  );
+
+  private readonly exclusivoValue = toSignal(
+    this.form.get('exclusivo')!.valueChanges.pipe(startWith(this.form.get('exclusivo')!.value)),
+    { initialValue: false }
+  );
+
+  // Computed signals for conditional fields (now properly reactive)
+  readonly showDataEncerramento = computed(() => this.prazoValue() === Prazo.DETERMINADO);
+  readonly showLimiteAlavancagem = computed(() => this.permiteAlavancagemValue() === true);
+  readonly reservadoDisabled = computed(() => this.exclusivoValue() === true);
 
   constructor() {
     // Setup form subscriptions
