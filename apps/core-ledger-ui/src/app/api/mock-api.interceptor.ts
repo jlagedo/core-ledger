@@ -137,9 +137,9 @@ function routeRequest(req: any, mockApiService: MockApiService): HttpResponse<an
         }
     }
 
-    // Check for CNPJ verification endpoint: /api/fundos/verificar-cnpj/:cnpj
+    // Check for CNPJ verification endpoint: /api/v1/fundos/verificar-cnpj/:cnpj
     // CNPJ can be alphanumeric (A-Z, 0-9) with 14 characters
-    const cnpjVerificationMatch = url.match(/\/api\/fundos\/verificar-cnpj\/([A-Z0-9]{14})/i);
+    const cnpjVerificationMatch = url.match(/\/api\/v1\/fundos\/verificar-cnpj\/([A-Z0-9]{14})/i);
     if (cnpjVerificationMatch && req.method === 'GET') {
         const cnpj = cnpjVerificationMatch[1];
         const response = mockVerificarCnpj(cnpj);

@@ -13,19 +13,10 @@ export const MOCK_REGISTERED_CNPJS: Map<string, { fundoId: number; nomeFantasia:
 
 /**
  * Mock response factory for CNPJ verification.
- * Returns disponivel: false if CNPJ is registered, disponivel: true otherwise.
+ * ALWAYS returns disponivel: true for development/testing purposes.
  * @internal
  */
 export function mockVerificarCnpj(cnpj: string): CnpjVerificationResponse {
-  const registered = MOCK_REGISTERED_CNPJS.get(cnpj);
-
-  if (registered) {
-    return {
-      disponivel: false,
-      fundoId: registered.fundoId,
-      nomeFantasia: registered.nomeFantasia,
-    };
-  }
-
+  // Always return available for development
   return { disponivel: true };
 }
