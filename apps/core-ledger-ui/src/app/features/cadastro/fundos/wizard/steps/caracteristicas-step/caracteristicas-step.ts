@@ -163,7 +163,7 @@ export class CaracteristicasStep {
         const condomionioPadrao = TIPO_FUNDO_CONDOMINIO_PADRAO[tipoFundo];
         const currentCondominio = this.form.get('condominio')?.value;
         if (!currentCondominio) {
-          this.form.get('condominio')?.setValue(condomionioPadrao);
+          this.form.get('condominio')?.setValue(condomionioPadrao, { emitEvent: false });
         }
 
         // Check if condominio diverges from default
@@ -181,7 +181,7 @@ export class CaracteristicasStep {
         const permiteAlavancagem = TIPO_FUNDO_PERMITE_ALAVANCAGEM[tipoFundo];
         if (!permiteAlavancagem) {
           this.alavancagemDisabled.set(true);
-          this.form.get('permiteAlavancagem')?.setValue(false);
+          this.form.get('permiteAlavancagem')?.setValue(false, { emitEvent: false });
         } else {
           this.alavancagemDisabled.set(false);
         }
@@ -190,7 +190,7 @@ export class CaracteristicasStep {
         const permiteExterior = TIPO_FUNDO_PERMITE_EXTERIOR[tipoFundo];
         if (!permiteExterior) {
           this.exteriorDisabled.set(true);
-          this.form.get('percentualExterior')?.setValue(null);
+          this.form.get('percentualExterior')?.setValue(null, { emitEvent: false });
         } else {
           this.exteriorDisabled.set(false);
         }

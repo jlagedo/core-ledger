@@ -18,8 +18,8 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter, startWith } from 'rxjs/operators';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { filter, map, startWith } from 'rxjs/operators';
 import { CurrencyMaskDirective } from '../../../../../../directives/currency-mask.directive';
 import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
@@ -86,23 +86,30 @@ export class PrazosStep {
     prazos: this.formBuilder.array<FormGroup>([]),
   });
 
+  // Convert form valueChanges to signal for reactive computed dependencies
+  // This fixes the bug where computed() doesn't track Reactive Forms values
+  // See: docs/aidebug/computed-signal-form-values.md
+  private readonly prazosFormValue = toSignal(
+    this.form.valueChanges.pipe(
+      startWith(this.form.value),
+      map((value) => value.prazos ?? [])
+    ),
+    { initialValue: [] as Partial<FundoPrazo>[] }
+  );
+
   // Computed signals
   readonly prazosArray = computed(() => this.form.get('prazos') as FormArray);
   readonly prazosCount = computed(() => this.prazosArray().length);
   readonly canAddPrazo = computed(() => this.prazosCount() < MAX_PRAZOS);
 
   readonly hasAplicacao = computed(() => {
-    const prazos = this.prazosArray().controls;
-    return prazos.some(
-      (control) => control.get('tipoOperacao')?.value === TipoOperacao.APLICACAO
-    );
+    const prazos = this.prazosFormValue();
+    return prazos.some((prazo) => prazo.tipoOperacao === TipoOperacao.APLICACAO);
   });
 
   readonly hasResgate = computed(() => {
-    const prazos = this.prazosArray().controls;
-    return prazos.some(
-      (control) => control.get('tipoOperacao')?.value === TipoOperacao.RESGATE
-    );
+    const prazos = this.prazosFormValue();
+    return prazos.some((prazo) => prazo.tipoOperacao === TipoOperacao.RESGATE);
   });
 
   // Track current tipo fundo for defaults

@@ -1,5 +1,6 @@
 ---
 description: Fast commit with sanity checks (build, naming conventions, lint)
+model: haiku
 allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git add:*), Bash(git commit:*), Bash(git log:*), Bash(nx affected:*), Bash(nx build:*), Bash(nx lint:*), Bash(npx nx build:*), Bash(npx nx lint:*), Bash(dotnet build:*), Read, Glob, Grep
 argument-hint: [commit message]
 ---
@@ -80,10 +81,22 @@ If all checks pass:
 git commit -m "$(cat <<'EOF'
 <commit message here>
 
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
+
+> "<goblin quote>" - <goblin name>, Goblin Camp
 EOF
 )"
 ```
+
+**Goblin Quote Guidelines:**
+- Invent a simple, funny one-liner as if spoken by a random goblin from Baldur's Gate 3
+- The quote should vaguely relate to their day (eating, fighting, being bossed around, worshipping the Absolute, etc.)
+- Use silly goblin names like: Brakk, Grubnik, Snot, Wort, Mungus, Skrawk, Drizzle, Gribble, Nix, Blobby
+- Keep it short and absurd (one sentence max)
+- Examples:
+  - "Me found shiny rock. Me ate shiny rock. Tummy hurts now." - Grubnik, Goblin Camp
+  - "Boss said stand here. Me stand here three days. Me good goblin." - Wort, Goblin Camp
+  - "Why tall ones always running? Just sit and eat bugs like normal." - Snot, Goblin Camp
 
 ### Step 6: Summary
 
