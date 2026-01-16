@@ -46,6 +46,49 @@ readonly showLimiteAlavancagem = computed(() => this.permiteAlavancagemValue() =
 3. `initialValue` provides a fallback before the observable emits
 4. The form must be defined **before** the `toSignal()` calls (class field initialization order matters)
 
+## FormArray Pattern
+
+For components with `FormArray`, convert the entire form's `valueChanges` and map to the array:
+
+```typescript
+// For FormArray-based computed signals
+private readonly itemsFormValue = toSignal(
+  this.form.valueChanges.pipe(
+    startWith(this.form.value),
+    map((value) => (value.items ?? []) as Partial<ItemType>[])
+  ),
+  { initialValue: [] as Partial<ItemType>[] }
+);
+
+// Now computed signals can react to array changes
+readonly itemsCount = computed(() => this.itemsFormValue().length);
+readonly hasSpecialItem = computed(() =>
+  this.itemsFormValue().some((item) => item.type === ItemType.SPECIAL)
+);
+```
+
+**Why the whole form?** Individual FormArray controls don't have stable `valueChanges` observables since controls are added/removed dynamically.
+
+## Form Validation Errors Pattern
+
+For computed signals that check validation errors (e.g., `hasError()`), track `statusChanges`:
+
+```typescript
+// Convert statusChanges to signal for validation tracking
+private readonly formStatus = toSignal(
+  this.form.statusChanges.pipe(startWith(this.form.status)),
+  { initialValue: this.form.status }
+);
+
+// Computed re-runs when validation state changes
+readonly hasCustomError = computed(() => {
+  this.formStatus(); // Triggers re-evaluation on status change
+  return this.form.get('items')?.hasError('customValidator') ?? false;
+});
+```
+
+**Why needed?** Validation errors change on `statusChanges`, not `valueChanges`. Without this, error-checking computed signals won't update.
+
 ## Angular Documentation Reference
 
 From Angular's official documentation (`angular.dev`):
@@ -55,17 +98,53 @@ From Angular's official documentation (`angular.dev`):
 
 ## Files Affected
 
-- `apps/core-ledger-ui/src/app/features/cadastro/fundos/wizard/steps/caracteristicas-step/caracteristicas-step.ts`
+**Originally fixed:**
+- `caracteristicas-step.ts` - Single control pattern
+
+**Later discovered and fixed (2025-01-16):**
+- `classificacao-step.ts` - Single control + effect dependency
+- `parametros-cota-step.ts` - Single control converted from effect to computed
+- `taxas-step.ts` - FormArray pattern
+- `vinculos-step.ts` - FormArray pattern
+- `classes-step.ts` - FormArray + statusChanges pattern
+- `parametros-fidc-step.ts` - Multiple single controls
+
+**Not affected (already correct):**
+- `identificacao-step.ts`
+- `prazos-step.ts`
+- `documentos-step.ts`
 
 ## Pattern to Watch For
 
 Any time you see `computed()` reading from:
-- `this.form.get('fieldName')?.value`
-- `this.formControl.value`
+- `this.form.get('fieldName')?.value` - Use single control toSignal pattern
+- `this.formControl.value` - Use single control toSignal pattern
+- `this.formArray.length` - Use FormArray pattern
+- `this.formArray.controls.map(...)` - Use FormArray pattern
+- `this.form.get('field')?.hasError(...)` - Use statusChanges pattern
 - Any non-signal reactive form property
 
-This is likely a bug. Convert to `toSignal()` pattern instead.
+This is likely a bug. Convert to the appropriate `toSignal()` pattern.
+
+## Common Mistake: Effects Reading Form Values
+
+Effects have the same problem - they won't re-run when form values change:
+
+```typescript
+// BROKEN - effect won't re-run when form changes
+effect(() => {
+  const value = this.form.get('field')?.value;
+  this.doSomething(value);
+});
+
+// FIXED - use toSignal dependency
+private readonly fieldValue = toSignal(...);
+effect(() => {
+  const value = this.fieldValue();
+  this.doSomething(value);
+});
+```
 
 ## Date
 
-2025-01-15
+2025-01-15 (original), 2025-01-16 (expanded with FormArray and statusChanges patterns)

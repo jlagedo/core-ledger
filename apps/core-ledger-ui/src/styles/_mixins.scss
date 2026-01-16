@@ -14,7 +14,7 @@
 /// @param {String} $mode - 'light' or 'dark'
 @mixin generate-theme-vars($mode) {
   $t: map.get($theme-tokens, $mode);
-  $prefix: if($mode == light, light, dark);
+  $prefix: if(sass($mode == light): light; else: dark);
 
   // --- Core ---
   --bs-body-bg: #{map.get($t, body-bg)};
@@ -189,11 +189,11 @@
   --indigo-30: #{map.get($t, indigo-30)};
 
   // --- Accent Colors ---
-  --accent-teal: #{if($mode == dark, $accent-teal, $daylight-teal)};
-  --accent-coral: #{if($mode == dark, $accent-coral, $daylight-coral)};
-  --accent-amber: #{if($mode == dark, $accent-amber, $daylight-amber)};
-  --accent-indigo: #{if($mode == dark, $accent-indigo, $daylight-indigo)};
-  --accent-blue: #{if($mode == dark, $accent-blue, $brand-blue-500)};
+  --accent-teal: #{if(sass($mode == dark): $accent-teal; else: $daylight-teal)};
+  --accent-coral: #{if(sass($mode == dark): $accent-coral; else: $daylight-coral)};
+  --accent-amber: #{if(sass($mode == dark): $accent-amber; else: $daylight-amber)};
+  --accent-indigo: #{if(sass($mode == dark): $accent-indigo; else: $daylight-indigo)};
+  --accent-blue: #{if(sass($mode == dark): $accent-blue; else: $brand-blue-500)};
 
   // --- Status Indicators (Ticker/Alerts) ---
   --status-safe: #{map.get($t, status-safe)};

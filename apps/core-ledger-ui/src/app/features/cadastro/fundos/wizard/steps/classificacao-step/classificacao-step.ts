@@ -10,8 +10,8 @@ import {
   untracked,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter } from 'rxjs/operators';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { filter, startWith } from 'rxjs/operators';
 import { ParametrosService } from '../../../../../../services/parametros';
 import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
@@ -69,18 +69,29 @@ export class ClassificacaoStep {
   // Loading flag to prevent store updates during restoration
   private isRestoring = false;
 
-  // Computed signal for checking if CVM classification has ANBIMA options
-  readonly cvmHasAnbimaOptions = computed(() => {
-    const cvmValue = this.form.get('classificacaoCvm')?.value;
-    return cvmValue ? CVM_HAS_ANBIMA_OPTIONS.has(cvmValue) : false;
-  });
-
+  // Form must be defined before toSignal() calls
   form = this.formBuilder.group({
     classificacaoCvm: [null as ClassificacaoCvm | null, [Validators.required]],
     classificacaoAnbima: [null as string | null],
     codigoAnbima: ['', [Validators.maxLength(20)]],
     publicoAlvo: [null as PublicoAlvo | null, [Validators.required]],
     tributacao: [null as Tributacao | null, [Validators.required]],
+  });
+
+  // Convert form control valueChanges to signal for reactive computed dependencies
+  // Fixes bug: computed() doesn't track Reactive Forms values directly
+  // See: docs/aidebug/computed-signal-form-values.md
+  private readonly classificacaoCvmValue = toSignal(
+    this.form.get('classificacaoCvm')!.valueChanges.pipe(
+      startWith(this.form.get('classificacaoCvm')!.value)
+    ),
+    { initialValue: null as ClassificacaoCvm | null }
+  );
+
+  // Computed signal for checking if CVM classification has ANBIMA options
+  readonly cvmHasAnbimaOptions = computed(() => {
+    const cvmValue = this.classificacaoCvmValue();
+    return cvmValue ? CVM_HAS_ANBIMA_OPTIONS.has(cvmValue) : false;
   });
 
   constructor() {
@@ -101,9 +112,10 @@ export class ClassificacaoStep {
       });
 
     // Effect to load ANBIMA options when CVM classification changes
+    // Uses classificacaoCvmValue signal for proper reactivity
     effect(
       () => {
-        const cvmValue = this.form.get('classificacaoCvm')?.value;
+        const cvmValue = this.classificacaoCvmValue();
 
         if (!cvmValue) {
           this.classificacoesAnbimaOptions.set([]);
@@ -168,18 +180,10 @@ export class ClassificacaoStep {
       const stepId = stepConfig.id;
       const dataVersion = this.wizardStore.dataVersion();
 
-      console.log('[ClassificacaoStep] Effect triggered:', {
-        stepId,
-        dataVersion,
-        lastLoadedStepId: this.lastLoadedStepId,
-        lastDataVersion: this.lastDataVersion,
-      });
-
       // Skip if same step AND same dataVersion (no changes)
       const sameStep = this.lastLoadedStepId === stepId;
       const sameVersion = this.lastDataVersion === dataVersion;
       if (sameStep && sameVersion) {
-        console.log('[ClassificacaoStep] Effect skipped: same step and version');
         return;
       }
       this.lastLoadedStepId = stepId;
@@ -197,20 +201,11 @@ export class ClassificacaoStep {
             | undefined
       );
 
-      console.log('[ClassificacaoStep] Effect loading data:', {
-        stepKey: stepConfig.key,
-        stepData,
-        allStepDataKeys: Object.keys(untracked(() => this.wizardStore.stepData())),
-      });
-
       if (stepData) {
         const formValue = this.prepareDataForForm(stepData);
-        console.log('[ClassificacaoStep] Patching form with:', formValue);
         // Patch WITHOUT emitEvent: false - let events fire naturally
         this.form.patchValue(formValue);
         this.form.markAsDirty();
-      } else {
-        console.log('[ClassificacaoStep] No step data found to restore');
       }
 
       // Clear restoration flag
@@ -245,7 +240,7 @@ export class ClassificacaoStep {
           if (currentAnbima) {
             const isValid = response.items.some((item) => item.codigo === currentAnbima);
             if (!isValid) {
-              this.form.get('classificacaoAnbima')?.setValue(null);
+              this.form.get('classificacaoAnbima')?.setValue(null, { emitEvent: false });
             }
           }
         },

@@ -18,7 +18,7 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { filter, startWith } from 'rxjs/operators';
 import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
@@ -116,11 +116,35 @@ export class ParametrosFidcStep {
     { validators: ratingAgenciaValidator }
   );
 
-  // Computed signals for conditional rendering
-  readonly possuiCoobrigacao = computed(() => this.form.get('possuiCoobrigacao')?.value === true);
-  readonly hasRegistradora = computed(() => this.form.get('registradoraRecebiveis')?.value !== null);
+  // Convert form control valueChanges to signal for reactive computed dependencies
+  // Fixes bug: computed() doesn't track Reactive Forms values directly
+  // See: docs/aidebug/computed-signal-form-values.md
+  private readonly possuiCoobrigacaoValue = toSignal(
+    this.form.get('possuiCoobrigacao')!.valueChanges.pipe(
+      startWith(this.form.get('possuiCoobrigacao')!.value)
+    ),
+    { initialValue: false }
+  );
+
+  private readonly registradoraRecebiveisValue = toSignal(
+    this.form.get('registradoraRecebiveis')!.valueChanges.pipe(
+      startWith(this.form.get('registradoraRecebiveis')!.value)
+    ),
+    { initialValue: null as RegistradoraRecebiveis | null }
+  );
+
+  private readonly ratingMinimoValue = toSignal(
+    this.form.get('ratingMinimo')!.valueChanges.pipe(
+      startWith(this.form.get('ratingMinimo')!.value)
+    ),
+    { initialValue: null as string | null }
+  );
+
+  // Computed signals for conditional rendering using signals for proper reactivity
+  readonly possuiCoobrigacao = computed(() => this.possuiCoobrigacaoValue() === true);
+  readonly hasRegistradora = computed(() => this.registradoraRecebiveisValue() !== null);
   readonly hasRating = computed(() => {
-    const rating = this.form.get('ratingMinimo')?.value;
+    const rating = this.ratingMinimoValue();
     return rating !== null && rating !== '';
   });
 

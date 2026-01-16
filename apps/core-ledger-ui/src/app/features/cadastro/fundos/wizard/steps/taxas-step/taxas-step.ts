@@ -100,15 +100,23 @@ export class TaxasStep {
     taxas: this.formBuilder.array<FormGroup>([]),
   });
 
-  // Computed signals
+  // Convert form valueChanges to signal for reactive computed dependencies
+  // Fixes bug: computed() doesn't track Reactive Forms values directly
+  // See: docs/aidebug/computed-signal-form-values.md
+  private readonly taxasFormValue = toSignal(
+    this.form.valueChanges.pipe(
+      startWith(this.form.value),
+    ),
+    { initialValue: { taxas: [] as Partial<FundoTaxa>[] } }
+  );
+
+  // Computed signals using the signal for proper reactivity
   readonly taxasArray = computed(() => this.form.get('taxas') as FormArray);
-  readonly taxasCount = computed(() => this.taxasArray().length);
+  readonly taxasCount = computed(() => (this.taxasFormValue().taxas ?? []).length);
   readonly canAddTaxa = computed(() => this.taxasCount() < MAX_TAXAS);
   readonly hasAdministracao = computed(() => {
-    const taxas = this.taxasArray().controls;
-    return taxas.some(
-      (control) => control.get('tipoTaxa')?.value === TipoTaxa.ADMINISTRACAO
-    );
+    const taxas = this.taxasFormValue().taxas ?? [];
+    return taxas.some((taxa) => taxa.tipoTaxa === TipoTaxa.ADMINISTRACAO);
   });
 
   constructor() {

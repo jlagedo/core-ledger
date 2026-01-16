@@ -19,8 +19,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged, filter, startWith, switchMap, catchError, of } from 'rxjs';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, filter, map, startWith, switchMap, catchError, of } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
@@ -104,14 +104,25 @@ export class VinculosStep {
     vinculos: this.formBuilder.array<FormGroup>([], [vinculosObrigatoriosValidator]),
   });
 
+  // Convert form valueChanges to signal for reactive computed dependencies
+  // Fixes bug: computed() doesn't track Reactive Forms values directly
+  // See: docs/aidebug/computed-signal-form-values.md
+  private readonly vinculosFormValue = toSignal(
+    this.form.valueChanges.pipe(
+      startWith(this.form.value),
+      map((value) => (value.vinculos ?? []) as Partial<VinculoFormData>[])
+    ),
+    { initialValue: [] as Partial<VinculoFormData>[] }
+  );
+
   // Autocomplete state per vínculo (keyed by index)
   readonly autocompleteResults = signal<Map<number, InstituicaoAutocompleteItem[]>>(new Map());
   readonly autocompleteLoading = signal<Map<number, boolean>>(new Map());
   readonly autocompleteVisible = signal<Map<number, boolean>>(new Map());
 
-  // Computed signals
+  // Computed signals using the signal for proper reactivity
   readonly vinculosArray = computed(() => this.form.get('vinculos') as FormArray);
-  readonly vinculosCount = computed(() => this.vinculosArray().length);
+  readonly vinculosCount = computed(() => this.vinculosFormValue().length);
 
   // Computed: Check if fund is FIDC type (RF-02)
   readonly isFidc = computed(() => {
@@ -122,11 +133,10 @@ export class VinculosStep {
 
   // Computed: Get missing required vinculos
   readonly missingVinculos = computed(() => {
-    const vinculosArray = this.form.get('vinculos') as FormArray;
-    const vinculos = vinculosArray.controls.map((ctrl) => ({
-      tipoVinculo: ctrl.get('tipoVinculo')?.value as TipoVinculo,
-      cnpjInstituicao: ctrl.get('cnpjInstituicao')?.value as string,
-      instituicaoId: ctrl.get('instituicaoId')?.value as string | null,
+    const vinculos = this.vinculosFormValue().map((v) => ({
+      tipoVinculo: v.tipoVinculo as TipoVinculo,
+      cnpjInstituicao: v.cnpjInstituicao as string,
+      instituicaoId: v.instituicaoId as string | null,
     })) as VinculoFormData[];
     return getMissingRequiredVinculos(vinculos);
   });
@@ -134,20 +144,18 @@ export class VinculosStep {
   // Computed: Check if FIDC has recommended vinculos (RF-02)
   readonly hasFidcRecommended = computed(() => {
     if (!this.isFidc()) return true;
-    const vinculosArray = this.form.get('vinculos') as FormArray;
-    const vinculos = vinculosArray.controls.map((ctrl) => ({
-      tipoVinculo: ctrl.get('tipoVinculo')?.value as TipoVinculo,
-      cnpjInstituicao: ctrl.get('cnpjInstituicao')?.value as string,
-      instituicaoId: ctrl.get('instituicaoId')?.value as string | null,
+    const vinculos = this.vinculosFormValue().map((v) => ({
+      tipoVinculo: v.tipoVinculo as TipoVinculo,
+      cnpjInstituicao: v.cnpjInstituicao as string,
+      instituicaoId: v.instituicaoId as string | null,
     })) as VinculoFormData[];
     return hasFidcRecommendedVinculos(vinculos);
   });
 
   // Computed: Get optional vinculo types available to add
   readonly availableOptionalVinculos = computed(() => {
-    const vinculosArray = this.form.get('vinculos') as FormArray;
-    const existingTypes = vinculosArray.controls
-      .map((ctrl) => ctrl.get('tipoVinculo')?.value as TipoVinculo)
+    const existingTypes = this.vinculosFormValue()
+      .map((v) => v.tipoVinculo as TipoVinculo)
       .filter(Boolean);
     return getAvailableTipoVinculos(existingTypes, false);
   });

@@ -10,10 +10,10 @@ import {
   untracked,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { merge, Observable, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, map, startWith } from 'rxjs/operators';
 import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
 import { IdentificacaoFormData } from '../../models/identificacao.model';
@@ -78,9 +78,6 @@ export class ParametrosCotaStep {
     return `R$ 1.234.567,${decimais}`;
   });
 
-  // Signals for UI state
-  readonly showCotaEstimadaInfo = signal(false);
-
   // Fuso horario typeahead (RF-04: Select com busca)
   readonly fusoHorarioFocus$ = new Subject<string>();
 
@@ -130,6 +127,19 @@ export class ParametrosCotaStep {
     permiteCotaEstimada: [PARAMETROS_COTA_DEFAULTS.permiteCotaEstimada, [Validators.required]],
   });
 
+  // Convert form control valueChanges to signal for reactive computed dependencies
+  // Fixes bug: computed() doesn't track Reactive Forms values directly
+  // See: docs/aidebug/computed-signal-form-values.md
+  private readonly permiteCotaEstimadaValue = toSignal(
+    this.form.get('permiteCotaEstimada')!.valueChanges.pipe(
+      startWith(this.form.get('permiteCotaEstimada')!.value)
+    ),
+    { initialValue: false }
+  );
+
+  // Computed signal for UI state (RF-05)
+  readonly showCotaEstimadaInfo = computed(() => this.permiteCotaEstimadaValue() === true);
+
   constructor() {
     // Setup form subscriptions
     this.form.statusChanges
@@ -156,13 +166,6 @@ export class ParametrosCotaStep {
         if (value.casasDecimaisPl != null) {
           this.casasDecimaisPlValue.set(value.casasDecimaisPl);
         }
-      });
-
-    // Effect: Handle permiteCotaEstimada info display (RF-05)
-    effect(
-      () => {
-        const permiteCotaEstimada = this.form.get('permiteCotaEstimada')?.value;
-        this.showCotaEstimadaInfo.set(permiteCotaEstimada === true);
       });
 
     // Effect: Load data when step changes OR when store data is restored (dataVersion changes)

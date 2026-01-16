@@ -42,5 +42,11 @@ export class WizardDatabase extends Dexie {
             draft.version = draft.version || 1;
           });
       });
+
+    // Version 3: Add compound index [draftId+tempId] for efficient lookups
+    this.version(3).stores({
+      drafts: 'id, updatedAt, version',
+      files: '++id, draftId, stepKey, tempId, [draftId+tempId], createdAt',
+    });
   }
 }

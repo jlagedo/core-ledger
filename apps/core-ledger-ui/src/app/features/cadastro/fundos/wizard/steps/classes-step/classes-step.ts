@@ -18,8 +18,8 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter, startWith } from 'rxjs/operators';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { filter, map, startWith } from 'rxjs/operators';
 import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
 import { IdentificacaoFormData, TipoFundo } from '../../models/identificacao.model';
@@ -111,9 +111,26 @@ export class ClassesStep {
     classes: this.formBuilder.array<FormGroup>([], [ordemSubordinacaoValidator, codigoUnicoValidator]),
   });
 
-  // Computed signals
+  // Convert form valueChanges to signal for reactive computed dependencies
+  // Fixes bug: computed() doesn't track Reactive Forms values directly
+  // See: docs/aidebug/computed-signal-form-values.md
+  private readonly classesFormValue = toSignal(
+    this.form.valueChanges.pipe(
+      startWith(this.form.value),
+      map((value) => (value.classes ?? []) as Partial<FundoClasse>[])
+    ),
+    { initialValue: [] as Partial<FundoClasse>[] }
+  );
+
+  // Convert form statusChanges to signal for validation error tracking
+  private readonly formStatus = toSignal(
+    this.form.statusChanges.pipe(startWith(this.form.status)),
+    { initialValue: this.form.status }
+  );
+
+  // Computed signals using the signal for proper reactivity
   readonly classesArray = computed(() => this.form.get('classes') as FormArray);
-  readonly classesCount = computed(() => this.classesArray().length);
+  readonly classesCount = computed(() => this.classesFormValue().length);
   readonly canAddClasse = computed(() => this.classesCount() < MAX_CLASSES);
   readonly isMulticlasse = signal(false);
 
@@ -134,13 +151,18 @@ export class ClassesStep {
   });
 
   // Computed: Check for subordination order validation errors
+  // Triggers on formStatus changes to ensure reactivity
   readonly hasOrdemGapError = computed(() => {
+    // Reading formStatus ensures this computed re-runs on validation changes
+    this.formStatus();
     const classesControl = this.form.get('classes');
     return classesControl?.hasError('ordemGap') ?? false;
   });
 
   // Computed: Check for duplicate codigo error
   readonly hasCodigoDuplicadoError = computed(() => {
+    // Reading formStatus ensures this computed re-runs on validation changes
+    this.formStatus();
     const classesControl = this.form.get('classes');
     return classesControl?.hasError('codigoDuplicado') ?? false;
   });
@@ -148,9 +170,9 @@ export class ClassesStep {
   // Computed: Get list of subordination types present
   readonly tiposSubordinacaoPresentes = computed(() => {
     const tipos: TipoClasseFidc[] = [];
-    const classesArray = this.form.get('classes') as FormArray;
-    classesArray.controls.forEach((ctrl) => {
-      const tipo = ctrl.get('tipoClasseFidc')?.value;
+    const classes = this.classesFormValue();
+    classes.forEach((classe) => {
+      const tipo = classe.tipoClasseFidc;
       if (tipo && !tipos.includes(tipo)) {
         tipos.push(tipo);
       }

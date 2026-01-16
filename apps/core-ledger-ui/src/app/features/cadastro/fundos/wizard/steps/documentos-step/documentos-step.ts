@@ -145,19 +145,24 @@ export class DocumentosStep implements OnDestroy {
       }
     });
 
-    // Watch documentos changes and update store (skip during restoration)
-    effect(() => {
-      const docs = this.documentos();
+    // NOTE: Removed the effect that watched documentos() changes.
+    // It caused an infinite loop because reading documentos() and calling setStepData()
+    // triggered reactive updates. Instead, we now call saveToStore() explicitly
+    // from addDocumento() and removeDocumento().
+  }
 
-      // Skip store update during data restoration
-      if (this.isRestoring) {
-        return;
-      }
-
-      const stepConfig = untracked(() => this.stepConfig());
-      this.wizardStore.setStepData(stepConfig.key, docs);
-      untracked(() => this.updateStepValidation());
-    });
+  /**
+   * Save current documentos to the wizard store.
+   * Called explicitly after adding/removing documents (not via effect).
+   */
+  private saveToStore(): void {
+    if (this.isRestoring) {
+      return;
+    }
+    const docs = this.documentos();
+    const stepConfig = this.stepConfig();
+    this.wizardStore.setStepData(stepConfig.key, docs);
+    this.updateStepValidation();
   }
 
   // Drag and drop handlers
@@ -262,6 +267,9 @@ export class DocumentosStep implements OnDestroy {
     // Add to list
     this.documentos.update((docs) => [...docs, documento]);
 
+    // Save to wizard store (explicit call instead of effect)
+    this.saveToStore();
+
     // Save file to IndexedDB for persistence
     this.saveFileToIndexedDB(documento, file);
 
@@ -276,6 +284,10 @@ export class DocumentosStep implements OnDestroy {
 
   removeDocumento(tempId: string): void {
     this.documentos.update((docs) => docs.filter((d) => d.tempId !== tempId));
+
+    // Save to wizard store (explicit call instead of effect)
+    this.saveToStore();
+
     // Delete file from IndexedDB
     this.deleteFileFromIndexedDB(tempId);
   }
