@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import { environment } from '../../environments/environment.production';
 
 /**
  * Production Safety Tests

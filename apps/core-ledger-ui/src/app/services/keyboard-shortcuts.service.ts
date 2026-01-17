@@ -340,16 +340,8 @@ export class KeyboardShortcutsService {
    * Mostrar ajuda de atalhos de teclado
    */
   private showHelp(): void {
-    // Por enquanto, registrar no console. Poderia ser melhorado para mostrar um modal.
-    console.group('Atalhos de Teclado');
-    for (const [category, shortcuts] of this.shortcutsByCategory()) {
-      console.group(category);
-      for (const shortcut of shortcuts) {
-        console.log(`${this.getKeyLabel(shortcut.keys)}: ${shortcut.label}`);
-      }
-      console.groupEnd();
-    }
-    console.groupEnd();
+    // TODO: Implement modal dialog to display keyboard shortcuts
+    // For now, this is a placeholder for future implementation
   }
 
   /**

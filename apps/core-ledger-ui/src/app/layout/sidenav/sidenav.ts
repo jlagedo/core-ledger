@@ -7,8 +7,6 @@ import {
   output,
   signal,
   viewChild,
-  viewChildren,
-  QueryList,
   afterNextRender,
   Injector,
 } from '@angular/core';

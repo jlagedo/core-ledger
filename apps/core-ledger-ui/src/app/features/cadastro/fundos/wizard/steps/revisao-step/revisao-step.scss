@@ -1,0 +1,751 @@
+/**
+ * Revisao Step - Institutional Review Aesthetic
+ * Clean data visualization with a professional financial services feel
+ */
+
+.revisao-step {
+  // Custom letter spacing for headings
+  .letter-spacing-wide {
+    letter-spacing: 0.05em;
+  }
+
+  // ================================================
+  // Completeness Card - Hero section
+  // ================================================
+  .completeness-card {
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-left: 4px solid var(--bs-primary);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .completeness-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .completeness-icon {
+    font-size: 2.5rem;
+    line-height: 1;
+  }
+
+  .completeness-info {
+    flex: 1;
+
+    h6 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--bs-emphasis-color);
+    }
+  }
+
+  .completeness-progress {
+    flex-shrink: 0;
+  }
+
+  // Progress Ring
+  .progress-ring {
+    position: relative;
+    width: 4rem;
+    height: 4rem;
+
+    svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    &__bg {
+      fill: none;
+      stroke: var(--bs-border-color);
+      stroke-width: 3;
+    }
+
+    &__fill {
+      fill: none;
+      stroke: var(--bs-success);
+      stroke-width: 3;
+      stroke-linecap: round;
+      transition: stroke-dasharray 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    &__text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--bs-emphasis-color);
+    }
+  }
+
+  .missing-steps-alert {
+    .alert {
+      border-radius: 0.5rem;
+      border-left: 4px solid var(--bs-warning);
+
+      ul {
+        padding-left: 1.25rem;
+        margin: 0;
+
+        li {
+          margin-bottom: 0.25rem;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+  }
+
+  // ================================================
+  // Section Checklist - Status grid
+  // ================================================
+  .section-checklist {
+    background: var(--bs-body-tertiary);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+  }
+
+  .checklist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: 0.75rem;
+  }
+
+  .checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--bs-body-bg);
+    border-radius: 0.5rem;
+    border: 1px solid var(--bs-border-color);
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateX(2px);
+    }
+
+    &--complete {
+      border-left: 3px solid var(--bs-success);
+
+      .checklist-status {
+        color: var(--bs-success);
+      }
+    }
+
+    &--incomplete {
+      border-left: 3px solid var(--bs-danger);
+
+      .checklist-status {
+        color: var(--bs-danger);
+      }
+    }
+
+    &--optional {
+      border-left: 3px solid var(--bs-secondary);
+      opacity: 0.8;
+
+      .checklist-status {
+        color: var(--bs-secondary);
+      }
+    }
+
+    &--warning {
+      border-left: 3px solid var(--bs-warning);
+
+      .checklist-status {
+        color: var(--bs-warning);
+      }
+    }
+  }
+
+  .checklist-status {
+    font-size: 1.125rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .checklist-label {
+    flex: 1;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--bs-emphasis-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .checklist-badge {
+    font-size: 0.6875rem;
+    padding: 0.125rem 0.5rem;
+    background: var(--bs-secondary-bg);
+    color: var(--bs-secondary);
+    border-radius: 0.25rem;
+    white-space: nowrap;
+  }
+
+  // ================================================
+  // Accordion Summary - Data display
+  // ================================================
+  .review-accordion {
+    .accordion-item {
+      border: 1px solid var(--bs-border-color);
+      border-radius: 0.75rem !important;
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+      background: var(--bs-body-bg);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .accordion-header {
+      margin: 0;
+    }
+
+    .accordion-header-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+      padding: 1rem 1.25rem;
+      background: transparent;
+      border: none;
+      text-align: left;
+
+      &:hover {
+        background: var(--bs-body-tertiary);
+      }
+
+      &:focus {
+        box-shadow: none;
+      }
+
+      &::after {
+        content: none;
+      }
+    }
+
+    .accordion-icon {
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bs-primary-bg-subtle);
+      color: var(--bs-primary);
+      border-radius: 0.375rem;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .accordion-title {
+      flex: 1;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--bs-emphasis-color);
+    }
+
+    .accordion-badge {
+      padding: 0.25rem 0.625rem;
+      background: var(--bs-secondary-bg);
+      color: var(--bs-secondary);
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .accordion-status {
+      font-size: 1.125rem;
+      line-height: 1;
+
+      &--complete {
+        color: var(--bs-success);
+      }
+
+      &--optional {
+        color: var(--bs-secondary);
+      }
+    }
+
+    .accordion-edit-btn {
+      margin-left: auto;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.75rem;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    .accordion-body {
+      padding: 1.25rem;
+      background: var(--bs-body-tertiary);
+      border-top: 1px solid var(--bs-border-color);
+    }
+  }
+
+  // ================================================
+  // Summary Grid - Key-value pairs
+  // ================================================
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: 1rem;
+  }
+
+  .summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .summary-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--bs-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .summary-value {
+    font-size: 0.9375rem;
+    color: var(--bs-emphasis-color);
+    font-weight: 500;
+  }
+
+  // ================================================
+  // Taxa Cards
+  // ================================================
+  .taxa-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .taxa-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 0.875rem 1rem;
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-left: 3px solid var(--bs-primary);
+    border-radius: 0.5rem;
+  }
+
+  .taxa-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .taxa-type {
+    font-weight: 600;
+    color: var(--bs-emphasis-color);
+  }
+
+  .taxa-value {
+    font-weight: 600;
+    color: var(--bs-primary);
+  }
+
+  .taxa-details {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--bs-secondary);
+  }
+
+  // ================================================
+  // Prazo Cards
+  // ================================================
+  .prazo-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .prazo-card {
+    flex: 1;
+    min-width: 12rem;
+    padding: 1rem;
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+  }
+
+  .prazo-type {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: var(--bs-emphasis-color);
+
+    i {
+      font-size: 1.125rem;
+    }
+  }
+
+  .prazo-values {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .prazo-value {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .prazo-label {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    color: var(--bs-secondary);
+    letter-spacing: 0.04em;
+  }
+
+  .prazo-dx {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--bs-emphasis-color);
+  }
+
+  // ================================================
+  // Classe Cards
+  // ================================================
+  .classe-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .classe-card {
+    flex: 1;
+    min-width: 14rem;
+    padding: 0.875rem 1rem;
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-left: 3px solid var(--bs-info);
+    border-radius: 0.5rem;
+  }
+
+  .classe-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .classe-codigo {
+    padding: 0.125rem 0.5rem;
+    background: var(--bs-secondary-bg);
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .classe-nome {
+    font-weight: 600;
+    color: var(--bs-emphasis-color);
+  }
+
+  .classe-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  // ================================================
+  // Vinculo Cards
+  // ================================================
+  .vinculo-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 0.75rem;
+  }
+
+  .vinculo-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.875rem 1rem;
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+  }
+
+  .vinculo-type {
+    .vinculo-label {
+      font-weight: 600;
+      color: var(--bs-primary);
+      font-size: 0.875rem;
+    }
+  }
+
+  .vinculo-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .vinculo-nome {
+    font-weight: 500;
+    color: var(--bs-emphasis-color);
+  }
+
+  .vinculo-cnpj {
+    font-size: 0.8125rem;
+    color: var(--bs-secondary);
+  }
+
+  // ================================================
+  // Documento Cards
+  // ================================================
+  .documento-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .documento-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+  }
+
+  .documento-icon {
+    color: var(--bs-danger);
+    font-size: 1.25rem;
+  }
+
+  .documento-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+
+  .documento-tipo {
+    font-weight: 500;
+    color: var(--bs-emphasis-color);
+  }
+
+  .documento-nome {
+    font-size: 0.75rem;
+    color: var(--bs-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .documento-size {
+    font-size: 0.75rem;
+    color: var(--bs-secondary);
+    flex-shrink: 0;
+  }
+
+  .empty-docs {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  // ================================================
+  // Modals - Success/Error
+  // ================================================
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .success-modal,
+  .error-modal {
+    background: var(--bs-body-bg);
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 28rem;
+    width: 90%;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .modal-icon {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+
+    &--success {
+      background: var(--bs-success-bg-subtle);
+      color: var(--bs-success);
+    }
+
+    &--error {
+      background: var(--bs-danger-bg-subtle);
+      color: var(--bs-danger);
+    }
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--bs-emphasis-color);
+  }
+
+  .modal-message {
+    color: var(--bs-secondary);
+    margin-bottom: 1rem;
+  }
+
+  .modal-details {
+    background: var(--bs-body-tertiary);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--bs-border-color);
+    }
+  }
+
+  .detail-label {
+    font-size: 0.875rem;
+    color: var(--bs-secondary);
+  }
+
+  .detail-value {
+    font-weight: 600;
+    color: var(--bs-emphasis-color);
+  }
+
+  .modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .btn {
+      width: 100%;
+    }
+  }
+
+  .field-errors {
+    text-align: left;
+    background: var(--bs-danger-bg-subtle);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+
+    ul {
+      margin: 0.5rem 0 0;
+      padding-left: 1.25rem;
+    }
+  }
+
+  // ================================================
+  // Responsive adjustments
+  // ================================================
+  @media (max-width: 768px) {
+    .completeness-header {
+      flex-wrap: wrap;
+    }
+
+    .completeness-progress {
+      order: -1;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .checklist-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .summary-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .prazo-list,
+    .classe-list {
+      flex-direction: column;
+    }
+
+    .prazo-card,
+    .classe-card {
+      min-width: 100%;
+    }
+
+    .vinculo-list {
+      grid-template-columns: 1fr;
+    }
+
+    .modal-actions {
+      .btn {
+        font-size: 0.875rem;
+        padding: 0.625rem 1rem;
+      }
+    }
+  }
+}

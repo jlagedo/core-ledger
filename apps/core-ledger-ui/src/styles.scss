@@ -1,14 +1,15 @@
 /* ============================================================
-   Core Ledger UI Theme — v3.2
+   Core Ledger UI Theme — v3.3
 
    Modular SCSS Architecture:
 
    📁 styles/
-   ├── _variables.scss      → Bootstrap config, primitives, semantic tokens
+   ├── _bootstrap.scss      → Bootstrap framework (CSS output, ONLY imported here)
+   ├── _variables.scss      → Sass variables only (primitives, semantic tokens)
    ├── _theme-tokens.scss   → Light/dark mode token maps
    ├── _alert-tokens.scss   → Alert & badge tokens
    ├── _functions.scss      → Helper functions (theme-get, alert-get)
-   ├── _mixins.scss         → CSS variable generation mixin
+   ├── _mixins.scss         → CSS variable generation mixin (no Bootstrap)
    ├── _keyframes.scss      → Animations
    ├── _theme-modes.scss    → Theme blocks (light/dark CSS vars)
    ├── _components.scss     → Component styles
@@ -16,10 +17,19 @@
    ├── _accessibility.scss  → Accessibility media queries
    └── _data-grid.scss      → AG Grid list components (filter bar, presets, etc.)
 
+   IMPORTANT: Component SCSS files should import _mixins.scss or _variables.scss
+   but NOT _bootstrap.scss to avoid duplicating Bootstrap CSS.
+
 ============================================================ */
 
 // ============================================================
-// 1. MODULE IMPORTS (@use rules must come first)
+// 1. BOOTSTRAP (must be first - outputs all Bootstrap CSS)
+// ============================================================
+
+@use "styles/bootstrap";
+
+// ============================================================
+// 2. MODULE IMPORTS (variables, then other modules)
 // ============================================================
 
 @use "styles/variables";
@@ -31,7 +41,7 @@
 @use "styles/data-grid";
 
 // ============================================================
-// 2. EXTERNAL FONTS (@import rules must come after @use)
+// 3. EXTERNAL FONTS (@import rules must come after @use)
 // ============================================================
 // IBM Plex Mono — Bloomberg Terminal inspired typography
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');

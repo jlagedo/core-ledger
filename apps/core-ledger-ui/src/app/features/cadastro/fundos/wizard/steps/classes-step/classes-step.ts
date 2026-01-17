@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   DestroyRef,
-  effect,
   inject,
   input,
   signal,
@@ -19,9 +18,15 @@ import {
   Validators,
 } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { filter, map, startWith } from 'rxjs/operators';
-import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
+import { map, startWith } from 'rxjs/operators';
+import { WizardStepConfig, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
+import {
+  createRestorationEffect,
+  withRestorationGuard,
+  markFormArrayAsTouched,
+  collectFormArrayInvalidFields,
+} from '../../shared';
 import { IdentificacaoFormData, TipoFundo } from '../../models/identificacao.model';
 import {
   ClassesFormData,
@@ -97,13 +102,6 @@ export class ClassesStep {
   readonly tipoClasseFidcOptions = TIPO_CLASSE_FIDC_OPTIONS;
   readonly publicoAlvoOptions = PUBLICO_ALVO_OPTIONS;
   readonly maxClasses = MAX_CLASSES;
-
-  // Track step ID and dataVersion to avoid re-loading unless store data changes
-  private lastLoadedStepId: WizardStepId | null = null;
-  private lastDataVersion = -1;
-
-  // Flag to prevent store updates during data restoration
-  private isRestoring = false;
 
   // Main form
   form = this.formBuilder.group({
@@ -181,6 +179,46 @@ export class ClassesStep {
   });
 
   constructor() {
+    // Create restoration effect
+    const { isRestoring } = createRestorationEffect<ClassesFormData>({
+      stepConfig: () => this.stepConfig(),
+      wizardStore: this.wizardStore,
+      form: this.form,
+      resetForm: () => {
+        const classesArray = this.form.get('classes') as FormArray;
+        classesArray.clear();
+      },
+      restoreData: (data) => {
+        const classesArray = this.form.get('classes') as FormArray;
+        const isFidc = this.isFidc();
+
+        // Restore saved data - use emitEvent: false to prevent handleMulticlasseChange from triggering
+        // and adding default classes before the saved classes are restored
+        // See: docs/aidebug/wizard-multiclasse-restoration-defaults.md
+        this.form.get('multiclasse')?.setValue(data.multiclasse, { emitEvent: false });
+        this.isMulticlasse.set(data.multiclasse);
+
+        if (data.classes && data.classes.length > 0) {
+          // Restore saved data - setupTipoClasseChangeHandler runs automatically via startWith
+          data.classes.forEach((classe) => {
+            classesArray.push(this.createClasseFormGroup(classe, isFidc));
+          });
+        }
+      },
+      createDefaultData: () => {
+        // RF-02: For FIDC, pre-create SENIOR class and enable multiclasse
+        if (this.isFidc()) {
+          const classesArray = this.form.get('classes') as FormArray;
+          // Use emitEvent: false since we're manually adding the class right after
+          this.form.get('multiclasse')?.setValue(true, { emitEvent: false });
+          this.isMulticlasse.set(true);
+          classesArray.push(this.createClasseFormGroup(this.getDefaultSeniorClasse(), true));
+        }
+      },
+      markAllAsTouched: () => this.markAllAsTouched(),
+      updateStepValidation: () => this.updateStepValidation(),
+    });
+
     // Watch multiclasse toggle
     this.form
       .get('multiclasse')
@@ -196,69 +234,13 @@ export class ClassesStep {
     this.form.valueChanges
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        filter(() => !this.isRestoring)
+        withRestorationGuard(isRestoring)
       )
       .subscribe((value) => {
         const stepConfig = untracked(() => this.stepConfig());
         const dataForStore = this.prepareDataForStore(value);
         this.wizardStore.setStepData(stepConfig.key, dataForStore);
       });
-
-    // Effect: Load data when step changes or dataVersion changes (draft restoration)
-    effect(() => {
-      const stepConfig = this.stepConfig();
-      const stepId = stepConfig.id;
-      const isFidc = this.isFidc();
-      const dataVersion = this.wizardStore.dataVersion();
-
-      // Skip if same step AND same dataVersion (no changes)
-      const sameStep = this.lastLoadedStepId === stepId;
-      const sameVersion = this.lastDataVersion === dataVersion;
-      if (sameStep && sameVersion) {
-        return;
-      }
-      this.lastLoadedStepId = stepId;
-      this.lastDataVersion = dataVersion;
-
-      // Set restoration flag to prevent store updates
-      this.isRestoring = true;
-
-      // Reset form array - events can emit now (store updates are filtered)
-      const classesArray = this.form.get('classes') as FormArray;
-      classesArray.clear();
-
-      const stepData = untracked(() => this.wizardStore.stepData()[stepConfig.key] as ClassesFormData | undefined);
-
-      if (stepData) {
-        // Restore saved data
-        this.form.get('multiclasse')?.setValue(stepData.multiclasse);
-        this.isMulticlasse.set(stepData.multiclasse);
-
-        if (stepData.classes && stepData.classes.length > 0) {
-          // Restore saved data - setupTipoClasseChangeHandler runs automatically via startWith
-          stepData.classes.forEach((classe) => {
-            classesArray.push(this.createClasseFormGroup(classe, isFidc));
-          });
-        }
-      } else if (isFidc) {
-        // RF-02: For FIDC, pre-create SENIOR class and enable multiclasse
-        this.form.get('multiclasse')?.setValue(true);
-        this.isMulticlasse.set(true);
-        classesArray.push(this.createClasseFormGroup(this.getDefaultSeniorClasse(), true));
-      }
-
-      // Clear restoration flag
-      this.isRestoring = false;
-
-      // Final validation update
-      classesArray.updateValueAndValidity();
-      this.form.updateValueAndValidity();
-
-      // Mark all fields as touched
-      this.markAllAsTouched();
-
-      untracked(() => this.updateStepValidation());
-    });
   }
 
   /**
@@ -511,11 +493,7 @@ export class ClassesStep {
 
   private markAllAsTouched(): void {
     const classesArray = this.form.get('classes') as FormArray;
-    classesArray.controls.forEach((group) => {
-      Object.keys((group as FormGroup).controls).forEach((key) => {
-        group.get(key)?.markAsTouched();
-      });
-    });
+    markFormArrayAsTouched(classesArray);
   }
 
   private updateStepValidation(): void {
@@ -566,23 +544,8 @@ export class ClassesStep {
   }
 
   private collectInvalidFields(): InvalidFieldInfo[] {
-    const invalidFields: InvalidFieldInfo[] = [];
     const classesArray = this.form.get('classes') as FormArray;
-    classesArray.controls.forEach((group, index) => {
-      Object.keys((group as FormGroup).controls).forEach((key) => {
-        const control = group.get(key);
-        if (control && control.invalid) {
-          const fieldErrors: string[] = [];
-          if (control.errors) {
-            Object.keys(control.errors).forEach((errorKey) => {
-              fieldErrors.push(errorKey);
-            });
-          }
-          invalidFields.push({ field: `classes[${index}].${key}`, errors: fieldErrors });
-        }
-      });
-    });
-    return invalidFields;
+    return collectFormArrayInvalidFields(classesArray, 'classes');
   }
 
   // Helper methods for template

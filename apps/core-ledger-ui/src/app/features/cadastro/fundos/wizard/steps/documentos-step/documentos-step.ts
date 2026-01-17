@@ -1,14 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  effect,
   inject,
   input,
   DestroyRef,
-  untracked,
   signal,
   computed,
   OnDestroy,
+  OnInit,
+  Signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -17,12 +17,12 @@ import {
   NgbDateStruct,
   NgbDateParserFormatter,
 } from '@ng-bootstrap/ng-bootstrap';
-import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
+import { WizardStepConfig, InvalidFieldInfo } from '../../models/wizard.model';
+import { createRestorationEffect } from '../../shared';
 import {
   DocumentoFundo,
   TipoDocumento,
   TIPO_DOCUMENTO_OPTIONS,
-  NovoDocumentoFormData,
   formatFileSize,
   getTipoDocumentoOption,
   isValidFileType,
@@ -48,7 +48,7 @@ import { NgbDateBRParserFormatter } from '../../../../../../shared/formatters/ng
   styleUrl: './documentos-step.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DocumentosStep implements OnDestroy {
+export class DocumentosStep implements OnInit, OnDestroy {
   stepConfig = input.required<WizardStepConfig>();
 
   private readonly formBuilder = inject(FormBuilder);
@@ -59,12 +59,8 @@ export class DocumentosStep implements OnDestroy {
   // Enum options for template
   readonly tipoDocumentoOptions = TIPO_DOCUMENTO_OPTIONS;
 
-  // Track step ID and dataVersion to avoid re-loading unless store data changes
-  private lastLoadedStepId: WizardStepId | null = null;
-  private lastDataVersion = -1;
-
-  // Flag to prevent store updates during data restoration
-  private isRestoring = false;
+  // Reference to isRestoring signal from restoration effect
+  private isRestoringSignal!: Signal<boolean>;
 
   // Track object URLs for cleanup to prevent memory leaks
   private readonly objectUrls: string[] = [];
@@ -104,46 +100,29 @@ export class DocumentosStep implements OnDestroy {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.updateStepValidation());
 
-    // Effect to load data when step changes OR when store data is restored (dataVersion changes)
-    effect(() => {
-      const stepConfig = this.stepConfig();
-      const stepId = stepConfig.id;
-      const dataVersion = this.wizardStore.dataVersion();
-
-      // Skip if same step AND same dataVersion (no changes)
-      const sameStep = this.lastLoadedStepId === stepId;
-      const sameVersion = this.lastDataVersion === dataVersion;
-      if (sameStep && sameVersion) {
-        return;
-      }
-      this.lastLoadedStepId = stepId;
-      this.lastDataVersion = dataVersion;
-
-      // Set restoration flag to prevent store updates
-      this.isRestoring = true;
-
-      // Load documentos from store
-      const stepData = untracked(
-        () => this.wizardStore.stepData()[stepConfig.key] as DocumentoFundo[] | undefined
-      );
-
-      if (stepData && Array.isArray(stepData)) {
-        this.documentos.set(stepData);
-        // Load file blobs from IndexedDB to hydrate arquivoConteudo
-        // Use IIFE to properly await async operation before clearing isRestoring
-        untracked(() => {
-          this.loadFilesFromIndexedDB().finally(() => {
-            this.isRestoring = false;
-            this.updateStepValidation();
-          });
-        });
-      } else {
+    // Create restoration effect (centralizes deduplication, isRestoring flag, and data restore)
+    const { isRestoring } = createRestorationEffect<DocumentoFundo[]>({
+      stepConfig: () => this.stepConfig(),
+      wizardStore: this.wizardStore,
+      form: this.form,
+      resetForm: () => {
+        // Reset documentos signal to empty array
         this.documentos.set([]);
-        // Clear restoration flag
-        this.isRestoring = false;
-        untracked(() => this.updateStepValidation());
-      }
+      },
+      restoreData: () => {
+        // Not used - asyncRestoration handles data restoration for this step
+      },
+      asyncRestoration: async (data) => {
+        // Set documentos from store data
+        this.documentos.set(data);
+        // Load file blobs from IndexedDB to hydrate arquivoConteudo
+        await this.loadFilesFromIndexedDB();
+      },
+      updateStepValidation: () => this.updateStepValidation(),
     });
+
+    // Store reference to check in saveToStore
+    this.isRestoringSignal = isRestoring;
 
     // NOTE: Removed the effect that watched documentos() changes.
     // It caused an infinite loop because reading documentos() and calling setStepData()
@@ -152,11 +131,20 @@ export class DocumentosStep implements OnDestroy {
   }
 
   /**
+   * Initialize step validation on component init.
+   * This ensures the step is marked as valid (optional step) even when
+   * the restoration effect hasn't run yet or when no documents are uploaded.
+   */
+  ngOnInit(): void {
+    this.updateStepValidation();
+  }
+
+  /**
    * Save current documentos to the wizard store.
    * Called explicitly after adding/removing documents (not via effect).
    */
   private saveToStore(): void {
-    if (this.isRestoring) {
+    if (this.isRestoringSignal()) {
       return;
     }
     const docs = this.documentos();

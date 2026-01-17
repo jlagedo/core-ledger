@@ -145,7 +145,7 @@ export class CnpjMaskDirective implements ControlValueAccessor {
     oldValue: string,
     maskedValue: string,
     cursorPosition: number,
-    rawValue: string
+    _rawValue: string
   ): number {
     // Count alphanumeric chars before cursor in old value
     let rawCount = 0;

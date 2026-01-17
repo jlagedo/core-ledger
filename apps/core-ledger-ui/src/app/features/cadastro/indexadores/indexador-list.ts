@@ -9,6 +9,8 @@ import { Router, RouterLink } from '@angular/router';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+// AG Grid setup (registers modules for lazy loading)
+import '../../../shared/ag-grid/ag-grid-setup';
 import { AgGridAngular } from 'ag-grid-angular';
 import {
   ColDef,

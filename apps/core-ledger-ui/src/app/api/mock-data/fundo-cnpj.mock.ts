@@ -16,7 +16,7 @@ export const MOCK_REGISTERED_CNPJS: Map<string, { fundoId: number; nomeFantasia:
  * ALWAYS returns disponivel: true for development/testing purposes.
  * @internal
  */
-export function mockVerificarCnpj(cnpj: string): CnpjVerificationResponse {
+export function mockVerificarCnpj(_cnpj: string): CnpjVerificationResponse {
   // Always return available for development
   return { disponivel: true };
 }

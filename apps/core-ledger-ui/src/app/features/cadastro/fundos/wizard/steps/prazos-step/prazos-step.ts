@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   DestroyRef,
-  effect,
   inject,
   input,
   signal,
@@ -19,10 +18,16 @@ import {
   Validators,
 } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { filter, map, startWith } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 import { CurrencyMaskDirective } from '../../../../../../directives/currency-mask.directive';
-import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
+import { WizardStepConfig, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
+import {
+  createRestorationEffect,
+  withRestorationGuard,
+  markFormArrayAsTouched,
+  collectFormArrayInvalidFields,
+} from '../../shared';
 import { IdentificacaoFormData, TipoFundo } from '../../models/identificacao.model';
 import {
   createPrazoAplicacao,
@@ -74,13 +79,6 @@ export class PrazosStep {
   readonly maxPrazos = MAX_PRAZOS;
   readonly maxPrazoDias = MAX_PRAZO_DIAS;
 
-  // Track step ID and dataVersion to avoid re-loading unless store data changes
-  private lastLoadedStepId: WizardStepId | null = null;
-  private lastDataVersion = -1;
-
-  // Flag to prevent store updates during data restoration
-  private isRestoring = false;
-
   // Main form with FormArray
   form = this.formBuilder.group({
     prazos: this.formBuilder.array<FormGroup>([]),
@@ -116,6 +114,43 @@ export class PrazosStep {
   private readonly tipoFundoSignal = signal<TipoFundo | null>(null);
 
   constructor() {
+    // Get tipo fundo for default creation
+    const getTipoFundo = () => {
+      const identificacaoData = this.wizardStore.stepData()['identificacao'] as IdentificacaoFormData | undefined;
+      return identificacaoData?.tipoFundo ?? null;
+    };
+
+    // Create restoration effect
+    const { isRestoring } = createRestorationEffect<PrazosFormData>({
+      stepConfig: () => this.stepConfig(),
+      wizardStore: this.wizardStore,
+      form: this.form,
+      resetForm: () => {
+        const prazosArray = this.form.get('prazos') as FormArray;
+        prazosArray.clear();
+        // Update tipoFundo signal for default creation
+        this.tipoFundoSignal.set(getTipoFundo());
+      },
+      restoreData: (data) => {
+        const prazosArray = this.form.get('prazos') as FormArray;
+        if (data.prazos && data.prazos.length > 0) {
+          // Restore saved data - setupConditionalValidators runs automatically via startWith
+          data.prazos.forEach((prazo) => {
+            prazosArray.push(this.createPrazoFormGroup(prazo));
+          });
+        }
+      },
+      createDefaultData: () => {
+        // RF-01: Add default aplicacao and resgate prazos
+        const prazosArray = this.form.get('prazos') as FormArray;
+        const tipoFundo = this.tipoFundoSignal();
+        prazosArray.push(this.createPrazoFormGroup(createPrazoAplicacao(tipoFundo)));
+        prazosArray.push(this.createPrazoFormGroup(createPrazoResgate(tipoFundo)));
+      },
+      markAllAsTouched: () => this.markAllAsTouched(),
+      updateStepValidation: () => this.updateStepValidation(),
+    });
+
     // Setup form subscriptions
     this.form.statusChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -124,70 +159,13 @@ export class PrazosStep {
     this.form.valueChanges
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        filter(() => !this.isRestoring)
+        withRestorationGuard(isRestoring)
       )
       .subscribe((value) => {
         const stepConfig = untracked(() => this.stepConfig());
         const dataForStore = this.prepareDataForStore(value as { prazos: Partial<FundoPrazo>[] });
         this.wizardStore.setStepData(stepConfig.key, dataForStore);
       });
-
-    // Effect: Load data when step changes or dataVersion changes (draft restoration)
-    effect(() => {
-      const stepConfig = this.stepConfig();
-      const stepId = stepConfig.id;
-      const dataVersion = this.wizardStore.dataVersion();
-
-      // Skip if same step AND same dataVersion (no changes)
-      const sameStep = this.lastLoadedStepId === stepId;
-      const sameVersion = this.lastDataVersion === dataVersion;
-      if (sameStep && sameVersion) {
-        return;
-      }
-      this.lastLoadedStepId = stepId;
-      this.lastDataVersion = dataVersion;
-
-      // Get identificacao data for tipo fundo defaults (RF-02)
-      const identificacaoData = untracked(
-        () => this.wizardStore.stepData()['identificacao'] as IdentificacaoFormData | undefined
-      );
-      const tipoFundo = identificacaoData?.tipoFundo ?? null;
-      this.tipoFundoSignal.set(tipoFundo);
-
-      // Set restoration flag to prevent store updates
-      this.isRestoring = true;
-
-      // Reset form array - events can emit now (store updates are filtered)
-      const prazosArray = this.form.get('prazos') as FormArray;
-      prazosArray.clear();
-
-      const stepData = untracked(
-        () => this.wizardStore.stepData()[stepConfig.key] as PrazosFormData | undefined
-      );
-
-      if (stepData?.prazos && stepData.prazos.length > 0) {
-        // Restore saved data - setupConditionalValidators runs automatically via startWith
-        stepData.prazos.forEach((prazo) => {
-          prazosArray.push(this.createPrazoFormGroup(prazo));
-        });
-      } else {
-        // RF-01: Add default aplicacao and resgate prazos
-        prazosArray.push(this.createPrazoFormGroup(createPrazoAplicacao(tipoFundo)));
-        prazosArray.push(this.createPrazoFormGroup(createPrazoResgate(tipoFundo)));
-      }
-
-      // Clear restoration flag
-      this.isRestoring = false;
-
-      // Final validation update
-      prazosArray.updateValueAndValidity();
-      this.form.updateValueAndValidity();
-
-      // Mark all fields as touched
-      this.markAllAsTouched();
-
-      untracked(() => this.updateStepValidation());
-    });
   }
 
   /**
@@ -379,11 +357,7 @@ export class PrazosStep {
 
   private markAllAsTouched(): void {
     const prazosArray = this.form.get('prazos') as FormArray;
-    prazosArray.controls.forEach((group) => {
-      Object.keys((group as FormGroup).controls).forEach((key) => {
-        group.get(key)?.markAsTouched();
-      });
-    });
+    markFormArrayAsTouched(prazosArray);
   }
 
   private updateStepValidation(): void {
@@ -417,23 +391,8 @@ export class PrazosStep {
   }
 
   private collectInvalidFields(): InvalidFieldInfo[] {
-    const invalidFields: InvalidFieldInfo[] = [];
     const prazosArray = this.form.get('prazos') as FormArray;
-    prazosArray.controls.forEach((group, index) => {
-      Object.keys((group as FormGroup).controls).forEach((key) => {
-        const control = group.get(key);
-        if (control && control.invalid) {
-          const fieldErrors: string[] = [];
-          if (control.errors) {
-            Object.keys(control.errors).forEach((errorKey) => {
-              fieldErrors.push(errorKey);
-            });
-          }
-          invalidFields.push({ field: `prazos[${index}].${key}`, errors: fieldErrors });
-        }
-      });
-    });
-    return invalidFields;
+    return collectFormArrayInvalidFields(prazosArray, 'prazos');
   }
 
   // Helper methods for template

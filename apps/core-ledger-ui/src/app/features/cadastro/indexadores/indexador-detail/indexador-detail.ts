@@ -5,6 +5,8 @@ import { map } from 'rxjs/operators';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbNavModule, NgbModal, NgbDatepickerModule, NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
+// AG Grid setup (registers modules for lazy loading)
+import '../../../../shared/ag-grid/ag-grid-setup';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef, GridApi, GridReadyEvent, IDatasource, GridOptions } from 'ag-grid-community';
 import { IndexadorService } from '../../../../services/indexador';

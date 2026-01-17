@@ -1,16 +1,9 @@
-import { ApplicationConfig, inject, isDevMode, provideAppInitializer, provideBrowserGlobalErrorListeners, } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { ApplicationConfig, inject, provideAppInitializer, provideBrowserGlobalErrorListeners, } from '@angular/core';
+import { provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor, OidcSecurityService, provideAuth } from 'angular-auth-oidc-client';
 import { firstValueFrom } from 'rxjs';
 import { provideMicroSentry } from '@micro-sentry/angular';
-
-// AG Grid module registration
-import { ModuleRegistry } from 'ag-grid-community';
-import { AllCommunityModule } from 'ag-grid-community';
-
-// Register AG Grid modules globally
-ModuleRegistry.registerModules([AllCommunityModule]);
 
 import { routes } from './app.routes';
 import { authConfig } from './auth/auth.config';
@@ -26,7 +19,7 @@ import { API_BASE_URL } from '@core-ledger/api-client';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
+    provideRouter(routes, withPreloading(PreloadAllModules)),
     // NSwag API client base URL (empty for Angular proxy routing)
     { provide: API_BASE_URL, useValue: '' },
     // Conditional HTTP interceptors based on mock flags

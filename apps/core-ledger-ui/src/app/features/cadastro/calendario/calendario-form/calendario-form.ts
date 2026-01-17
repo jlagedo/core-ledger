@@ -67,7 +67,7 @@ export class CalendarioForm {
           descricao: calendario.descricao,
         });
       },
-      error: (err) => {
+      error: () => {
         this.toastService.error('Falha ao carregar calendário');
         this.router.navigate(['/cadastro/calendario']);
       },
@@ -117,7 +117,7 @@ export class CalendarioForm {
       };
 
       this.calendarioService.createCalendario(dto).subscribe({
-        next: (calendario) => {
+        next: () => {
           this.submitStatus.set('success');
           this.toastService.success('Calendário criado com sucesso');
           setTimeout(() => {

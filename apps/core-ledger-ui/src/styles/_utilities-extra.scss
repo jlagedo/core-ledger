@@ -1,0 +1,51 @@
+// ============================================================
+// EXTRA UTILITIES
+//
+// Additional utility styles for scrollbar, selection,
+// and reduced motion preferences.
+// ============================================================
+
+@use "mixins" as *;
+
+// ============================================================
+// SCROLLBAR
+// ============================================================
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 2px;
+}
+
+// ============================================================
+// SELECTION
+// ============================================================
+
+::selection {
+  background: var(--selection-bg);
+  color: var(--bs-emphasis-color);
+}
+
+// ============================================================
+// REDUCED MOTION
+// ============================================================
+
+@include reduced-motion {
+  .step-field--conditional,
+  .step-field__error,
+  .step-field__success,
+  .step-field__warning,
+  .step-field__info,
+  .step-alert,
+  .autocomplete-dropdown {
+    animation: none;
+  }
+}

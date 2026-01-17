@@ -20,6 +20,7 @@ import { ParametrosFidcStep } from './steps/parametros-fidc-step/parametros-fidc
 import { ClassesStep } from './steps/classes-step/classes-step';
 import { VinculosStep } from './steps/vinculos-step/vinculos-step';
 import { DocumentosStep } from './steps/documentos-step/documentos-step';
+import { RevisaoStep } from './steps/revisao-step/revisao-step';
 import { PageHeader } from '../../../../layout/page-header/page-header';
 import { ToastService } from '../../../../services/toast-service';
 
@@ -42,6 +43,7 @@ import { ToastService } from '../../../../services/toast-service';
     ClassesStep,
     VinculosStep,
     DocumentosStep,
+    RevisaoStep,
   ],
   providers: [WizardStore], // Store com escopo do componente
   templateUrl: './wizard-container.html',
@@ -109,33 +111,20 @@ export class WizardContainer implements DirtyComponent, OnInit {
    * 3. Show recovery banner if draft found, otherwise start fresh
    */
   async ngOnInit(): Promise<void> {
-    console.log('[WizardContainer] ngOnInit starting');
-
     // Cleanup stale drafts first (older than 7 days)
     await this.persistenceService.cleanupStaleDrafts(7);
 
     // Check for existing draft (from route param or most recent)
     const draftIdFromRoute = this.route.snapshot.queryParamMap.get('draftId');
-    console.log('[WizardContainer] Looking for draft, route param:', draftIdFromRoute);
 
     const draft = draftIdFromRoute
       ? await this.persistenceService.loadDraft(draftIdFromRoute)
       : await this.persistenceService.getMostRecentDraft();
 
-    console.log('[WizardContainer] Draft found:', draft ? {
-      id: draft.id,
-      currentStep: draft.currentStep,
-      completedSteps: draft.completedSteps,
-      formDataKeys: Object.keys(draft.formData),
-      updatedAt: draft.updatedAt,
-    } : null);
-
     if (draft && this.isDraftValid(draft)) {
-      console.log('[WizardContainer] Draft is valid, showing recovery banner');
       this.recoveryDraft.set(draft);
       this.showRecoveryBanner.set(true);
     } else {
-      console.log('[WizardContainer] No valid draft, initializing fresh');
       // No valid draft found, start fresh
       this.store.initializeDraft();
     }
@@ -155,17 +144,9 @@ export class WizardContainer implements DirtyComponent, OnInit {
    */
   async restoreDraft(): Promise<void> {
     const draft = this.recoveryDraft();
-    console.log('[WizardContainer] restoreDraft called with draft:', draft?.id);
     if (!draft) return;
 
-    console.log('[WizardContainer] Calling store.loadDraft...');
     const success = await this.store.loadDraft(draft.id);
-    console.log('[WizardContainer] loadDraft returned:', success);
-    console.log('[WizardContainer] Store state after load:', {
-      currentStep: this.store.currentStep(),
-      dataVersion: this.store.dataVersion(),
-      stepDataKeys: Object.keys(this.store.stepData()),
-    });
 
     this.showRecoveryBanner.set(false);
 
@@ -201,7 +182,7 @@ export class WizardContainer implements DirtyComponent, OnInit {
    * Handler do clique em um passo no stepper
    */
   onStepClick(stepId: number): void {
-    this.store.goToStep(stepId as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10);
+    this.store.goToStep(stepId as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11);
   }
 
   /**

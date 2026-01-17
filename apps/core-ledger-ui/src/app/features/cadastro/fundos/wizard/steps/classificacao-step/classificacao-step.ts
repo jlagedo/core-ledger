@@ -11,14 +11,14 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { filter, startWith } from 'rxjs/operators';
+import { startWith } from 'rxjs/operators';
 import { ParametrosService } from '../../../../../../services/parametros';
-import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
+import { WizardStepConfig, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
+import { createRestorationEffect, withRestorationGuard } from '../../shared';
 import { IdentificacaoFormData } from '../../models/identificacao.model';
 import {
   ClassificacaoAnbimaOption,
-  ClassificacaoAnbimaResponse,
   ClassificacaoFormData,
   ClassificacaoCvm,
   CLASSIFICACAO_CVM_OPTIONS,
@@ -62,13 +62,6 @@ export class ClassificacaoStep {
   readonly anbimaMessage = signal<string | null>(null);
   readonly restrictedPublicoAlvo = signal<PublicoAlvo | null>(null);
 
-  // Track step ID and dataVersion to avoid re-loading unless store data changes
-  private lastLoadedStepId: WizardStepId | null = null;
-  private lastDataVersion = -1;
-
-  // Loading flag to prevent store updates during restoration
-  private isRestoring = false;
-
   // Form must be defined before toSignal() calls
   form = this.formBuilder.group({
     classificacaoCvm: [null as ClassificacaoCvm | null, [Validators.required]],
@@ -95,6 +88,21 @@ export class ClassificacaoStep {
   });
 
   constructor() {
+    // Create restoration effect (centralizes deduplication, isRestoring flag, and form restore)
+    const { isRestoring } = createRestorationEffect<ClassificacaoFormData>({
+      stepConfig: () => this.stepConfig(),
+      wizardStore: this.wizardStore,
+      form: this.form,
+      resetForm: () => this.form.reset({}),
+      restoreData: (data) => {
+        const formValue = this.prepareDataForForm(data);
+        // Patch WITHOUT emitEvent: false - let events fire naturally for ANBIMA loading
+        this.form.patchValue(formValue);
+        this.form.markAsDirty();
+      },
+      updateStepValidation: () => this.updateStepValidation(),
+    });
+
     // Setup form subscriptions (outside of effect)
     this.form.statusChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -103,7 +111,7 @@ export class ClassificacaoStep {
     this.form.valueChanges
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        filter(() => !this.isRestoring)
+        withRestorationGuard(isRestoring)
       )
       .subscribe((value) => {
         const stepConfig = untracked(() => this.stepConfig());
@@ -139,7 +147,7 @@ export class ClassificacaoStep {
     // Effect to apply restrictions based on tipo_fundo from Step 1
     effect(
       () => {
-        const stepConfig = this.stepConfig();
+        const _stepConfig = this.stepConfig(); // Track reactively for re-triggering
         const identificacaoData = untracked(
           () => this.wizardStore.stepData()['identificacao'] as IdentificacaoFormData | undefined
         );
@@ -173,52 +181,6 @@ export class ClassificacaoStep {
           }
         }
       });
-
-    // Effect to load data when step changes OR when store data is restored (dataVersion changes)
-    effect(() => {
-      const stepConfig = this.stepConfig();
-      const stepId = stepConfig.id;
-      const dataVersion = this.wizardStore.dataVersion();
-
-      // Skip if same step AND same dataVersion (no changes)
-      const sameStep = this.lastLoadedStepId === stepId;
-      const sameVersion = this.lastDataVersion === dataVersion;
-      if (sameStep && sameVersion) {
-        return;
-      }
-      this.lastLoadedStepId = stepId;
-      this.lastDataVersion = dataVersion;
-
-      // Set restoration flag to prevent store updates
-      this.isRestoring = true;
-
-      this.form.reset({});
-
-      const stepData = untracked(
-        () =>
-          this.wizardStore.stepData()[stepConfig.key] as
-            | Partial<ClassificacaoFormData>
-            | undefined
-      );
-
-      if (stepData) {
-        const formValue = this.prepareDataForForm(stepData);
-        // Patch WITHOUT emitEvent: false - let events fire naturally
-        this.form.patchValue(formValue);
-        this.form.markAsDirty();
-      }
-
-      // Clear restoration flag
-      this.isRestoring = false;
-
-      // Mark all fields as touched to show validation state
-      Object.keys(this.form.controls).forEach((key) => {
-        this.form.get(key)?.markAsTouched();
-      });
-
-      this.form.updateValueAndValidity();
-      untracked(() => this.updateStepValidation());
-    });
   }
 
   private loadAnbimaOptions(cvmValue: ClassificacaoCvm): void {

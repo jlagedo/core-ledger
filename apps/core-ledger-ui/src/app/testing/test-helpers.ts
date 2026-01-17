@@ -2,7 +2,6 @@ import { EnvironmentProviders, Provider } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideLocationMocks } from '@angular/common/testing';
-import { HttpTestingController } from '@angular/common/http/testing';
 import { vi } from 'vitest';
 import { MicroSentryService } from '@micro-sentry/angular';
 import { OidcSecurityService } from 'angular-auth-oidc-client';

@@ -72,7 +72,6 @@ export class UserService {
    */
   setUser(user: UserDto): void {
     this._currentUser.set(user);
-    this.logger.info('Dados do usuário carregados', { userId: user.id }, 'UserService.setUser');
   }
 
   /**
@@ -81,6 +80,5 @@ export class UserService {
    */
   clearUser(): void {
     this._currentUser.set(null);
-    this.logger.debug('Dados do usuário limpos', undefined, 'UserService.clearUser');
   }
 }

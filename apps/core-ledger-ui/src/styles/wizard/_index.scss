@@ -1,0 +1,15 @@
+// ============================================================
+// WIZARD STYLES INDEX
+//
+// Shared styles for wizard step components.
+// Import this file to include all wizard-related styles.
+// Note: _variables.scss is not forwarded, only used internally.
+// ============================================================
+
+@forward "layout" hide $wizard-field-radius;
+@forward "fields" hide $wizard-field-radius;
+@forward "feedback";
+@forward "hints" hide $wizard-field-radius;
+@forward "checkbox" hide $wizard-field-radius;
+@forward "alerts" hide $wizard-field-radius;
+@forward "list-card";

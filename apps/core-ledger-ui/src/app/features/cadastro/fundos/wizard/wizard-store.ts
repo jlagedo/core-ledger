@@ -52,9 +52,6 @@ const initialState: WizardState = {
   dataVersion: 0,
 };
 
-/** Step ID do Parâmetros FIDC (condicional) */
-const FIDC_STEP_ID: WizardStepId = 8;
-
 /** Último step do wizard */
 const LAST_STEP_ID: WizardStepId = 11;
 
@@ -470,24 +467,13 @@ export const WizardStore = signalStore(
        * Increments dataVersion to signal step components to reload.
        */
       async loadDraft(draftId: string): Promise<boolean> {
-        console.log('[WizardStore] loadDraft called with ID:', draftId);
         const draft = await persistenceService.loadDraft(draftId);
 
         if (!draft) {
-          console.error('[WizardStore] loadDraft: draft not found in IndexedDB');
           return false;
         }
 
-        console.log('[WizardStore] loadDraft: draft loaded:', {
-          id: draft.id,
-          currentStep: draft.currentStep,
-          completedSteps: draft.completedSteps,
-          formDataKeys: Object.keys(draft.formData),
-          formData: draft.formData,
-        });
-
         const newDataVersion = store.dataVersion() + 1;
-        console.log('[WizardStore] loadDraft: incrementing dataVersion from', store.dataVersion(), 'to', newDataVersion);
 
         patchState(store, {
           draftId: draft.id,
@@ -499,12 +485,6 @@ export const WizardStore = signalStore(
           isDirty: false,
           // Increment dataVersion to signal step components to reload their forms
           dataVersion: newDataVersion,
-        });
-
-        console.log('[WizardStore] loadDraft: state patched. New state:', {
-          currentStep: store.currentStep(),
-          dataVersion: store.dataVersion(),
-          stepDataKeys: Object.keys(store.stepData()),
         });
 
         return true;

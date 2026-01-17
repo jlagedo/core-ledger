@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   DestroyRef,
-  effect,
   inject,
   input,
   signal,
@@ -13,14 +12,14 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { merge, Observable, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, map, startWith } from 'rxjs/operators';
-import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
+import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs/operators';
+import { WizardStepConfig, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
+import { createRestorationEffect, withRestorationGuard } from '../../shared';
 import { IdentificacaoFormData } from '../../models/identificacao.model';
 import {
   ParametrosCotaFormData,
   TipoCota,
-  FusoHorario,
   FusoHorarioOption,
   TIPO_COTA_OPTIONS,
   FUSO_HORARIO_OPTIONS,
@@ -56,13 +55,6 @@ export class ParametrosCotaStep {
   readonly casasDecimaisCotaOptions = CASAS_DECIMAIS_COTA_OPTIONS;
   readonly casasDecimaisQuantidadeOptions = CASAS_DECIMAIS_QUANTIDADE_OPTIONS;
   readonly casasDecimaisPlOptions = CASAS_DECIMAIS_PL_OPTIONS;
-
-  // Track step ID and dataVersion to avoid re-loading unless store data changes
-  private lastLoadedStepId: WizardStepId | null = null;
-  private lastDataVersion = -1;
-
-  // Loading flag to prevent store updates during restoration
-  private isRestoring = false;
 
   // Signals for computed previews
   private readonly casasDecimaisCotaValue = signal<number>(PARAMETROS_COTA_DEFAULTS.casasDecimaisCota);
@@ -141,6 +133,49 @@ export class ParametrosCotaStep {
   readonly showCotaEstimadaInfo = computed(() => this.permiteCotaEstimadaValue() === true);
 
   constructor() {
+    // Create restoration effect (centralizes deduplication, isRestoring flag, and form restore)
+    const { isRestoring } = createRestorationEffect<ParametrosCotaFormData>({
+      stepConfig: () => this.stepConfig(),
+      wizardStore: this.wizardStore,
+      form: this.form,
+      resetForm: () => {
+        // Get identificacao data for default dataCotaInicial
+        const identificacaoData = untracked(
+          () => this.wizardStore.stepData()['identificacao'] as IdentificacaoFormData | undefined
+        );
+
+        this.form.reset({
+          casasDecimaisCota: PARAMETROS_COTA_DEFAULTS.casasDecimaisCota,
+          casasDecimaisQuantidade: PARAMETROS_COTA_DEFAULTS.casasDecimaisQuantidade,
+          casasDecimaisPl: PARAMETROS_COTA_DEFAULTS.casasDecimaisPl,
+          tipoCota: PARAMETROS_COTA_DEFAULTS.tipoCota,
+          horarioCorte: PARAMETROS_COTA_DEFAULTS.horarioCorte,
+          cotaInicial: PARAMETROS_COTA_DEFAULTS.cotaInicial,
+          dataCotaInicial: identificacaoData?.dataInicioAtividade ?? null,
+          fusoHorario: this.defaultFusoHorarioOption,
+          permiteCotaEstimada: PARAMETROS_COTA_DEFAULTS.permiteCotaEstimada,
+        });
+      },
+      restoreData: (data) => {
+        const formValue = this.prepareDataForForm(data);
+        this.form.patchValue(formValue, { emitEvent: false });
+
+        // Update preview signals
+        if (data.casasDecimaisCota != null) {
+          this.casasDecimaisCotaValue.set(data.casasDecimaisCota);
+        }
+        if (data.casasDecimaisQuantidade != null) {
+          this.casasDecimaisQuantidadeValue.set(data.casasDecimaisQuantidade);
+        }
+        if (data.casasDecimaisPl != null) {
+          this.casasDecimaisPlValue.set(data.casasDecimaisPl);
+        }
+
+        this.form.markAsDirty();
+      },
+      updateStepValidation: () => this.updateStepValidation(),
+    });
+
     // Setup form subscriptions
     this.form.statusChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -149,7 +184,7 @@ export class ParametrosCotaStep {
     this.form.valueChanges
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        filter(() => !this.isRestoring)
+        withRestorationGuard(isRestoring)
       )
       .subscribe((value) => {
         const stepConfig = untracked(() => this.stepConfig());
@@ -167,80 +202,6 @@ export class ParametrosCotaStep {
           this.casasDecimaisPlValue.set(value.casasDecimaisPl);
         }
       });
-
-    // Effect: Load data when step changes OR when store data is restored (dataVersion changes)
-    effect(() => {
-      const stepConfig = this.stepConfig();
-      const stepId = stepConfig.id;
-      const dataVersion = this.wizardStore.dataVersion();
-
-      // Skip if same step AND same dataVersion (no changes)
-      const sameStep = this.lastLoadedStepId === stepId;
-      const sameVersion = this.lastDataVersion === dataVersion;
-      if (sameStep && sameVersion) {
-        return;
-      }
-      this.lastLoadedStepId = stepId;
-      this.lastDataVersion = dataVersion;
-
-      // Set restoration flag to prevent store updates
-      this.isRestoring = true;
-
-      // Get identificacao data for default dataCotaInicial
-      const identificacaoData = untracked(
-        () => this.wizardStore.stepData()['identificacao'] as IdentificacaoFormData | undefined
-      );
-
-      // Reset form with defaults
-      this.form.reset({
-        casasDecimaisCota: PARAMETROS_COTA_DEFAULTS.casasDecimaisCota,
-        casasDecimaisQuantidade: PARAMETROS_COTA_DEFAULTS.casasDecimaisQuantidade,
-        casasDecimaisPl: PARAMETROS_COTA_DEFAULTS.casasDecimaisPl,
-        tipoCota: PARAMETROS_COTA_DEFAULTS.tipoCota,
-        horarioCorte: PARAMETROS_COTA_DEFAULTS.horarioCorte,
-        cotaInicial: PARAMETROS_COTA_DEFAULTS.cotaInicial,
-        dataCotaInicial: identificacaoData?.dataInicioAtividade ?? null,
-        fusoHorario: this.defaultFusoHorarioOption,
-        permiteCotaEstimada: PARAMETROS_COTA_DEFAULTS.permiteCotaEstimada,
-      });
-
-      // Load existing step data if available
-      const stepData = untracked(
-        () =>
-          this.wizardStore.stepData()[stepConfig.key] as
-            | Partial<ParametrosCotaFormData>
-            | undefined
-      );
-
-      if (stepData) {
-        const formValue = this.prepareDataForForm(stepData);
-        this.form.patchValue(formValue);
-
-        // Update preview signals
-        if (stepData.casasDecimaisCota != null) {
-          this.casasDecimaisCotaValue.set(stepData.casasDecimaisCota);
-        }
-        if (stepData.casasDecimaisQuantidade != null) {
-          this.casasDecimaisQuantidadeValue.set(stepData.casasDecimaisQuantidade);
-        }
-        if (stepData.casasDecimaisPl != null) {
-          this.casasDecimaisPlValue.set(stepData.casasDecimaisPl);
-        }
-
-        this.form.markAsDirty();
-      }
-
-      // Clear restoration flag
-      this.isRestoring = false;
-
-      // Mark all fields as touched to show validation state
-      Object.keys(this.form.controls).forEach((key) => {
-        this.form.get(key)?.markAsTouched();
-      });
-
-      this.form.updateValueAndValidity();
-      untracked(() => this.updateStepValidation());
-    });
   }
 
   private prepareDataForStore(formValue: Partial<typeof this.form.value>): ParametrosCotaFormData {

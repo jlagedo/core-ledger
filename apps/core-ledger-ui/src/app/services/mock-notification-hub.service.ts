@@ -52,8 +52,6 @@ export class MockNotificationHubService {
       throw new Error('CRÍTICO: Hub de notificação mock não pode ser ativado em produção!');
     }
 
-    this.logger.debug('MockNotificationHubService inicializado', undefined, 'MockNotificationHubService');
-
     // Efeito reativo: simular conectar/desconectar baseado no estado de autenticação
     effect(() => {
       const isLoggedIn = this.authService.isLoggedIn();
@@ -76,7 +74,6 @@ export class MockNotificationHubService {
    */
   async connect(): Promise<void> {
     this._connectionState.set('connecting');
-    this.logger.debug('Mock: Conectando ao hub de notificações', undefined, 'MockNotificationHubService');
 
     // Simular atraso de conexão
     await this.delay(200);
@@ -84,8 +81,6 @@ export class MockNotificationHubService {
     this._connectionState.set('connected');
     this._lastError.set(null);
     this._reconnectAttempts.set(0);
-
-    this.logger.info('Mock: Conectado ao hub de notificações', undefined, 'MockNotificationHubService');
 
     // Mostrar notificação de boas-vindas após breve atraso
     setTimeout(() => {
@@ -124,8 +119,6 @@ export class MockNotificationHubService {
       );
       return;
     }
-
-    this.logger.debug('Mock: Enviando notificação de teste', { notification }, 'MockNotificationHubService');
 
     // Exibir notificação via ToastService
     switch (notification.type) {

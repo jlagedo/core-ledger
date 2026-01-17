@@ -1,4 +1,4 @@
-import { HttpInterceptorFn, HttpResponse, HttpErrorResponse, HttpEventType } from '@angular/common/http';
+import { HttpInterceptorFn, HttpResponse, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';

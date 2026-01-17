@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  effect,
   inject,
   input,
   DestroyRef,
@@ -10,19 +9,19 @@ import {
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter } from 'rxjs/operators';
 import {
   NgbDatepickerModule,
   NgbDateStruct,
   NgbDateParserFormatter,
 } from '@ng-bootstrap/ng-bootstrap';
-import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
+import { WizardStepConfig, InvalidFieldInfo } from '../../models/wizard.model';
 import {
   IdentificacaoFormData,
   TipoFundo,
   TIPO_FUNDO_OPTIONS,
 } from '../../models/identificacao.model';
 import { WizardStore } from '../../wizard-store';
+import { createRestorationEffect, withRestorationGuard } from '../../shared';
 import { cnpjValidator } from '../../../../../../shared/validators/cnpj.validator';
 import { CnpjUniqueValidatorService } from '../../../../../../shared/validators/cnpj-unique.validator';
 import { CnpjMaskDirective } from '../../../../../../directives/cnpj-mask.directive';
@@ -50,13 +49,6 @@ export class IdentificacaoStep {
 
   // Enum options for template
   readonly tipoFundoOptions = TIPO_FUNDO_OPTIONS;
-
-  // Track step ID and dataVersion to avoid re-loading unless store data changes
-  private lastLoadedStepId: WizardStepId | null = null;
-  private lastDataVersion = -1;
-
-  // Loading flag to prevent store updates during restoration
-  private isRestoring = false;
 
   // Signal for CNPJ validation status
   readonly cnpjValidating = signal(false);
@@ -89,6 +81,29 @@ export class IdentificacaoStep {
   );
 
   constructor() {
+    // Create restoration effect with async validator bypass for CNPJ
+    const { isRestoring } = createRestorationEffect<IdentificacaoFormData>({
+      stepConfig: () => this.stepConfig(),
+      wizardStore: this.wizardStore,
+      form: this.form,
+      resetForm: () => this.form.reset({}),
+      restoreData: (data) => {
+        const formValue = this.prepareDataForForm(data);
+        // Patch form without emitting events during restoration
+        this.form.patchValue(formValue, { emitEvent: false });
+        this.form.markAsDirty();
+      },
+      updateStepValidation: () => this.updateStepValidation(),
+      asyncValidatorBypass: {
+        controls: [this.form.get('cnpj')!],
+        shouldBypass: () => {
+          const completedSteps = this.wizardStore.completedSteps();
+          const stepData = this.wizardStore.stepData()[this.stepConfig().key];
+          return completedSteps.has(this.stepConfig().id) && !!stepData;
+        },
+      },
+    });
+
     // Track CNPJ validation pending state
     this.form
       .get('cnpj')!
@@ -105,7 +120,7 @@ export class IdentificacaoStep {
     this.form.valueChanges
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        filter(() => !this.isRestoring)
+        withRestorationGuard(isRestoring)
       )
       .subscribe((value) => {
         const stepConfig = untracked(() => this.stepConfig());
@@ -129,100 +144,6 @@ export class IdentificacaoStep {
           }
         }
       });
-
-    // Effect to load data when step changes OR when store data is restored (dataVersion changes)
-    effect(() => {
-      const stepConfig = this.stepConfig();
-      const stepId = stepConfig.id;
-      const dataVersion = this.wizardStore.dataVersion();
-
-      // Skip if same step AND same dataVersion (no changes)
-      const sameStep = this.lastLoadedStepId === stepId;
-      const sameVersion = this.lastDataVersion === dataVersion;
-      if (sameStep && sameVersion) {
-        return;
-      }
-      this.lastLoadedStepId = stepId;
-      this.lastDataVersion = dataVersion;
-
-      // Set restoration flag to prevent store updates
-      this.isRestoring = true;
-
-      this.form.reset({});
-
-      const stepData = untracked(
-        () =>
-          this.wizardStore.stepData()[stepConfig.key] as
-            | Partial<IdentificacaoFormData>
-            | undefined
-      );
-
-      // Check if step was already validated (user navigating back or restoring draft)
-      // We check completedSteps because stepValidation is not persisted in drafts
-      const completedSteps = untracked(() => this.wizardStore.completedSteps());
-      const wasAlreadyCompleted = completedSteps.has(stepId);
-      const hasStepData = !!stepData;
-
-      if (stepData) {
-        const formValue = this.prepareDataForForm(stepData);
-
-        // Patch form without emitting events during restoration
-        // Following wizard_research.md pattern: avoid triggering watchers during restore
-        this.form.patchValue(formValue, { emitEvent: false });
-        this.form.markAsDirty();
-
-        // Mark all fields as touched to show validation state
-        Object.keys(this.form.controls).forEach((key) => {
-          this.form.get(key)?.markAsTouched();
-        });
-
-        // If step was already completed (from draft or previous navigation), bypass async validation
-        // Per Angular docs: clearAsyncValidators() + updateValueAndValidity() removes async validators
-        if (wasAlreadyCompleted && hasStepData) {
-          const cnpjControl = this.form.get('cnpj')!;
-          const originalAsyncValidators = cnpjControl.asyncValidator;
-
-          // Step 1: Clear async validators
-          cnpjControl.clearAsyncValidators();
-
-          // Step 2: Apply the validator removal by calling updateValueAndValidity on the control
-          // Per Angular docs: "you must call updateValueAndValidity() for the new validation to take effect"
-          cnpjControl.updateValueAndValidity({ emitEvent: false });
-
-          // Step 3: Now update the entire form (sync validators only since async are cleared)
-          this.form.updateValueAndValidity({ emitEvent: false });
-
-          // Step 4: Restore async validators for future user interactions (when they edit the field)
-          if (originalAsyncValidators) {
-            cnpjControl.setAsyncValidators(originalAsyncValidators);
-            // IMPORTANT: Don't call updateValueAndValidity() after restoring!
-            // This keeps the control VALID without triggering async validators
-          }
-
-          // Directly set the store validation state
-          this.wizardStore.setStepValidation(stepId, {
-            isValid: this.form.valid,
-            isDirty: true,
-            errors: [],
-            invalidFields: [],
-          });
-
-          if (this.form.valid) {
-            this.wizardStore.markStepComplete(stepId);
-          }
-        } else {
-          // Fresh load or incomplete data - run all validators normally
-          this.form.updateValueAndValidity();
-          // updateStepValidation will be called by statusChanges subscription
-        }
-      } else {
-        // No data to restore - run validators
-        this.form.updateValueAndValidity();
-      }
-
-      // Clear restoration flag
-      this.isRestoring = false;
-    });
   }
 
   /**

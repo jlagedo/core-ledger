@@ -1,0 +1,60 @@
+// ============================================================
+// BOOTSTRAP — Framework Import with Configuration
+//
+// This file imports Bootstrap with custom configuration.
+// IMPORTANT: This file should ONLY be imported in styles.scss
+// to prevent Bootstrap CSS from being duplicated in components.
+// ============================================================
+
+@use "bootstrap/scss/bootstrap" with (
+  $enable-dark-mode: true,
+
+  // Typography — Bloomberg Terminal inspired (IBM Plex Mono)
+  $font-family-base: ('IBM Plex Mono', 'SF Mono', Consolas, monospace),
+  $font-family-monospace: ('IBM Plex Mono', 'SF Mono', Consolas, monospace),
+  $font-family-sans-serif: ('IBM Plex Mono', monospace),
+
+  $font-size-base: 0.8125rem,
+  $font-size-sm: 0.75rem,
+  $font-size-lg: 0.9375rem,
+
+  $font-weight-base: 400,
+  $font-weight-bold: 600,
+
+  $line-height-base: 1.5,
+  $line-height-sm: 1.35,
+
+  $headings-font-family: ('IBM Plex Mono', monospace),
+  $headings-font-weight: 600,
+  $headings-line-height: 1.3,
+
+  // Border Radius — Micro radius for modern financial aesthetic (2px)
+  $border-radius:       0.125rem,    // 2px - default
+  $border-radius-sm:    0.0625rem,   // 1px - small elements
+  $border-radius-lg:    0.125rem,    // 2px - large elements (same as default)
+  $border-radius-xl:    0.1875rem,   // 3px - extra large
+  $border-radius-xxl:   0.25rem,     // 4px - modals, popovers
+  $border-radius-pill:  0.125rem,    // 2px - no pills, consistent radius
+
+  // Brand colors
+  $primary: #0077B6,
+  $secondary: #003566,
+  $dark: #001D3D,
+  $light: #cee2ff,
+
+  // Semantic colors
+  $success: #0b2b7c,
+  $info: #0068ff,
+  $warning: #FFB703,
+  $danger: #E63946,
+
+  // Light mode body
+  $body-bg: #F8FBFA,
+  $body-color: #212529,
+
+  // Dark mode body - Bloomberg Terminal style
+  $body-bg-dark: #000000,
+  $body-color-dark: #FFA028,
+  $body-secondary-bg-dark: #1a1a1a,
+  $body-tertiary-bg-dark: #2a2a2a
+);

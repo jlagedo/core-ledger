@@ -27,13 +27,11 @@ function loadStateFromSession(logger: LoggerService, storage: StorageService): S
     const stored = storage.getItem(STORAGE_KEY);
     if (stored) {
       const loadedState: SidenavState = {...initialState, ...JSON.parse(stored)};
-      logger.debug('Loaded sidenav state from sessionStorage', loadedState, STORAGE_KEY);
       return loadedState;
     }
   } catch (error) {
     logger.warn('Failed to load sidenav state from sessionStorage', error, STORAGE_KEY);
   }
-  logger.debug('Using initial sidenav state (no stored state found)', undefined, STORAGE_KEY);
   return initialState;
 }
 
@@ -43,7 +41,6 @@ function loadStateFromSession(logger: LoggerService, storage: StorageService): S
 function saveStateToSession(state: SidenavState, logger: LoggerService, storage: StorageService): void {
   try {
     storage.setItem(STORAGE_KEY, JSON.stringify(state));
-    logger.debug('Saved sidenav state to sessionStorage', state, STORAGE_KEY);
   } catch (error) {
     // Storage can fail if:
     // - Storage quota exceeded

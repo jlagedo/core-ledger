@@ -48,7 +48,7 @@ export const MOCK_USERS: Record<string, MockUser> = new Proxy(
  * @returns MockUser object with OIDC and backend data
  * @throws Error always in production
  */
-export function getMockUser(role: string): MockUser {
+export function getMockUser(_role: string): MockUser {
   throw new Error(
     'CRITICAL SECURITY ERROR: Mock authentication is not available in production. ' +
       'This indicates a build configuration error. Please check your Angular build settings.'

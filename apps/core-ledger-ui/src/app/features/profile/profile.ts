@@ -269,7 +269,6 @@ export class Profile {
 
   // Handle quick action
   handleAction(action: string): void {
-    console.log('Action triggered:', action);
     // In real app, would trigger appropriate action
   }
 

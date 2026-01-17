@@ -1,165 +1,32 @@
 // ============================================================
 // DATA GRID STYLES — Bloomberg Terminal List Components
 //
-// Shared styles for AG Grid lists with filter bars, preset bars,
+// Global styles for AG Grid lists with filter bars, preset bars,
 // status badges, and action buttons. Used by cadastro/calendario,
 // cadastro/indexadores, and other data-dense list views.
 //
 // Structure:
-// 1. AG Grid Refinements (host, cells, headers)
-// 2. Preset Bar (quick filter presets)
-// 3. Filter Bar (search, dropdowns)
-// 4. Filter Pills (active filter display)
-// 5. Status Badges (cell renderer)
-// 6. Grid Status Bar (pagination info)
-// 7. Row Action Buttons
-// 8. Date Picker (NgbDatepicker integration)
-// 9. Type Badges (colored type indicators)
+// 1. Preset Bar (quick filter presets)
+// 2. Filter Bar (search, dropdowns)
+// 3. Filter Pills (active filter display)
+// 4. Status Badges (cell renderer)
+// 5. Grid Status Bar (pagination info)
+// 6. Row Action Buttons
+// 7. Date Picker (NgbDatepicker integration)
+// 8. Type Badges (colored type indicators)
+//
+// NOTE: AG Grid mixins are in _data-grid-mixins.scss
+// Components should import that file for mixins, not this one.
 // ============================================================
 
 @use "variables" as *;
 
-// ============================================================
-// 1. AG GRID REFINEMENTS — Component-level overrides
-// ============================================================
-
-// Note: These styles must be applied via ::ng-deep in component SCSS
-// as they target AG Grid's internal DOM structure.
-
-// Base component host
-@mixin ag-grid-host {
-  display: block;
-}
-
-// Grid container styling
-@mixin ag-grid-container {
-  display: block;
-  border-radius: 0;
-  transition: background-color 0.2s ease-in-out;
-}
-
-// AG Grid cell and header refinements
-@mixin ag-grid-refinements {
-  // Header cell refinements
-  .ag-header-cell-label {
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    font-size: 0.6875rem;
-  }
-
-  // Cell typography
-  .ag-cell {
-    display: flex;
-    align-items: center;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.01em;
-  }
-
-  // Text alignment classes
-  .ag-cell.text-center,
-  .ag-header-cell.text-center .ag-header-cell-label {
-    justify-content: center;
-    text-align: center;
-  }
-
-  .ag-cell.text-end,
-  .ag-header-cell.text-end .ag-header-cell-label {
-    justify-content: flex-end;
-    text-align: right;
-  }
-
-  // Numeric columns - right-aligned with monospace
-  .ag-cell.ag-right-aligned-cell {
-    font-feature-settings: 'tnum' 1;
-    justify-content: flex-end;
-  }
-
-  // Row hover enhancement
-  .ag-row-hover {
-    transition: background-color 0.1s ease-in-out;
-  }
-
-  // Loading overlay styling
-  .ag-overlay-loading-wrapper {
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-  }
-
-  // No rows overlay
-  .ag-overlay-no-rows-wrapper {
-    color: var(--bs-secondary-color);
-  }
-
-  // Scrollbar refinements for webkit browsers
-  .ag-body-viewport::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  .ag-body-viewport::-webkit-scrollbar-track {
-    background: var(--bs-tertiary-bg);
-    border-radius: 4px;
-  }
-
-  .ag-body-viewport::-webkit-scrollbar-thumb {
-    background: var(--bs-secondary-color);
-    border-radius: 4px;
-
-    &:hover {
-      background: var(--bs-body-color);
-    }
-  }
-
-  // Sort indicator refinement
-  .ag-sort-indicator-icon {
-    opacity: 0.8;
-  }
-
-  // Column resize handle
-  .ag-header-cell-resize {
-    opacity: 0;
-    transition: opacity 0.15s ease-in-out;
-  }
-
-  .ag-header-cell:hover .ag-header-cell-resize {
-    opacity: 1;
-  }
-}
-
-// Dark mode AG Grid enhancements
-@mixin ag-grid-dark-mode {
-  // Subtle amber glow on header
-  .ag-header {
-    border-bottom: 1px solid var(--terminal-glow-muted);
-  }
-
-  // Selected row amber accent
-  .ag-row-selected {
-    border-left: 2px solid var(--terminal-glow);
-  }
-
-  // Loading spinner color
-  .ag-overlay-loading-center {
-    color: var(--terminal-glow);
-  }
-}
-
-// Light mode AG Grid enhancements
-@mixin ag-grid-light-mode {
-  // Warm border on header
-  .ag-header {
-    border-bottom: 1px solid var(--bs-border-color);
-  }
-
-  // Selected row amber accent
-  .ag-row-selected {
-    border-left: 2px solid var(--terminal-glow);
-  }
-}
+// Re-export mixins for backwards compatibility
+// (but components should prefer importing _data-grid-mixins.scss directly)
+@forward "data-grid-mixins";
 
 // ============================================================
-// 2. PRESET BAR — Bloomberg Function Keys Style
+// 1. PRESET BAR — Bloomberg Function Keys Style
 // ============================================================
 
 .preset-bar {
@@ -360,7 +227,7 @@
 }
 
 // ============================================================
-// 3. FILTER BAR — Bloomberg Terminal Quick Filters
+// 2. FILTER BAR — Bloomberg Terminal Quick Filters
 // ============================================================
 
 .filter-bar {
@@ -673,7 +540,7 @@
 }
 
 // ============================================================
-// 4. FILTER PILLS — Active Filter Display
+// 3. FILTER PILLS — Active Filter Display
 // ============================================================
 
 @keyframes pill-appear {
@@ -781,7 +648,7 @@
 }
 
 // ============================================================
-// 5. STATUS BADGES — Cell Renderer Styles
+// 4. STATUS BADGES — Cell Renderer Styles
 // ============================================================
 
 // Note: Applied via ::ng-deep in component styles
@@ -811,7 +678,7 @@
 }
 
 // ============================================================
-// 6. GRID STATUS BAR — Bloomberg Terminal Ticker
+// 5. GRID STATUS BAR — Bloomberg Terminal Ticker
 // ============================================================
 
 @keyframes pulse-fetch {
@@ -1004,7 +871,7 @@
 }
 
 // ============================================================
-// 7. ROW ACTION BUTTONS — Compact Icon Toolbar
+// 6. ROW ACTION BUTTONS — Compact Icon Toolbar
 // ============================================================
 
 // Note: Applied via ::ng-deep in component styles
@@ -1077,7 +944,7 @@
 }
 
 // ============================================================
-// 8. DATE PICKER — NgbDatepicker Integration
+// 7. DATE PICKER — NgbDatepicker Integration
 // ============================================================
 
 .date-range-picker {
@@ -1427,7 +1294,7 @@ ngb-datepicker {
 }
 
 // ============================================================
-// 9. TYPE BADGES — Colored Type Indicators
+// 8. TYPE BADGES — Colored Type Indicators
 // ============================================================
 
 // Note: Applied via ::ng-deep in component styles

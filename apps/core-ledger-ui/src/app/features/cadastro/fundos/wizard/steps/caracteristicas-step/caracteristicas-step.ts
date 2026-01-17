@@ -17,9 +17,10 @@ import {
   Validators,
 } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { filter, startWith } from 'rxjs/operators';
-import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
+import { startWith } from 'rxjs/operators';
+import { WizardStepConfig, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
+import { createRestorationEffect, withRestorationGuard } from '../../shared';
 import { IdentificacaoFormData } from '../../models/identificacao.model';
 import {
   ClassificacaoFormData,
@@ -83,13 +84,6 @@ export class CaracteristicasStep {
   readonly exteriorDisabled = signal(false);
   readonly alavancagemDisabled = signal(false);
 
-  // Track step ID and dataVersion to avoid re-loading unless store data changes
-  private lastLoadedStepId: WizardStepId | null = null;
-  private lastDataVersion = -1;
-
-  // Flag to prevent store updates during data restoration
-  private isRestoring = false;
-
   // Form must be defined first for toSignal() to work
   form = this.formBuilder.group({
     condominio: [null as Condominio | null, [Validators.required]],
@@ -125,6 +119,31 @@ export class CaracteristicasStep {
   readonly reservadoDisabled = computed(() => this.exclusivoValue() === true);
 
   constructor() {
+    // Create restoration effect (centralizes deduplication, isRestoring flag, and form restore)
+    const { isRestoring } = createRestorationEffect<CaracteristicasFormData>({
+      stepConfig: () => this.stepConfig(),
+      wizardStore: this.wizardStore,
+      form: this.form,
+      resetForm: () => this.form.reset({
+        condominio: null,
+        prazo: null,
+        dataEncerramento: null,
+        exclusivo: false,
+        reservado: false,
+        permiteAlavancagem: false,
+        limiteAlavancagem: null,
+        aceitaCripto: false,
+        percentualExterior: null,
+      }),
+      restoreData: (data) => {
+        const formValue = this.prepareDataForForm(data);
+        // Events fire, validators run automatically via startWith subscriptions
+        this.form.patchValue(formValue);
+        this.form.markAsDirty();
+      },
+      updateStepValidation: () => this.updateStepValidation(),
+    });
+
     // Setup form subscriptions
     this.form.statusChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -133,7 +152,7 @@ export class CaracteristicasStep {
     this.form.valueChanges
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        filter(() => !this.isRestoring)
+        withRestorationGuard(isRestoring)
       )
       .subscribe((value) => {
         const stepConfig = untracked(() => this.stepConfig());
@@ -147,7 +166,7 @@ export class CaracteristicasStep {
     // Effect: Apply rules based on tipo_fundo and classificacao from previous steps
     effect(
       () => {
-        const stepConfig = this.stepConfig();
+        const _stepConfig = this.stepConfig(); // Track reactively for re-triggering
         const identificacaoData = untracked(
           () => this.wizardStore.stepData()['identificacao'] as IdentificacaoFormData | undefined
         );
@@ -240,62 +259,6 @@ export class CaracteristicasStep {
         }
         percentualExteriorControl?.updateValueAndValidity({ emitEvent: false });
       });
-
-    // Effect: Load data when step changes OR when store data is restored (dataVersion changes)
-    effect(() => {
-      const stepConfig = this.stepConfig();
-      const stepId = stepConfig.id;
-      const dataVersion = this.wizardStore.dataVersion();
-
-      // Skip if same step AND same dataVersion (no changes)
-      const sameStep = this.lastLoadedStepId === stepId;
-      const sameVersion = this.lastDataVersion === dataVersion;
-      if (sameStep && sameVersion) {
-        return;
-      }
-      this.lastLoadedStepId = stepId;
-      this.lastDataVersion = dataVersion;
-
-      // Set restoration flag to prevent store updates
-      this.isRestoring = true;
-
-      this.form.reset({
-        condominio: null,
-        prazo: null,
-        dataEncerramento: null,
-        exclusivo: false,
-        reservado: false,
-        permiteAlavancagem: false,
-        limiteAlavancagem: null,
-        aceitaCripto: false,
-        percentualExterior: null,
-      });
-
-      const stepData = untracked(
-        () =>
-          this.wizardStore.stepData()[stepConfig.key] as
-            | Partial<CaracteristicasFormData>
-            | undefined
-      );
-
-      if (stepData) {
-        const formValue = this.prepareDataForForm(stepData);
-        // Events fire, validators run automatically via startWith subscriptions
-        this.form.patchValue(formValue);
-        this.form.markAsDirty();
-      }
-
-      // Clear restoration flag
-      this.isRestoring = false;
-
-      // Mark all fields as touched to show validation state
-      Object.keys(this.form.controls).forEach((key) => {
-        this.form.get(key)?.markAsTouched();
-      });
-
-      this.form.updateValueAndValidity();
-      untracked(() => this.updateStepValidation());
-    });
   }
 
   /**

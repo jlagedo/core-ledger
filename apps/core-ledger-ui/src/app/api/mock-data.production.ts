@@ -23,3 +23,5 @@ const createProductionProxy = <T extends object>(entityName: string): T => {
 };
 
 export const MOCK_USERS = createProductionProxy<any[]>('user');
+export const MOCK_INDEXADORES = createProductionProxy<any[]>('indexador');
+export const MOCK_HISTORICO_INDEXADORES = createProductionProxy<any[]>('historicoIndexador');

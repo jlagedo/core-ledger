@@ -183,6 +183,30 @@ TypeScript DTOs and API clients are auto-generated from the .NET API using NSwag
 
 See `docs/api-client-generation.md` for complete guide.
 
+### Angular MCP Tools with Nx Monorepo
+
+The Angular CLI MCP's `list_projects` tool is designed for standard Angular CLI workspaces (`angular.json`), not Nx monorepos that use `project.json` per project. Use these workarounds:
+
+**Use Nx CLI instead of `list_projects`:**
+```bash
+npx nx show projects                        # List all projects
+npx nx show project core-ledger-ui --json   # Get project details (root, sourceRoot, prefix, targets)
+```
+
+**MCP tools work without `workspacePath`:**
+| Tool | Usage |
+|------|-------|
+| `get_best_practices` | Call without arguments → returns generic guide |
+| `search_documentation` | Pass `version: 21` manually |
+| `find_examples` | Call without arguments → returns generic examples |
+
+**Project metadata from `project.json`:**
+- Angular version: `21` (from `package.json`)
+- Test framework: Vitest (executor: `@angular/build:unit-test`)
+- Style language: SCSS (from `inlineStyleLanguage`)
+- Prefix: `app`
+- Source root: `apps/core-ledger-ui/src`
+
 ### Documentation
 All documentation is centralized in `/docs/`:
 - `docs/specs/api/` - API specifications (.NET)

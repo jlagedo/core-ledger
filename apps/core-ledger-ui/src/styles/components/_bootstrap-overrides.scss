@@ -1,0 +1,194 @@
+// ============================================================
+// BOOTSTRAP COMPONENT OVERRIDES
+//
+// Theme-aware styles for Bootstrap cards, buttons, alerts, badges,
+// navigation, links, and focus states.
+// ============================================================
+
+@use "../variables" as *;
+@use "../alert-tokens" as *;
+
+// ============================================================
+// CARD
+// ============================================================
+
+.card {
+  background-color: var(--card-bg);
+  border-color: var(--card-border-color);
+  box-shadow: var(--card-shadow);
+  transition: box-shadow $transition-fast;
+
+  &:hover {
+    box-shadow: var(--card-hover-shadow);
+  }
+
+  .card-header {
+    background-color: var(--card-header-bg);
+    border-bottom-color: var(--card-border-color);
+  }
+}
+
+// ============================================================
+// GLASS EFFECT
+// ============================================================
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur($blur-sm);
+  -webkit-backdrop-filter: blur($blur-sm);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+// ============================================================
+// BUTTONS
+// ============================================================
+
+.btn {
+  transition: all $transition-smooth;
+
+  // Icon spacing inside buttons
+  > i.bi {
+    &:first-child:not(:last-child) {
+      margin-right: 0.375rem;
+    }
+
+    &:last-child:not(:first-child) {
+      margin-left: 0.375rem;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--btn-focus-outline);
+    outline-offset: var(--focus-ring-offset);
+    box-shadow: 0 0 0 4px var(--bs-focus-ring-color);
+  }
+
+  &:disabled,
+  &.disabled {
+    background-color: var(--disabled-bg);
+    border-color: var(--disabled-border);
+    color: var(--disabled-color);
+    opacity: var(--disabled-opacity);
+    pointer-events: none;
+  }
+}
+
+.btn-primary:hover {
+  background-color: var(--btn-primary-hover-bg);
+  border-color: var(--btn-primary-hover-border);
+}
+
+.btn-secondary {
+  --bs-btn-bg: var(--btn-secondary-bg);
+  --bs-btn-border-color: var(--btn-secondary-border);
+  --bs-btn-color: var(--btn-secondary-color);
+  --bs-btn-hover-bg: var(--btn-secondary-hover-bg);
+  --bs-btn-hover-border-color: var(--btn-secondary-hover-bg);
+  --bs-btn-hover-color: #{$neutral-white};
+}
+
+// Primary button emphasis
+.btn-primary {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+// ============================================================
+// DARK MODE OVERRIDES - Bloomberg Terminal
+// ============================================================
+
+[data-bs-theme="dark"] {
+  // Button overrides
+  .btn-outline-secondary {
+    --bs-btn-color: #{$neutral-100};
+    --bs-btn-border-color: rgba(#{$brand-blue-400}, 0.3);
+    --bs-btn-hover-color: #{$neutral-white};
+    --bs-btn-hover-bg: #{$neutral-600};
+    --bs-btn-hover-border-color: #{$brand-blue-400};
+    --bs-btn-active-color: #{$neutral-white};
+    --bs-btn-active-bg: #{$neutral-500};
+  }
+
+  // Text hierarchy using distinct colors (not opacity)
+  .text-secondary {
+    color: var(--terminal-text-secondary) !important;
+  }
+
+  .text-muted {
+    color: var(--terminal-text-muted) !important;
+  }
+
+  // Table headers should use emphasis color (white)
+  .table thead th,
+  .table-light th {
+    background-color: var(--table-header-bg) !important;
+    color: var(--table-header-color) !important;
+  }
+}
+
+// ============================================================
+// ALERTS
+// ============================================================
+
+.alert {
+  border-left-width: 4px;
+  border-radius: var(--bs-border-radius);
+}
+
+@each $type, $_ in $alert-tokens {
+  .alert-#{$type} {
+    background-color: var(--alert-#{$type}-bg);
+    border-color: var(--alert-#{$type}-border);
+    border-left-color: var(--alert-#{$type}-accent);
+    color: var(--alert-#{$type}-color);
+    text-shadow: var(--alert-#{$type}-text-shadow, none);
+
+    .alert-link {
+      color: var(--alert-#{$type}-color);
+      filter: brightness(0.9);
+    }
+  }
+}
+
+// ============================================================
+// BADGES
+// ============================================================
+
+@each $type, $_ in $badge-tokens {
+  .badge.bg-#{$type} {
+    background-color: var(--badge-#{$type}-bg) !important;
+    color: var(--badge-#{$type}-color) !important;
+  }
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+
+.nav-link {
+  transition: all $transition-smooth;
+  position: relative;
+
+  &.active {
+    color: var(--nav-link-active-color) !important;
+    text-shadow: var(--nav-link-active-text-shadow, none);
+  }
+}
+
+// ============================================================
+// LINKS
+// ============================================================
+
+a:visited:not(.btn):not(.nav-link):not(.dropdown-item) {
+  color: var(--link-visited-color);
+}
+
+// ============================================================
+// FOCUS
+// ============================================================
+
+:focus-visible {
+  outline: 2px solid var(--btn-focus-outline);
+  outline-offset: var(--focus-ring-offset, 2px);
+}

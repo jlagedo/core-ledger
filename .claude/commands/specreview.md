@@ -29,21 +29,54 @@ Read the matched specification and extract:
 3. **Functional requirements** (RF-XX)
 4. **Acceptance criteria** from Critérios de Aceite
 
-## Step 3: Find Implementation
+## Step 3: Map Requirements to Architectural Layers
 
-Search for related components in `apps/core-ledger-ui/src/`:
+Before searching for code, classify each requirement by where it would logically be implemented:
+
+| Layer | Examples |
+|-------|----------|
+| **Step/Component** | Form fields, validation, display logic, UI interactions |
+| **Container/Parent** | Cross-step state, navigation between steps, beforeunload handlers |
+| **Route/Guards** | canDeactivate (exit confirmation), canActivate (auth), resolvers |
+| **Store/Service** | Shared state, persistence, API calls, dirty tracking |
+
+**IMPORTANT**: Requirements like "confirmation when leaving", "unsaved changes warning", or "prevent navigation" are NEVER implemented in child components - always check routes/guards/containers.
+
+## Step 4: Find Implementation (Full Scope)
+
+Search for related code in `apps/core-ledger-ui/src/`:
+
+### 4a. Primary Component
 - Use component name from spec as search term
-- Look for wizard-related files
-- Check for matching form implementations
+- Read the component `.ts`, `.html`, and `.scss` files
 
-## Step 4: Get Angular Best Practices
+### 4b. Feature Infrastructure (REQUIRED for wizard/multi-component features)
+- **Parent container**: Look for `*-container.ts` or parent component
+- **Routes file**: Check `*.routes.ts` for guards and route config
+- **Guards directory**: Check for `guards/*.guard.ts` files
+- **Store/Service**: Check for `*-store.ts` or related services
+
+### 4c. Cross-Cutting Concern Search
+Before marking ANY requirement as "not implemented", search the feature directory for related patterns:
+
+```
+Grep patterns to try:
+- canDeactivate|CanDeactivate (exit guards)
+- beforeunload (browser close protection)
+- isDirty|dirty|unsaved (change tracking)
+- confirm|confirmation|modal (user confirmations)
+```
+
+**NEVER conclude a requirement is missing without searching the broader feature directory first.**
+
+## Step 5: Get Angular Best Practices
 
 Call Angular MCP tools to verify implementation follows current standards:
 1. Call `mcp__angular-cli__list_projects` to get workspace info
 2. Call `mcp__angular-cli__get_best_practices` with workspacePath for version-specific standards
 3. Check implementation against these best practices
 
-## Step 5: Generate Checklist Report
+## Step 6: Generate Checklist Report
 
 Compare implementation against spec. Output format:
 
@@ -54,9 +87,13 @@ Compare implementation against spec. Output format:
 | ... | ... | ... |
 
 ### Requisitos Funcionais
-- RF-01: [description] → ✅/❌
-- RF-02: [description] → ✅/❌
-- ...
+| RF | Descrição | Status | Localização |
+|----|-----------|--------|-------------|
+| RF-01 | [description] | ✅/❌ | component / container / guard / store |
+| RF-02 | [description] | ✅/❌ | component / container / guard / store |
+| ... | ... | ... | ... |
+
+**Note**: Always specify WHERE each requirement was found to ensure full-scope review.
 
 ### Critérios de Aceite
 - [ ] Criteria 1 → ✅/❌

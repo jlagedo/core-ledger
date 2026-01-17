@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   DestroyRef,
-  effect,
   inject,
   input,
   signal,
@@ -22,8 +21,9 @@ import { Router } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, filter, map, startWith, switchMap, catchError, of } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
+import { WizardStepConfig, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
+import { createRestorationEffect, withRestorationGuard, markFormArrayAsTouched, collectFormArrayInvalidFields } from '../../shared';
 import { IdentificacaoFormData, TipoFundo } from '../../models/identificacao.model';
 import {
   TipoVinculo,
@@ -31,7 +31,6 @@ import {
   VinculosFormData,
   VINCULOS_OBRIGATORIOS,
   TIPO_VINCULO_OPTIONS,
-  TipoVinculoOption,
   VINCULO_DEFAULT,
   getTipoVinculoLabel,
   isVinculoObrigatorio,
@@ -87,13 +86,6 @@ export class VinculosStep {
   private readonly instituicoesService = inject(InstituicoesService);
   private readonly modalService = inject(NgbModal);
   private readonly router = inject(Router);
-
-  // Track step ID and dataVersion to avoid re-loading unless store data changes
-  private lastLoadedStepId: WizardStepId | null = null;
-  private lastDataVersion = -1;
-
-  // Flag to prevent store updates during data restoration
-  private isRestoring = false;
 
   // Enum options for template
   readonly tipoVinculoOptions = TIPO_VINCULO_OPTIONS;
@@ -164,55 +156,26 @@ export class VinculosStep {
   readonly expandedDetails = signal<Set<number>>(new Set());
 
   constructor() {
-    // Setup form subscriptions
-    this.form.statusChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.updateStepValidation());
-
-    this.form.valueChanges
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        filter(() => !this.isRestoring)
-      )
-      .subscribe((value) => {
-        const stepConfig = untracked(() => this.stepConfig());
-        const dataForStore = this.prepareDataForStore(value);
-        this.wizardStore.setStepData(stepConfig.key, dataForStore);
-      });
-
-    // Effect: Load data when step changes or dataVersion changes (draft restoration)
-    effect(() => {
-      const stepConfig = this.stepConfig();
-      const stepId = stepConfig.id;
-      const dataVersion = this.wizardStore.dataVersion();
-
-      // Skip if same step AND same dataVersion (no changes)
-      const sameStep = this.lastLoadedStepId === stepId;
-      const sameVersion = this.lastDataVersion === dataVersion;
-      if (sameStep && sameVersion) {
-        return;
-      }
-      this.lastLoadedStepId = stepId;
-      this.lastDataVersion = dataVersion;
-
-      // Set restoration flag to prevent store updates
-      this.isRestoring = true;
-
-      // Reset form array - events can emit now (store updates are filtered)
-      const vinculosArray = this.form.get('vinculos') as FormArray;
-      vinculosArray.clear();
-
-      const stepData = untracked(
-        () => this.wizardStore.stepData()[stepConfig.key] as VinculosFormData | undefined
-      );
-
-      if (stepData && stepData.vinculos && stepData.vinculos.length > 0) {
-        // Restore saved data - setupDateValidation runs automatically via startWith
-        stepData.vinculos.forEach((vinculo) => {
+    // Create restoration effect (centralizes deduplication, isRestoring flag, and form restore)
+    const { isRestoring } = createRestorationEffect<VinculosFormData>({
+      stepConfig: () => this.stepConfig(),
+      wizardStore: this.wizardStore,
+      form: this.form,
+      resetForm: () => {
+        const vinculosArray = this.form.get('vinculos') as FormArray;
+        vinculosArray.clear();
+      },
+      restoreData: (data) => {
+        const vinculosArray = this.form.get('vinculos') as FormArray;
+        // Restore saved vinculos - setupDateValidation runs automatically via startWith
+        data.vinculos.forEach((vinculo) => {
           vinculosArray.push(this.createVinculoFormGroup(vinculo));
         });
-      } else {
+        this.form.markAsDirty();
+      },
+      createDefaultData: () => {
         // Initialize with required vinculos (RF-01)
+        const vinculosArray = this.form.get('vinculos') as FormArray;
         VINCULOS_OBRIGATORIOS.forEach((tipo) => {
           vinculosArray.push(
             this.createVinculoFormGroup({
@@ -222,20 +185,29 @@ export class VinculosStep {
             } as VinculoFormData)
           );
         });
-      }
-
-      // Clear restoration flag
-      this.isRestoring = false;
-
-      // Final validation update
-      vinculosArray.updateValueAndValidity();
-      this.form.updateValueAndValidity();
-
-      // Mark all fields as touched
-      this.markAllAsTouched();
-
-      untracked(() => this.updateStepValidation());
+      },
+      markAllAsTouched: () => {
+        const vinculosArray = this.form.get('vinculos') as FormArray;
+        markFormArrayAsTouched(vinculosArray);
+      },
+      updateStepValidation: () => this.updateStepValidation(),
     });
+
+    // Setup form subscriptions
+    this.form.statusChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.updateStepValidation());
+
+    this.form.valueChanges
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        withRestorationGuard(isRestoring)
+      )
+      .subscribe((value) => {
+        const stepConfig = untracked(() => this.stepConfig());
+        const dataForStore = this.prepareDataForStore(value);
+        this.wizardStore.setStepData(stepConfig.key, dataForStore);
+      });
   }
 
   /**
@@ -708,15 +680,6 @@ export class VinculosStep {
     };
   }
 
-  private markAllAsTouched(): void {
-    const vinculosArray = this.form.get('vinculos') as FormArray;
-    vinculosArray.controls.forEach((group) => {
-      Object.keys((group as FormGroup).controls).forEach((key) => {
-        group.get(key)?.markAsTouched();
-      });
-    });
-  }
-
   private updateStepValidation(): void {
     const stepId = this.stepConfig().id;
     const vinculosArray = this.form.get('vinculos') as FormArray;
@@ -766,22 +729,8 @@ export class VinculosStep {
   }
 
   private collectInvalidFields(): InvalidFieldInfo[] {
-    const invalidFields: InvalidFieldInfo[] = [];
     const vinculosArray = this.form.get('vinculos') as FormArray;
-    vinculosArray.controls.forEach((group, index) => {
-      Object.keys((group as FormGroup).controls).forEach((key) => {
-        const control = group.get(key);
-        if (control && control.invalid && key !== 'searchTerm') {
-          const fieldErrors: string[] = [];
-          if (control.errors) {
-            Object.keys(control.errors).forEach((errorKey) => {
-              fieldErrors.push(errorKey);
-            });
-          }
-          invalidFields.push({ field: `vinculos[${index}].${key}`, errors: fieldErrors });
-        }
-      });
-    });
-    return invalidFields;
+    // Exclude searchTerm field from validation as it's just for autocomplete
+    return collectFormArrayInvalidFields(vinculosArray, 'vinculos', ['searchTerm']);
   }
 }

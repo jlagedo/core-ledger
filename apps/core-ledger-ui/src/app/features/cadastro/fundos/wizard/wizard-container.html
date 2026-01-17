@@ -99,6 +99,10 @@
                 <!-- Step 10: Upload de Documentos -->
                 <app-documentos-step [stepConfig]="stepConfig" />
               }
+              @case (11) {
+                <!-- Step 11: Revisão e Submissão -->
+                <app-revisao-step [stepConfig]="stepConfig" />
+              }
               @default {
                 <app-placeholder-step [stepConfig]="stepConfig" />
               }

@@ -1,10 +1,13 @@
 // Calendario List — AG Grid Component Styles
 //
 // This file contains only component-scoped styles that require ::ng-deep.
-// All shared styles (preset-bar, filter-bar, status badges, etc.) are now
-// in src/styles/_data-grid.scss and loaded globally.
+// All shared styles (preset-bar, filter-bar, status badges, etc.) are loaded
+// globally via src/styles/_data-grid.scss in the main styles.scss file.
+//
+// IMPORTANT: Import only the mixins file, NOT the full _data-grid.scss
+// to avoid duplicating global styles in this component's bundle.
 
-@use "../../../../styles/data-grid" as *;
+@use "../../../../styles/data-grid-mixins" as *;
 
 :host {
   @include ag-grid-host;

@@ -1,0 +1,159 @@
+// ============================================================
+// DATA GRID MIXINS — AG Grid Component Refinements
+//
+// This file contains ONLY mixins (no CSS output).
+// Use these mixins in component SCSS files that need AG Grid styling.
+//
+// IMPORTANT: Import this file in components, NOT _data-grid.scss
+// The global classes (preset-bar, filter-bar, etc.) are already
+// loaded globally via styles.scss.
+// ============================================================
+
+@use "variables" as *;
+
+// ============================================================
+// AG GRID HOST & CONTAINER
+// ============================================================
+
+// Base component host
+@mixin ag-grid-host {
+  display: block;
+}
+
+// Grid container styling
+@mixin ag-grid-container {
+  display: block;
+  border-radius: 0;
+  transition: background-color 0.2s ease-in-out;
+}
+
+// ============================================================
+// AG GRID REFINEMENTS — Cell and Header Overrides
+// ============================================================
+
+// AG Grid cell and header refinements
+// Note: These styles must be applied via ::ng-deep in component SCSS
+@mixin ag-grid-refinements {
+  // Header cell refinements
+  .ag-header-cell-label {
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    font-size: 0.6875rem;
+  }
+
+  // Cell typography
+  .ag-cell {
+    display: flex;
+    align-items: center;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+  }
+
+  // Text alignment classes
+  .ag-cell.text-center,
+  .ag-header-cell.text-center .ag-header-cell-label {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .ag-cell.text-end,
+  .ag-header-cell.text-end .ag-header-cell-label {
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  // Numeric columns - right-aligned with monospace
+  .ag-cell.ag-right-aligned-cell {
+    font-feature-settings: 'tnum' 1;
+    justify-content: flex-end;
+  }
+
+  // Row hover enhancement
+  .ag-row-hover {
+    transition: background-color 0.1s ease-in-out;
+  }
+
+  // Loading overlay styling
+  .ag-overlay-loading-wrapper {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+  }
+
+  // No rows overlay
+  .ag-overlay-no-rows-wrapper {
+    color: var(--bs-secondary-color);
+  }
+
+  // Scrollbar refinements for webkit browsers
+  .ag-body-viewport::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .ag-body-viewport::-webkit-scrollbar-track {
+    background: var(--bs-tertiary-bg);
+    border-radius: 4px;
+  }
+
+  .ag-body-viewport::-webkit-scrollbar-thumb {
+    background: var(--bs-secondary-color);
+    border-radius: 4px;
+
+    &:hover {
+      background: var(--bs-body-color);
+    }
+  }
+
+  // Sort indicator refinement
+  .ag-sort-indicator-icon {
+    opacity: 0.8;
+  }
+
+  // Column resize handle
+  .ag-header-cell-resize {
+    opacity: 0;
+    transition: opacity 0.15s ease-in-out;
+  }
+
+  .ag-header-cell:hover .ag-header-cell-resize {
+    opacity: 1;
+  }
+}
+
+// ============================================================
+// DARK MODE AG GRID ENHANCEMENTS
+// ============================================================
+
+@mixin ag-grid-dark-mode {
+  // Subtle amber glow on header
+  .ag-header {
+    border-bottom: 1px solid var(--terminal-glow-muted);
+  }
+
+  // Selected row amber accent
+  .ag-row-selected {
+    border-left: 2px solid var(--terminal-glow);
+  }
+
+  // Loading spinner color
+  .ag-overlay-loading-center {
+    color: var(--terminal-glow);
+  }
+}
+
+// ============================================================
+// LIGHT MODE AG GRID ENHANCEMENTS
+// ============================================================
+
+@mixin ag-grid-light-mode {
+  // Warm border on header
+  .ag-header {
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+
+  // Selected row amber accent
+  .ag-row-selected {
+    border-left: 2px solid var(--terminal-glow);
+  }
+}

@@ -52,20 +52,6 @@ function getCurrentYearRange(): { dataInicio: string; dataFim: string } {
 }
 
 /**
- * Helper to get current month date range
- */
-function getCurrentMonthRange(): { dataInicio: string; dataFim: string } {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = (now.getMonth() + 1).toString().padStart(2, '0');
-  const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
-  return {
-    dataInicio: `${year}-${month}-01`,
-    dataFim: `${year}-${month}-${lastDay}`,
-  };
-}
-
-/**
  * Helper to get next N days date range
  */
 function getNextDaysRange(days: number): { dataInicio: string; dataFim: string } {

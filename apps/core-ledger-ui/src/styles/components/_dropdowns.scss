@@ -1,0 +1,18 @@
+// ============================================================
+// DROPDOWN STYLES
+//
+// Theme-aware styles for Bootstrap dropdown menus.
+// ============================================================
+
+@use "../variables" as *;
+
+// ============================================================
+// BASE DROPDOWN
+// ============================================================
+
+.dropdown-menu {
+  --bs-dropdown-bg: var(--dropdown-bg);
+  backdrop-filter: blur($blur-md);
+  box-shadow: var(--bs-box-shadow-lg);
+  border-color: var(--dropdown-border);
+}

@@ -1,0 +1,783 @@
+<div class="revisao-step">
+  <!-- Completeness Overview -->
+  <div class="completeness-card mb-4">
+    <div class="completeness-header">
+      <div class="completeness-icon">
+        @if (canSubmit()) {
+          <i class="bi bi-check-circle-fill text-success"></i>
+        } @else {
+          <i class="bi bi-exclamation-circle-fill text-warning"></i>
+        }
+      </div>
+      <div class="completeness-info">
+        <h6 class="mb-1">
+          @if (canSubmit()) {
+            Cadastro Pronto para Submissão
+          } @else {
+            Cadastro Incompleto
+          }
+        </h6>
+        <p class="text-muted mb-0 small">
+          {{ completenessPercentage() }}% completo — {{ sectionSummaries().length }} etapas
+        </p>
+      </div>
+      <div class="completeness-progress">
+        <div class="progress-ring" [attr.data-progress]="completenessPercentage()">
+          <svg viewBox="0 0 36 36">
+            <path
+              class="progress-ring__bg"
+              d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831"
+            />
+            <path
+              class="progress-ring__fill"
+              [style.stroke-dasharray]="completenessPercentage() + ', 100'"
+              d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831"
+            />
+          </svg>
+          <span class="progress-ring__text font-monospace">{{ completenessPercentage() }}%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Missing Steps Warning -->
+    @if (missingRequiredSteps().length > 0) {
+      <div class="missing-steps-alert mt-3">
+        <div class="alert alert-warning border-0 mb-0 d-flex align-items-start">
+          <i class="bi bi-exclamation-triangle-fill me-3 mt-1"></i>
+          <div>
+            <strong>Etapas obrigatórias pendentes:</strong>
+            <ul class="mb-0 mt-2">
+              @for (step of missingRequiredSteps(); track step.stepId) {
+                <li>
+                  <button
+                    type="button"
+                    class="btn btn-link p-0 text-warning"
+                    (click)="goToStep(step.stepId)"
+                  >
+                    {{ step.label }}
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Section Checklist -->
+  <div class="section-checklist mb-4">
+    <h6 class="text-uppercase text-secondary fw-semibold mb-3 fs-6 letter-spacing-wide">
+      <i class="bi bi-list-check me-2"></i>
+      Status das Etapas
+    </h6>
+    <div class="checklist-grid">
+      @for (section of sectionSummaries(); track section.stepId) {
+        <div
+          class="checklist-item"
+          [class.checklist-item--complete]="section.status === 'complete'"
+          [class.checklist-item--incomplete]="section.status === 'incomplete'"
+          [class.checklist-item--optional]="section.status === 'optional'"
+          [class.checklist-item--warning]="section.status === 'warning'"
+        >
+          <span class="checklist-status">
+            @switch (section.status) {
+              @case ('complete') {
+                <i class="bi bi-check-circle-fill"></i>
+              }
+              @case ('incomplete') {
+                <i class="bi bi-x-circle-fill"></i>
+              }
+              @case ('optional') {
+                <i class="bi bi-circle"></i>
+              }
+              @case ('warning') {
+                <i class="bi bi-exclamation-circle-fill"></i>
+              }
+            }
+          </span>
+          <span class="checklist-label">{{ section.label }}</span>
+          <span class="checklist-badge font-monospace">{{ section.statusLabel }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Accordion Summary -->
+  <div class="accordion-summary">
+    <h6 class="text-uppercase text-secondary fw-semibold mb-3 fs-6 letter-spacing-wide">
+      <i class="bi bi-card-list me-2"></i>
+      Resumo do Cadastro
+    </h6>
+
+    <div ngbAccordion [closeOthers]="false" class="review-accordion">
+      <!-- 1. Identificação -->
+      <div ngbAccordionItem="identificacao" [collapsed]="false">
+        <h2 ngbAccordionHeader>
+          <button ngbAccordionButton class="accordion-header-btn">
+            <span class="accordion-icon"><i class="bi bi-card-heading"></i></span>
+            <span class="accordion-title">Identificação</span>
+            <span class="accordion-status accordion-status--complete">
+              <i class="bi bi-check-circle-fill"></i>
+            </span>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary accordion-edit-btn"
+              (click)="goToStep(1); $event.stopPropagation()"
+            >
+              <i class="bi bi-pencil me-1"></i>
+              Editar
+            </button>
+          </button>
+        </h2>
+        <div ngbAccordionCollapse>
+          <div ngbAccordionBody>
+            <ng-template>
+              @if (identificacao(); as ident) {
+                <div class="summary-grid">
+                  <div class="summary-item">
+                    <span class="summary-label">CNPJ</span>
+                    <span class="summary-value font-monospace">{{ formatCnpj(ident.cnpj) }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Razão Social</span>
+                    <span class="summary-value">{{ ident.razaoSocial || '—' }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Nome Fantasia</span>
+                    <span class="summary-value">{{ ident.nomeFantasia || '—' }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Tipo de Fundo</span>
+                    <span class="summary-value">{{ getTipoFundoLabel(ident.tipoFundo) }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Data Constituição</span>
+                    <span class="summary-value">{{ formatDate(ident.dataConstituicao) }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Início Atividade</span>
+                    <span class="summary-value">{{ formatDate(ident.dataInicioAtividade) }}</span>
+                  </div>
+                </div>
+              } @else {
+                <p class="text-muted mb-0">Dados não preenchidos</p>
+              }
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Classificação -->
+      <div ngbAccordionItem="classificacao">
+        <h2 ngbAccordionHeader>
+          <button ngbAccordionButton class="accordion-header-btn">
+            <span class="accordion-icon"><i class="bi bi-tags"></i></span>
+            <span class="accordion-title">Classificação</span>
+            <span class="accordion-status accordion-status--complete">
+              <i class="bi bi-check-circle-fill"></i>
+            </span>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary accordion-edit-btn"
+              (click)="goToStep(2); $event.stopPropagation()"
+            >
+              <i class="bi bi-pencil me-1"></i>
+              Editar
+            </button>
+          </button>
+        </h2>
+        <div ngbAccordionCollapse>
+          <div ngbAccordionBody>
+            <ng-template>
+              @if (classificacao(); as classif) {
+                <div class="summary-grid">
+                  <div class="summary-item">
+                    <span class="summary-label">Classificação CVM</span>
+                    <span class="summary-value">{{ getClassificacaoCvmLabel(classif.classificacaoCvm) }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Classificação ANBIMA</span>
+                    <span class="summary-value">{{ classif.classificacaoAnbima || '—' }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Código ANBIMA</span>
+                    <span class="summary-value font-monospace">{{ classif.codigoAnbima || '—' }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Público Alvo</span>
+                    <span class="summary-value">{{ getPublicoAlvoLabel(classif.publicoAlvo) }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Tributação</span>
+                    <span class="summary-value">{{ getTributacaoLabel(classif.tributacao) }}</span>
+                  </div>
+                </div>
+              } @else {
+                <p class="text-muted mb-0">Dados não preenchidos</p>
+              }
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Características -->
+      <div ngbAccordionItem="caracteristicas">
+        <h2 ngbAccordionHeader>
+          <button ngbAccordionButton class="accordion-header-btn">
+            <span class="accordion-icon"><i class="bi bi-sliders"></i></span>
+            <span class="accordion-title">Características</span>
+            <span class="accordion-status accordion-status--complete">
+              <i class="bi bi-check-circle-fill"></i>
+            </span>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary accordion-edit-btn"
+              (click)="goToStep(3); $event.stopPropagation()"
+            >
+              <i class="bi bi-pencil me-1"></i>
+              Editar
+            </button>
+          </button>
+        </h2>
+        <div ngbAccordionCollapse>
+          <div ngbAccordionBody>
+            <ng-template>
+              @if (caracteristicas(); as carac) {
+                <div class="summary-grid">
+                  <div class="summary-item">
+                    <span class="summary-label">Condomínio</span>
+                    <span class="summary-value">{{ getCondominioLabel(carac.condominio) }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Prazo</span>
+                    <span class="summary-value">{{ getPrazoLabel(carac.prazo) }}</span>
+                  </div>
+                  @if (carac.dataEncerramento) {
+                    <div class="summary-item">
+                      <span class="summary-label">Data Encerramento</span>
+                      <span class="summary-value">{{ formatDate(carac.dataEncerramento) }}</span>
+                    </div>
+                  }
+                  <div class="summary-item">
+                    <span class="summary-label">Exclusivo</span>
+                    <span class="summary-value">{{ formatBoolean(carac.exclusivo) }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Reservado</span>
+                    <span class="summary-value">{{ formatBoolean(carac.reservado) }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Permite Alavancagem</span>
+                    <span class="summary-value">{{ formatBoolean(carac.permiteAlavancagem) }}</span>
+                  </div>
+                  @if (carac.permiteAlavancagem && carac.limiteAlavancagem) {
+                    <div class="summary-item">
+                      <span class="summary-label">Limite Alavancagem</span>
+                      <span class="summary-value">{{ formatPercentual(carac.limiteAlavancagem) }}</span>
+                    </div>
+                  }
+                  <div class="summary-item">
+                    <span class="summary-label">Aceita Cripto</span>
+                    <span class="summary-value">{{ formatBoolean(carac.aceitaCripto) }}</span>
+                  </div>
+                  @if (carac.percentualExterior) {
+                    <div class="summary-item">
+                      <span class="summary-label">% Investimento Exterior</span>
+                      <span class="summary-value">{{ formatPercentual(carac.percentualExterior) }}</span>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="text-muted mb-0">Dados não preenchidos</p>
+              }
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Parâmetros de Cota -->
+      <div ngbAccordionItem="parametrosCota">
+        <h2 ngbAccordionHeader>
+          <button ngbAccordionButton class="accordion-header-btn">
+            <span class="accordion-icon"><i class="bi bi-calculator"></i></span>
+            <span class="accordion-title">Parâmetros de Cota</span>
+            <span class="accordion-status accordion-status--complete">
+              <i class="bi bi-check-circle-fill"></i>
+            </span>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary accordion-edit-btn"
+              (click)="goToStep(4); $event.stopPropagation()"
+            >
+              <i class="bi bi-pencil me-1"></i>
+              Editar
+            </button>
+          </button>
+        </h2>
+        <div ngbAccordionCollapse>
+          <div ngbAccordionBody>
+            <ng-template>
+              @if (parametrosCota(); as params) {
+                <div class="summary-grid">
+                  <div class="summary-item">
+                    <span class="summary-label">Casas Decimais (Cota)</span>
+                    <span class="summary-value font-monospace">{{ params.casasDecimaisCota }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Casas Decimais (Qtd)</span>
+                    <span class="summary-value font-monospace">{{ params.casasDecimaisQuantidade }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Tipo de Cota</span>
+                    <span class="summary-value">{{ getTipoCotaLabel(params.tipoCota) }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Horário de Corte</span>
+                    <span class="summary-value font-monospace">{{ params.horarioCorte || '—' }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="summary-label">Cota Inicial</span>
+                    <span class="summary-value font-monospace">{{ formatCurrency(params.cotaInicial) }}</span>
+                  </div>
+                  @if (params.dataCotaInicial) {
+                    <div class="summary-item">
+                      <span class="summary-label">Data Cota Inicial</span>
+                      <span class="summary-value">{{ formatDate(params.dataCotaInicial) }}</span>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="text-muted mb-0">Dados não preenchidos</p>
+              }
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Taxas -->
+      <div ngbAccordionItem="taxas">
+        <h2 ngbAccordionHeader>
+          <button ngbAccordionButton class="accordion-header-btn">
+            <span class="accordion-icon"><i class="bi bi-percent"></i></span>
+            <span class="accordion-title">Taxas</span>
+            <span class="accordion-badge font-monospace">{{ (taxas()?.taxas ?? []).length }}</span>
+            <span class="accordion-status accordion-status--complete">
+              <i class="bi bi-check-circle-fill"></i>
+            </span>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary accordion-edit-btn"
+              (click)="goToStep(5); $event.stopPropagation()"
+            >
+              <i class="bi bi-pencil me-1"></i>
+              Editar
+            </button>
+          </button>
+        </h2>
+        <div ngbAccordionCollapse>
+          <div ngbAccordionBody>
+            <ng-template>
+              @if (taxas()?.taxas?.length) {
+                <div class="taxa-list">
+                  @for (taxa of taxas()!.taxas; track $index) {
+                    <div class="taxa-card">
+                      <div class="taxa-header">
+                        <span class="taxa-type">{{ getTipoTaxaLabel(taxa.tipoTaxa) }}</span>
+                        <span class="taxa-value font-monospace">{{ formatPercentual(taxa.percentual) }} a.a.</span>
+                      </div>
+                      <div class="taxa-details">
+                        <span>{{ getBaseCalculoLabel(taxa.baseCalculo) }}</span>
+                        <span class="text-muted">•</span>
+                        <span>{{ getFormaCobrancaLabel(taxa.formaCobranca) }}</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="text-muted mb-0">Nenhuma taxa configurada</p>
+              }
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Prazos -->
+      <div ngbAccordionItem="prazos">
+        <h2 ngbAccordionHeader>
+          <button ngbAccordionButton class="accordion-header-btn">
+            <span class="accordion-icon"><i class="bi bi-calendar-event"></i></span>
+            <span class="accordion-title">Prazos</span>
+            <span class="accordion-badge font-monospace">{{ (prazos()?.prazos ?? []).length }}</span>
+            <span class="accordion-status accordion-status--complete">
+              <i class="bi bi-check-circle-fill"></i>
+            </span>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary accordion-edit-btn"
+              (click)="goToStep(6); $event.stopPropagation()"
+            >
+              <i class="bi bi-pencil me-1"></i>
+              Editar
+            </button>
+          </button>
+        </h2>
+        <div ngbAccordionCollapse>
+          <div ngbAccordionBody>
+            <ng-template>
+              @if (prazos()?.prazos?.length) {
+                <div class="prazo-list">
+                  @for (prazo of prazos()!.prazos; track $index) {
+                    <div class="prazo-card">
+                      <div class="prazo-type">
+                        @if (prazo.tipoOperacao === 'APLICACAO') {
+                          <i class="bi bi-box-arrow-in-down text-success"></i>
+                          <span>Aplicação</span>
+                        } @else {
+                          <i class="bi bi-box-arrow-up text-danger"></i>
+                          <span>Resgate</span>
+                        }
+                      </div>
+                      <div class="prazo-values">
+                        <div class="prazo-value">
+                          <span class="prazo-label">Cotização</span>
+                          <span class="prazo-dx font-monospace">{{ formatPrazoDX(prazo.prazoCotizacao) }}</span>
+                        </div>
+                        <div class="prazo-value">
+                          <span class="prazo-label">Liquidação</span>
+                          <span class="prazo-dx font-monospace">{{ formatPrazoDX(prazo.prazoLiquidacao) }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="text-muted mb-0">Nenhum prazo configurado</p>
+              }
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Classes (Optional) -->
+      <div ngbAccordionItem="classes">
+        <h2 ngbAccordionHeader>
+          <button ngbAccordionButton class="accordion-header-btn">
+            <span class="accordion-icon"><i class="bi bi-layers"></i></span>
+            <span class="accordion-title">Classes</span>
+            @if (classes()?.multiclasse) {
+              <span class="accordion-badge font-monospace">{{ (classes()?.classes ?? []).length }}</span>
+            }
+            <span
+              class="accordion-status"
+              [class.accordion-status--complete]="classes()?.classes?.length"
+              [class.accordion-status--optional]="!classes()?.classes?.length"
+            >
+              @if (classes()?.classes?.length) {
+                <i class="bi bi-check-circle-fill"></i>
+              } @else {
+                <i class="bi bi-circle"></i>
+              }
+            </span>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary accordion-edit-btn"
+              (click)="goToStep(7); $event.stopPropagation()"
+            >
+              <i class="bi bi-pencil me-1"></i>
+              Editar
+            </button>
+          </button>
+        </h2>
+        <div ngbAccordionCollapse>
+          <div ngbAccordionBody>
+            <ng-template>
+              @if (classes(); as classesData) {
+                @if (!classesData.multiclasse) {
+                  <p class="text-muted mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Fundo de classe única (não multiclasse)
+                  </p>
+                } @else if (classesData.classes && classesData.classes.length) {
+                  <div class="classe-list">
+                    @for (classe of classesData.classes; track classe.codigoClasse) {
+                      <div class="classe-card">
+                        <div class="classe-header">
+                          <span class="classe-codigo font-monospace">{{ classe.codigoClasse }}</span>
+                          <span class="classe-nome">{{ classe.nomeClasse }}</span>
+                        </div>
+                        <div class="classe-details">
+                          @if (classe.tipoClasseFidc) {
+                            <span class="badge bg-secondary-subtle text-secondary">
+                              {{ getTipoClasseLabel(classe.tipoClasseFidc) }}
+                            </span>
+                          }
+                          @if (classe.publicoAlvo) {
+                            <span class="badge bg-info-subtle text-info">
+                              {{ classe.publicoAlvo }}
+                            </span>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <p class="text-muted mb-0">Nenhuma classe configurada</p>
+                }
+              } @else {
+                <p class="text-muted mb-0">Dados não preenchidos (opcional)</p>
+              }
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. Parâmetros FIDC (Conditional) -->
+      @if (isFidc()) {
+        <div ngbAccordionItem="parametrosFidc">
+          <h2 ngbAccordionHeader>
+            <button ngbAccordionButton class="accordion-header-btn">
+              <span class="accordion-icon"><i class="bi bi-bank2"></i></span>
+              <span class="accordion-title">Parâmetros FIDC</span>
+              <span
+                class="accordion-status"
+                [class.accordion-status--complete]="parametrosFidc()"
+                [class.accordion-status--optional]="!parametrosFidc()"
+              >
+                @if (parametrosFidc()) {
+                  <i class="bi bi-check-circle-fill"></i>
+                } @else {
+                  <i class="bi bi-circle"></i>
+                }
+              </span>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary accordion-edit-btn"
+                (click)="goToStep(8); $event.stopPropagation()"
+              >
+                <i class="bi bi-pencil me-1"></i>
+                Editar
+              </button>
+            </button>
+          </h2>
+          <div ngbAccordionCollapse>
+            <div ngbAccordionBody>
+              <ng-template>
+                @if (parametrosFidc(); as fidc) {
+                  <div class="summary-grid">
+                    <div class="summary-item">
+                      <span class="summary-label">Tipo FIDC</span>
+                      <span class="summary-value">{{ fidc.tipoFidc || '—' }}</span>
+                    </div>
+                    <div class="summary-item">
+                      <span class="summary-label">Índice Subordinação Alvo</span>
+                      <span class="summary-value">{{ formatPercentual(fidc.indiceSubordinacaoAlvo) }}</span>
+                    </div>
+                    <div class="summary-item">
+                      <span class="summary-label">Prazo Médio Carteira</span>
+                      <span class="summary-value">{{ fidc.prazoMedioCarteira ? fidc.prazoMedioCarteira + ' dias' : '—' }}</span>
+                    </div>
+                    <div class="summary-item">
+                      <span class="summary-label">Limite Cedente</span>
+                      <span class="summary-value">{{ formatPercentual(fidc.limiteConcentracaoCedente) }}</span>
+                    </div>
+                    <div class="summary-item">
+                      <span class="summary-label">Limite Sacado</span>
+                      <span class="summary-value">{{ formatPercentual(fidc.limiteConcentracaoSacado) }}</span>
+                    </div>
+                    <div class="summary-item">
+                      <span class="summary-label">Coobrigação</span>
+                      <span class="summary-value">{{ formatBoolean(fidc.possuiCoobrigacao) }}</span>
+                    </div>
+                  </div>
+                } @else {
+                  <p class="text-muted mb-0">Dados não preenchidos (opcional)</p>
+                }
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- 9. Vínculos -->
+      <div ngbAccordionItem="vinculos">
+        <h2 ngbAccordionHeader>
+          <button ngbAccordionButton class="accordion-header-btn">
+            <span class="accordion-icon"><i class="bi bi-link-45deg"></i></span>
+            <span class="accordion-title">Vínculos</span>
+            <span class="accordion-badge font-monospace">{{ (vinculos()?.vinculos ?? []).length }}</span>
+            <span class="accordion-status accordion-status--complete">
+              <i class="bi bi-check-circle-fill"></i>
+            </span>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary accordion-edit-btn"
+              (click)="goToStep(9); $event.stopPropagation()"
+            >
+              <i class="bi bi-pencil me-1"></i>
+              Editar
+            </button>
+          </button>
+        </h2>
+        <div ngbAccordionCollapse>
+          <div ngbAccordionBody>
+            <ng-template>
+              @if (vinculos()?.vinculos?.length) {
+                <div class="vinculo-list">
+                  @for (vinculo of vinculos()!.vinculos; track $index) {
+                    <div class="vinculo-card">
+                      <div class="vinculo-type">
+                        <span class="vinculo-label">{{ getTipoVinculoLabel(vinculo.tipoVinculo) }}</span>
+                      </div>
+                      <div class="vinculo-info">
+                        <span class="vinculo-nome">{{ vinculo.nomeInstituicao || '—' }}</span>
+                        <span class="vinculo-cnpj font-monospace">{{ formatCnpj(vinculo.cnpjInstituicao) }}</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="text-muted mb-0">Nenhum vínculo configurado</p>
+              }
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- 10. Documentos (Optional) -->
+      <div ngbAccordionItem="documentos">
+        <h2 ngbAccordionHeader>
+          <button ngbAccordionButton class="accordion-header-btn">
+            <span class="accordion-icon"><i class="bi bi-file-earmark-text"></i></span>
+            <span class="accordion-title">Documentos</span>
+            @if (documentos().length) {
+              <span class="accordion-badge font-monospace">{{ documentos().length }}</span>
+            }
+            <span
+              class="accordion-status"
+              [class.accordion-status--complete]="documentos().length"
+              [class.accordion-status--optional]="!documentos().length"
+            >
+              @if (documentos().length) {
+                <i class="bi bi-check-circle-fill"></i>
+              } @else {
+                <i class="bi bi-circle"></i>
+              }
+            </span>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary accordion-edit-btn"
+              (click)="goToStep(10); $event.stopPropagation()"
+            >
+              <i class="bi bi-pencil me-1"></i>
+              Editar
+            </button>
+          </button>
+        </h2>
+        <div ngbAccordionCollapse>
+          <div ngbAccordionBody>
+            <ng-template>
+              @if (documentos().length) {
+                <div class="documento-list">
+                  @for (doc of documentos(); track doc.tempId) {
+                    <div class="documento-card">
+                      <i class="bi bi-file-earmark-pdf documento-icon"></i>
+                      <div class="documento-info">
+                        <span class="documento-tipo">{{ getTipoDocumentoLabel(doc.tipoDocumento) }}</span>
+                        <span class="documento-nome font-monospace">{{ doc.arquivoNome }}</span>
+                      </div>
+                      <span class="documento-size font-monospace">{{ formatFileSize(doc.arquivoTamanho) }}</span>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="empty-docs">
+                  <i class="bi bi-file-earmark-x display-6 text-muted mb-2"></i>
+                  <p class="text-muted mb-0 small">Nenhum documento anexado (opcional)</p>
+                </div>
+              }
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  @if (showSuccessModal()) {
+    <div class="modal-overlay" (click)="closeModals()">
+      <div class="success-modal" (click)="$event.stopPropagation()">
+        <div class="modal-icon modal-icon--success">
+          <i class="bi bi-check-lg"></i>
+        </div>
+        <h4 class="modal-title">Fundo Criado com Sucesso!</h4>
+        @if (submissionResult(); as result) {
+          <div class="modal-details">
+            <div class="detail-item">
+              <span class="detail-label">CNPJ</span>
+              <span class="detail-value font-monospace">{{ formatCnpj(result.cnpj ?? '') }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Nome</span>
+              <span class="detail-value">{{ result.nomeFantasia }}</span>
+            </div>
+          </div>
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn btn-primary" (click)="viewFund()">
+            <i class="bi bi-eye me-2"></i>
+            Ver Fundo
+          </button>
+          <button type="button" class="btn btn-outline-primary" (click)="registerAnother()">
+            <i class="bi bi-plus-lg me-2"></i>
+            Cadastrar Outro
+          </button>
+          <button type="button" class="btn btn-outline-secondary" (click)="goToDashboard()">
+            <i class="bi bi-house me-2"></i>
+            Dashboard
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Error Modal -->
+  @if (showErrorModal()) {
+    <div class="modal-overlay" (click)="closeModals()">
+      <div class="error-modal" (click)="$event.stopPropagation()">
+        <div class="modal-icon modal-icon--error">
+          <i class="bi bi-x-lg"></i>
+        </div>
+        <h4 class="modal-title">Erro ao Criar Fundo</h4>
+        @if (submissionResult(); as result) {
+          <p class="modal-message">{{ result.error }}</p>
+          @if (result.fieldErrors?.length) {
+            <div class="field-errors">
+              <strong>Campos com erro:</strong>
+              <ul>
+                @for (err of result.fieldErrors; track err.field) {
+                  <li>
+                    <strong>{{ err.field }}:</strong> {{ err.message }}
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        }
+        <div class="modal-actions">
+          <button type="button" class="btn btn-primary" (click)="closeModals()">
+            <i class="bi bi-pencil me-2"></i>
+            Corrigir Dados
+          </button>
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModals()">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,10 +1,4 @@
 import { Injectable, inject, signal, computed, effect, DestroyRef } from '@angular/core';
-import {
-  HubConnection,
-  HubConnectionBuilder,
-  HubConnectionState as SignalRState,
-  LogLevel,
-} from '@microsoft/signalr';
 import { OidcSecurityService } from 'angular-auth-oidc-client';
 import { firstValueFrom } from 'rxjs';
 import { ToastService } from './toast-service';
@@ -15,9 +9,14 @@ import { ENVIRONMENT } from '../config/environment.config';
 import { HubConnectionState, NotificationMessage } from '../models/notification.model';
 import { environment } from '../../environments/environment';
 
+// Lazy-load SignalR types (actual import happens in connect())
+type HubConnection = import('@microsoft/signalr').HubConnection;
+
 /**
  * Serviço para gerenciar conexão de hub SignalR e receber notificações em tempo real.
  * Conecta automaticamente após autenticação do usuário e trata reconexão com backoff exponencial.
+ *
+ * SignalR library is lazy-loaded only when the user authenticates, reducing initial bundle size.
  *
  * Uso:
  * - Conecta automaticamente quando usuário faz login (via integração AuthService)
@@ -55,8 +54,9 @@ export class NotificationHubService {
   readonly isConnected = computed(() => this._connectionState() === 'connected');
   readonly isReconnecting = computed(() => this._connectionState() === 'reconnecting');
 
-  // Instância de conexão de hub
+  // Instância de conexão de hub (lazy-loaded)
   private hubConnection: HubConnection | null = null;
+  private signalRModule: typeof import('@microsoft/signalr') | null = null;
 
   // Configuração com valores padrão
   private readonly config = this.env.signalr ?? {
@@ -95,6 +95,17 @@ export class NotificationHubService {
   }
 
   /**
+   * Lazy-loads the SignalR library.
+   * Only called when user authenticates, keeping initial bundle small.
+   */
+  private async loadSignalR(): Promise<typeof import('@microsoft/signalr')> {
+    if (!this.signalRModule) {
+      this.signalRModule = await import('@microsoft/signalr');
+    }
+    return this.signalRModule;
+  }
+
+  /**
    * Estabelece conexão com o hub SignalR.
    * Chamado automaticamente quando usuário faz login.
    */
@@ -103,7 +114,10 @@ export class NotificationHubService {
       return;
     }
 
-    if (this.hubConnection?.state === SignalRState.Connected) {
+    // Lazy-load SignalR library
+    const signalR = await this.loadSignalR();
+
+    if (this.hubConnection?.state === signalR.HubConnectionState.Connected) {
       this.logger.debug('Já conectado ao hub de notificações', undefined, 'NotificationHubService');
       return;
     }
@@ -112,7 +126,7 @@ export class NotificationHubService {
       this._connectionState.set('connecting');
       this._lastError.set(null);
 
-      this.hubConnection = new HubConnectionBuilder()
+      this.hubConnection = new signalR.HubConnectionBuilder()
         .withUrl(this.config.hubUrl, {
           accessTokenFactory: () => this.getAccessToken(),
         })
@@ -141,7 +155,7 @@ export class NotificationHubService {
             return delay;
           },
         })
-        .configureLogging(this.env.production ? LogLevel.Warning : LogLevel.Information)
+        .configureLogging(this.env.production ? signalR.LogLevel.Warning : signalR.LogLevel.Information)
         .build();
 
       // Registrar manipuladores de evento

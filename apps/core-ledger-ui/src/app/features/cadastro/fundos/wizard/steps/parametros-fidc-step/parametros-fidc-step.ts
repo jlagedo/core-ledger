@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   DestroyRef,
-  effect,
   inject,
   input,
   signal,
@@ -12,16 +11,16 @@ import {
 import {
   AbstractControl,
   FormBuilder,
-  FormControl,
   FormGroup,
   ReactiveFormsModule,
   ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { filter, startWith } from 'rxjs/operators';
-import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
+import { startWith } from 'rxjs/operators';
+import { WizardStepConfig, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
+import { createRestorationEffect, withRestorationGuard } from '../../shared';
 import { IdentificacaoFormData, TipoFundo } from '../../models/identificacao.model';
 import {
   AGENCIA_RATING_OPTIONS,
@@ -81,13 +80,6 @@ export class ParametrosFidcStep {
   readonly maxPercentual = MAX_PERCENTUAL;
   readonly defaultLimiteCedente = DEFAULT_LIMITE_CEDENTE;
   readonly defaultLimiteSacado = DEFAULT_LIMITE_SACADO;
-
-  // Track step ID and dataVersion to avoid re-loading unless store data changes
-  private lastLoadedStepId: WizardStepId | null = null;
-  private lastDataVersion = -1;
-
-  // Loading flag to prevent store updates during restoration
-  private isRestoring = false;
 
   // Track current tipo fundo for defaults
   private readonly tipoFundoSignal = signal<TipoFundo | null>(null);
@@ -152,13 +144,64 @@ export class ParametrosFidcStep {
   readonly recebiveisSelecionados = signal<number>(0);
 
   constructor() {
+    // Create restoration effect (centralizes deduplication, isRestoring flag, and form restore)
+    const { isRestoring } = createRestorationEffect<ParametrosFidcFormData>({
+      stepConfig: () => this.stepConfig(),
+      wizardStore: this.wizardStore,
+      form: this.form,
+      resetForm: () => {
+        // Get identificacao data for tipo fundo defaults (RF-02)
+        const identificacaoData = untracked(
+          () => this.wizardStore.stepData()['identificacao'] as IdentificacaoFormData | undefined
+        );
+        const tipoFundo = identificacaoData?.tipoFundo ?? null;
+        this.tipoFundoSignal.set(tipoFundo);
+
+        // RF-02: Set default tipo based on tipo_fundo
+        const isFidcNp = tipoFundo === TipoFundo.FIDC_NP;
+        const defaults = createDefaultFidcParametros(isFidcNp);
+        this.form.patchValue({
+          tipoFidc: defaults.tipoFidc,
+          limiteConcentracaoCedente: defaults.limiteConcentracaoCedente,
+          limiteConcentracaoSacado: defaults.limiteConcentracaoSacado,
+          possuiCoobrigacao: defaults.possuiCoobrigacao,
+          permiteCessaoParcial: defaults.permiteCessaoParcial,
+          integracaoRegistradora: defaults.integracaoRegistradora,
+        });
+      },
+      restoreData: (data) => {
+        // Restore saved data with emitEvent: false to prevent cascading updates
+        this.form.patchValue({
+          tipoFidc: data.tipoFidc,
+          prazoMedioCarteira: data.prazoMedioCarteira,
+          indiceSubordinacaoAlvo: data.indiceSubordinacaoAlvo,
+          provisaoDevedoresDuvidosos: data.provisaoDevedoresDuvidosos,
+          limiteConcentracaoCedente: data.limiteConcentracaoCedente,
+          limiteConcentracaoSacado: data.limiteConcentracaoSacado,
+          possuiCoobrigacao: data.possuiCoobrigacao,
+          percentualCoobrigacao: data.percentualCoobrigacao,
+          permiteCessaoParcial: data.permiteCessaoParcial,
+          ratingMinimo: data.ratingMinimo,
+          agenciaRating: data.agenciaRating,
+          registradoraRecebiveis: data.registradoraRecebiveis,
+          contaRegistradora: data.contaRegistradora,
+          integracaoRegistradora: data.integracaoRegistradora,
+        }, { emitEvent: false });
+
+        // Restore recebiveis selection
+        this.setRecebiveisFromArray(data.tipoRecebiveis);
+        this.form.markAsDirty();
+      },
+      updateStepValidation: () => this.updateStepValidation(),
+    });
+
     // Setup form subscriptions
     this.form.statusChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.updateStepValidation());
 
     this.form.valueChanges
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        filter(() => !this.isRestoring)
+        withRestorationGuard(isRestoring)
       )
       .subscribe((value) => {
         const stepConfig = untracked(() => this.stepConfig());
@@ -203,81 +246,6 @@ export class ParametrosFidcStep {
           integracaoControl?.setValue(false, { emitEvent: false });
         }
       });
-
-    // Effect: Load data when step changes or dataVersion changes (draft restoration)
-    effect(() => {
-      const stepConfig = this.stepConfig();
-      const stepId = stepConfig.id;
-      const dataVersion = this.wizardStore.dataVersion();
-
-      // Skip if same step AND same dataVersion (no changes)
-      const sameStep = this.lastLoadedStepId === stepId;
-      const sameVersion = this.lastDataVersion === dataVersion;
-      if (sameStep && sameVersion) {
-        return;
-      }
-      this.lastLoadedStepId = stepId;
-      this.lastDataVersion = dataVersion;
-
-      // Set restoration flag to prevent store updates
-      this.isRestoring = true;
-
-      // Get identificacao data for tipo fundo defaults (RF-02)
-      const identificacaoData = untracked(
-        () => this.wizardStore.stepData()['identificacao'] as IdentificacaoFormData | undefined
-      );
-      const tipoFundo = identificacaoData?.tipoFundo ?? null;
-      this.tipoFundoSignal.set(tipoFundo);
-
-      const stepData = untracked(
-        () => this.wizardStore.stepData()[stepConfig.key] as ParametrosFidcFormData | undefined
-      );
-
-      if (stepData && stepData.tipoFidc !== null) {
-        // Restore saved data - events fire naturally
-        this.form.patchValue({
-          tipoFidc: stepData.tipoFidc,
-          prazoMedioCarteira: stepData.prazoMedioCarteira,
-          indiceSubordinacaoAlvo: stepData.indiceSubordinacaoAlvo,
-          provisaoDevedoresDuvidosos: stepData.provisaoDevedoresDuvidosos,
-          limiteConcentracaoCedente: stepData.limiteConcentracaoCedente,
-          limiteConcentracaoSacado: stepData.limiteConcentracaoSacado,
-          possuiCoobrigacao: stepData.possuiCoobrigacao,
-          percentualCoobrigacao: stepData.percentualCoobrigacao,
-          permiteCessaoParcial: stepData.permiteCessaoParcial,
-          ratingMinimo: stepData.ratingMinimo,
-          agenciaRating: stepData.agenciaRating,
-          registradoraRecebiveis: stepData.registradoraRecebiveis,
-          contaRegistradora: stepData.contaRegistradora,
-          integracaoRegistradora: stepData.integracaoRegistradora,
-        });
-
-        // Restore recebiveis selection
-        this.setRecebiveisFromArray(stepData.tipoRecebiveis);
-        this.form.markAsDirty();
-      } else {
-        // RF-02: Set default tipo based on tipo_fundo
-        const isFidcNp = tipoFundo === TipoFundo.FIDC_NP;
-        const defaults = createDefaultFidcParametros(isFidcNp);
-        this.form.patchValue({
-          tipoFidc: defaults.tipoFidc,
-          limiteConcentracaoCedente: defaults.limiteConcentracaoCedente,
-          limiteConcentracaoSacado: defaults.limiteConcentracaoSacado,
-          possuiCoobrigacao: defaults.possuiCoobrigacao,
-          permiteCessaoParcial: defaults.permiteCessaoParcial,
-          integracaoRegistradora: defaults.integracaoRegistradora,
-        });
-      }
-
-      // Clear restoration flag
-      this.isRestoring = false;
-
-      // Mark all fields as touched
-      this.markAllAsTouched();
-
-      this.form.updateValueAndValidity();
-      untracked(() => this.updateStepValidation());
-    });
   }
 
   /**

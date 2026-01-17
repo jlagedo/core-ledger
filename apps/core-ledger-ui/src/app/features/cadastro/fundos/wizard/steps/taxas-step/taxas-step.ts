@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   DestroyRef,
-  effect,
   inject,
   input,
   signal,
@@ -20,9 +19,10 @@ import {
 } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { Subject, of } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, startWith, switchMap, tap, catchError } from 'rxjs/operators';
-import { WizardStepConfig, WizardStepId, InvalidFieldInfo } from '../../models/wizard.model';
+import { debounceTime, distinctUntilChanged, startWith, switchMap, tap, catchError } from 'rxjs/operators';
+import { WizardStepConfig, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
+import { createRestorationEffect, withRestorationGuard, markFormArrayAsTouched, collectFormArrayInvalidFields } from '../../shared';
 import {
   BaseCalculo,
   BASE_CALCULO_OPTIONS,
@@ -88,13 +88,6 @@ export class TaxasStep {
   // Signals for UI state
   readonly searchingIndexadores = signal(false);
 
-  // Track step ID and dataVersion to avoid re-loading unless store data changes
-  private lastLoadedStepId: WizardStepId | null = null;
-  private lastDataVersion = -1;
-
-  // Flag to prevent store updates during data restoration
-  private isRestoring = false;
-
   // Main form with FormArray
   form = this.formBuilder.group({
     taxas: this.formBuilder.array<FormGroup>([]),
@@ -120,6 +113,35 @@ export class TaxasStep {
   });
 
   constructor() {
+    // Create restoration effect (centralizes deduplication, isRestoring flag, and form restore)
+    const { isRestoring } = createRestorationEffect<TaxasFormData>({
+      stepConfig: () => this.stepConfig(),
+      wizardStore: this.wizardStore,
+      form: this.form,
+      resetForm: () => {
+        const taxasArray = this.form.get('taxas') as FormArray;
+        taxasArray.clear();
+      },
+      restoreData: (data) => {
+        const taxasArray = this.form.get('taxas') as FormArray;
+        // Restore saved taxes
+        data.taxas.forEach((taxa) => {
+          taxasArray.push(this.createTaxaFormGroup(taxa));
+        });
+        this.form.markAsDirty();
+      },
+      createDefaultData: () => {
+        // RF-01: Add default administracao tax
+        const taxasArray = this.form.get('taxas') as FormArray;
+        taxasArray.push(this.createTaxaFormGroup(this.getDefaultAdministracaoTaxa()));
+      },
+      markAllAsTouched: () => {
+        const taxasArray = this.form.get('taxas') as FormArray;
+        markFormArrayAsTouched(taxasArray);
+      },
+      updateStepValidation: () => this.updateStepValidation(),
+    });
+
     // Setup form subscriptions
     this.form.statusChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -128,7 +150,7 @@ export class TaxasStep {
     this.form.valueChanges
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        filter(() => !this.isRestoring)
+        withRestorationGuard(isRestoring)
       )
       .subscribe((value) => {
         const stepConfig = untracked(() => this.stepConfig());
@@ -164,55 +186,6 @@ export class TaxasStep {
 
     // Load initial indexadores (active only, sorted by codigo)
     this.loadInitialIndexadores();
-
-    // Effect: Load data when step changes or dataVersion changes (draft restoration)
-    effect(() => {
-      const stepConfig = this.stepConfig();
-      const stepId = stepConfig.id;
-      const dataVersion = this.wizardStore.dataVersion();
-
-      // Skip if same step AND same dataVersion (no changes)
-      const sameStep = this.lastLoadedStepId === stepId;
-      const sameVersion = this.lastDataVersion === dataVersion;
-      if (sameStep && sameVersion) {
-        return;
-      }
-      this.lastLoadedStepId = stepId;
-      this.lastDataVersion = dataVersion;
-
-      // Set restoration flag to prevent store updates
-      this.isRestoring = true;
-
-      // Reset form array - events can emit now (store updates are filtered)
-      const taxasArray = this.form.get('taxas') as FormArray;
-      taxasArray.clear();
-
-      const stepData = untracked(
-        () => this.wizardStore.stepData()[stepConfig.key] as TaxasFormData | undefined
-      );
-
-      if (stepData?.taxas && stepData.taxas.length > 0) {
-        // Restore saved data - setupConditionalValidators runs automatically via startWith
-        stepData.taxas.forEach((taxa) => {
-          taxasArray.push(this.createTaxaFormGroup(taxa));
-        });
-      } else {
-        // RF-01: Add default administracao tax
-        taxasArray.push(this.createTaxaFormGroup(this.getDefaultAdministracaoTaxa()));
-      }
-
-      // Clear restoration flag
-      this.isRestoring = false;
-
-      // Final validation update
-      taxasArray.updateValueAndValidity();
-      this.form.updateValueAndValidity();
-
-      // Mark all fields as touched
-      this.markAllAsTouched();
-
-      untracked(() => this.updateStepValidation());
-    });
   }
 
   /**
@@ -454,15 +427,6 @@ export class TaxasStep {
     };
   }
 
-  private markAllAsTouched(): void {
-    const taxasArray = this.form.get('taxas') as FormArray;
-    taxasArray.controls.forEach((group) => {
-      Object.keys((group as FormGroup).controls).forEach((key) => {
-        group.get(key)?.markAsTouched();
-      });
-    });
-  }
-
   private updateStepValidation(): void {
     const stepId = this.stepConfig().id;
     const taxasArray = this.form.get('taxas') as FormArray;
@@ -487,23 +451,8 @@ export class TaxasStep {
   }
 
   private collectInvalidFields(): InvalidFieldInfo[] {
-    const invalidFields: InvalidFieldInfo[] = [];
     const taxasArray = this.form.get('taxas') as FormArray;
-    taxasArray.controls.forEach((group, index) => {
-      Object.keys((group as FormGroup).controls).forEach((key) => {
-        const control = group.get(key);
-        if (control && control.invalid) {
-          const fieldErrors: string[] = [];
-          if (control.errors) {
-            Object.keys(control.errors).forEach((errorKey) => {
-              fieldErrors.push(errorKey);
-            });
-          }
-          invalidFields.push({ field: `taxas[${index}].${key}`, errors: fieldErrors });
-        }
-      });
-    });
-    return invalidFields;
+    return collectFormArrayInvalidFields(taxasArray, 'taxas');
   }
 
   // Helper methods for template

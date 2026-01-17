@@ -1,0 +1,59 @@
+// ============================================================
+// WIZARD LAYOUT
+//
+// Step form layout components including grids and sections.
+// ============================================================
+
+@use "variables" as *;
+
+// ============================================================
+// STEP FORM LAYOUT
+// ============================================================
+
+.step-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.step-form__section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.step-form__grid {
+  display: grid;
+  gap: 1rem;
+
+  &--1-col {
+    grid-template-columns: 1fr;
+  }
+
+  &--2-cols {
+    grid-template-columns: 1fr;
+
+    @media (min-width: 576px) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+  }
+
+  &--3-cols {
+    grid-template-columns: 1fr;
+
+    @media (min-width: 576px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+  }
+}
+
+.step-form__footer {
+  padding-top: 1rem;
+  border-top: 1px dashed var(--table-border-color);
+}

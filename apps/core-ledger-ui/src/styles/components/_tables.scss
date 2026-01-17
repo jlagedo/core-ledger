@@ -1,0 +1,103 @@
+// ============================================================
+// TABLE STYLES - Bloomberg Terminal Density
+//
+// Theme-aware styles for tables with terminal-style density,
+// row states, and action buttons.
+// ============================================================
+
+@use "../variables" as *;
+
+// ============================================================
+// BASE TABLE STYLES
+// ============================================================
+
+.table {
+  --bs-table-bg: var(--table-bg);
+  --bs-table-striped-bg: var(--table-striped-bg);
+  --bs-table-hover-bg: var(--table-hover-bg);
+  --bs-table-border-color: var(--table-border-color);
+  background-color: var(--table-bg);
+  font-size: 0.75rem;  // 12px for terminal density
+
+  thead th {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-color);
+    font-weight: 600;
+    font-size: 0.6875rem;  // 11px for headers
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom-width: 2px;
+  }
+
+  tbody td {
+    background-color: var(--table-bg);
+    color: var(--table-cell-color);
+  }
+
+  td {
+    color: var(--table-cell-color);
+  }
+}
+
+// ============================================================
+// TABLE ROW STATES
+// ============================================================
+
+.table > tbody > tr.table-primary,
+.table > tbody > tr.table-active,
+.table > tbody > tr[aria-selected="true"] {
+  --bs-table-bg: var(--table-active-bg);
+  --bs-table-color: var(--table-active-color);
+  --bs-table-striped-bg: var(--table-active-bg);
+  --bs-table-accent-bg: var(--table-active-bg);
+  --bs-table-hover-bg: var(--table-active-bg);
+  background-color: var(--table-active-bg) !important;
+  border-left: 3px solid var(--table-active-border);
+
+  > td,
+  > th {
+    color: var(--table-active-color) !important;
+    background-color: var(--table-active-bg) !important;
+  }
+
+  &:hover > td,
+  &:hover > th {
+    background-color: var(--table-active-bg) !important;
+    color: var(--table-active-color) !important;
+  }
+
+  .table-row-actions {
+    opacity: 1;
+    color: var(--table-action-hover-color);
+  }
+}
+
+// ============================================================
+// TABLE ROW ACTIONS
+// ============================================================
+
+.table-row-actions {
+  opacity: 0.85;
+  color: var(--table-action-color);
+  transition: opacity $transition-fast, color $transition-fast;
+
+  &:hover,
+  &:focus-within {
+    opacity: 1;
+    color: var(--table-action-hover-color);
+  }
+}
+
+// ============================================================
+// DISABLED TABLE ROWS
+// ============================================================
+
+.table > tbody > tr.disabled,
+.table > tbody > tr[aria-disabled="true"] {
+  opacity: var(--disabled-opacity);
+  pointer-events: none;
+
+  > td {
+    color: var(--disabled-color);
+  }
+}

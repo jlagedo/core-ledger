@@ -1,0 +1,164 @@
+// ============================================================
+// FORM STYLES
+//
+// Theme-aware styles for form controls, inputs, selects,
+// input groups, and form field enhancements.
+// ============================================================
+
+@use "../variables" as *;
+
+// ============================================================
+// FORM CONTROLS
+// ============================================================
+
+.form-control,
+.form-select {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--bs-body-color);
+  transition: border-color $transition-fast, box-shadow $transition-fast, background-color $transition-fast;
+
+  &:focus {
+    border-color: var(--input-focus-border);
+    box-shadow: var(--input-focus-shadow);
+  }
+
+  &::placeholder {
+    color: var(--input-placeholder-color);
+  }
+
+  &:disabled,
+  &[readonly] {
+    background-color: var(--disabled-bg);
+    border-color: var(--disabled-border);
+    color: var(--disabled-color);
+    opacity: var(--disabled-opacity);
+  }
+
+  &.is-invalid,
+  &:invalid:not(:placeholder-shown) {
+    background-color: var(--input-error-bg);
+    border-color: var(--bs-form-invalid-border-color);
+
+    &:focus {
+      box-shadow: 0 0 0 0.25rem rgba(var(--bs-danger-rgb, 230, 57, 70), 0.2);
+    }
+  }
+}
+
+.form-label {
+  color: var(--bs-body-color);
+  font-weight: 500;
+}
+
+// ============================================================
+// INPUT GROUPS
+// ============================================================
+
+.input-group {
+  .btn-outline-secondary,
+  .btn-outline-primary,
+  .input-group-text {
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--bs-body-color);
+
+    &:hover {
+      background-color: var(--table-hover-bg);
+      border-color: var(--input-focus-border);
+      color: var(--bs-emphasis-color);
+    }
+
+    &:focus {
+      border-color: var(--input-focus-border);
+      box-shadow: var(--input-focus-shadow);
+    }
+  }
+
+  // Datepicker button styling
+  [ngbdatepickertoggle] .btn,
+  .ngb-dp-button,
+  button[type="button"]:has(i.bi-calendar),
+  .btn:has(.bi-calendar),
+  .btn:has(.bi-calendar3) {
+    background-color: var(--btn-secondary-bg);
+    border-color: var(--input-border);
+    color: var(--btn-secondary-color);
+
+    &:hover {
+      background-color: var(--btn-secondary-hover-bg);
+      border-color: var(--input-focus-border);
+    }
+  }
+}
+
+// Dark mode form placeholders
+[data-bs-theme="dark"] {
+  .form-control::placeholder,
+  .form-select::placeholder {
+    color: var(--input-placeholder-color);
+  }
+}
+
+// ============================================================
+// FORM FIELD ENHANCEMENTS - Terminal Data Entry Style
+// ============================================================
+
+// Terminal-style form labels
+.form-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.375rem;
+  color: var(--bs-body-color);
+}
+
+// Monospace fields get extra letter spacing
+.form-control.font-monospace {
+  letter-spacing: 0.08em;
+}
+
+// Form field section separator
+.form-section {
+  border-top: 1px solid var(--table-border-color, var(--amber-15));
+  padding-top: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+// ============================================================
+// RADIO & CHECKBOX ENHANCEMENTS
+// ============================================================
+
+.form-check-input {
+  border-color: var(--input-border);
+  background-color: var(--input-bg);
+  transition: background-color $transition-fast, border-color $transition-fast, box-shadow $transition-fast;
+
+  &:checked {
+    background-color: var(--accent-amber, #FFA028);
+    border-color: var(--accent-amber, #FFA028);
+  }
+
+  &:focus {
+    border-color: var(--accent-amber, #FFA028);
+    box-shadow: 0 0 0 0.25rem var(--amber-25);
+  }
+}
+
+.form-check-label {
+  font-size: 0.8125rem;
+}
+
+// ============================================================
+// FORM ACTION BUTTONS - Visual Hierarchy
+// ============================================================
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--table-border-color, var(--amber-15));
+  margin-top: 1.5rem;
+}
