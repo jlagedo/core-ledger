@@ -94,20 +94,11 @@ setup_session() {
     # Apply tiled layout for perfect 2x2 grid
     tmux select-layout -t "$SESSION_NAME:dev" tiled
 
-    # Configure pane borders and titles visibility
-    tmux set-option -t "$SESSION_NAME" pane-border-status top
-    tmux set-option -t "$SESSION_NAME" pane-border-format '#[bold]#{pane_title}'
-    tmux set-option -t "$SESSION_NAME" remain-on-exit off
-
-    # Pane numbering in tiled layout (left-to-right, top-to-bottom):
-    # NOTE: With -d flag, panes are numbered 1-4, not 0-3!
-    # 1 = top-left, 2 = top-right, 3 = bottom-left, 4 = bottom-right
-
-    # Set pane titles
-    tmux select-pane -t "$SESSION_NAME:dev.1" -T "Angular UI"
-    tmux select-pane -t "$SESSION_NAME:dev.2" -T ".NET API"
-    tmux select-pane -t "$SESSION_NAME:dev.3" -T ".NET Worker"
-    tmux select-pane -t "$SESSION_NAME:dev.4" -T "PostgreSQL Logs"
+    # Set pane titles (displayed by Catppuccin theme)
+    tmux select-pane -t "$SESSION_NAME:dev.1" -T "󰚲 Angular UI"
+    tmux select-pane -t "$SESSION_NAME:dev.2" -T "󰒍 .NET API"
+    tmux select-pane -t "$SESSION_NAME:dev.3" -T "󰓁 .NET Worker"
+    tmux select-pane -t "$SESSION_NAME:dev.4" -T "󰆼 PostgreSQL"
 
     # Pane 1 (top-left): Angular UI
     tmux send-keys -t "$SESSION_NAME:dev.1" "clear" C-m
