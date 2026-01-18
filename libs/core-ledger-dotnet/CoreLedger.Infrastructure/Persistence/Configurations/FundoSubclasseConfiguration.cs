@@ -69,7 +69,7 @@ public class FundoSubclasseConfiguration : IEntityTypeConfiguration<FundoSubclas
             .HasFilter("deleted_at IS NULL")
             .HasDatabaseName("ix_subclasse_codigo");
 
-        // Query filter for soft delete
-        builder.HasQueryFilter(s => s.DeletedAt == null);
+        // Query filter for soft delete - check own, parent Classe, and grandparent Fundo
+        builder.HasQueryFilter(s => s.DeletedAt == null && s.Classe.DeletedAt == null && s.Classe.Fundo.DeletedAt == null);
     }
 }

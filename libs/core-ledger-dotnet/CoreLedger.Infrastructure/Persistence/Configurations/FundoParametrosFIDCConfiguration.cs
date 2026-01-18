@@ -2,6 +2,7 @@ using System.Text.Json;
 using CoreLedger.Domain.Cadastros.Entities;
 using CoreLedger.Domain.Cadastros.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace CoreLedger.Infrastructure.Persistence.Configurations;
@@ -40,6 +41,12 @@ public class FundoParametrosFIDCConfiguration : IEntityTypeConfiguration<FundoPa
                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
                 v => JsonSerializer.Deserialize<List<TipoRecebiveis>>(v, (JsonSerializerOptions?)null)
                      ?? new List<TipoRecebiveis>())
+            .Metadata.SetValueComparer(new ValueComparer<List<TipoRecebiveis>>(
+                (c1, c2) => c1!.SequenceEqual(c2!),
+                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c.ToList()));
+
+        builder.Property(p => p.TiposRecebiveis)
             .IsRequired();
 
         builder.Property(p => p.PrazoMedioCarteira)
@@ -107,5 +114,8 @@ public class FundoParametrosFIDCConfiguration : IEntityTypeConfiguration<FundoPa
         builder.HasIndex(p => p.FundoId)
             .IsUnique()
             .HasDatabaseName("ix_parametros_fidc_fundo");
+
+        // Query filter: match parent Fundo's soft delete filter
+        builder.HasQueryFilter(p => p.Fundo.DeletedAt == null);
     }
 }

@@ -128,5 +128,8 @@ public class FundoPrazoConfiguration : IEntityTypeConfiguration<FundoPrazo>
             .HasDatabaseName("ix_prazo_tipo")
             .HasFilter("ativo = true")
             .IsUnique();
+
+        // Query filter: match parent Fundo's soft delete filter
+        builder.HasQueryFilter(fp => fp.Fundo.DeletedAt == null);
     }
 }

@@ -7,6 +7,7 @@ using CoreLedger.Application.Configuration;
 using CoreLedger.Infrastructure;
 using Serilog;
 using Serilog.Events;
+using Serilog.Sinks.SystemConsole.Themes;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -20,25 +21,38 @@ var configuration = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
+//TODO: implement isDevelopment flag to enable more detailed logging
+// Log.Logger = new LoggerConfiguration()
+//     .MinimumLevel.Information()
+//     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+//     .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+//     .Enrich.FromLogContext()
+//     .Enrich.WithMachineName()
+//     .Enrich.WithThreadId()
+//     .Enrich.WithProperty("Application", "CoreLedgerApi")
+//     .WriteTo.Console(
+//         outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}",
+//         theme: AnsiConsoleTheme.Code,
+//         applyThemeToRedirectedOutput: true)
+//     .ReadFrom.Configuration(configuration)
+//     .CreateLogger();
+
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
+    .ReadFrom.Configuration(configuration) // Load base config first
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
     .Enrich.FromLogContext()
-    .Enrich.WithMachineName()
-    .Enrich.WithThreadId()
-    .Enrich.WithProperty("Application", "CoreLedgerApi")
-    .WriteTo.Console(outputTemplate:
-        "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
-    .ReadFrom.Configuration(configuration)
+    .WriteTo.Console(
+        outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
+        theme: AnsiConsoleTheme.Code,
+        applyThemeToRedirectedOutput: true)
     .CreateLogger();
-
 try
 {
     Log.Information("Starting Core Ledger API");
 
     var builder = WebApplication.CreateBuilder(args);
-    
+
     // Use mock authentication in development (bypasses Auth0)
     var useMockAuth = builder.Configuration.GetValue<bool>("Auth:UseMock");
 

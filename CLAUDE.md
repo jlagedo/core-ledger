@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Development Constraints
+
+- **Never start/serve applications** - Do not run `nx serve`, `npm start`, `npm run start:*`, `dotnet run`, or any commands that start dev servers. The user manages application lifecycle manually.
+
 ## Repository Overview
 
 This is a **monorepo for Core Ledger**, a fund accounting ABOR (Accounting Book of Records) system for the Brazilian investment fund market. It implements Brazilian regulatory requirements (CVM 175, ANBIMA, etc.).

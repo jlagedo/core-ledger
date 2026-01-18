@@ -86,5 +86,9 @@ public class FundoVinculoConfiguration : IEntityTypeConfiguration<FundoVinculo>
             .WithMany(i => i.Vinculos)
             .HasForeignKey(v => v.InstituicaoId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // Query filter matching Fundo's soft-delete filter to avoid EF Core warning
+        // about required navigation to filtered entity
+        builder.HasQueryFilter(v => v.Fundo.DeletedAt == null);
     }
 }

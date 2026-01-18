@@ -89,5 +89,8 @@ public class FundoParametrosCotaConfiguration : IEntityTypeConfiguration<FundoPa
         builder.HasIndex(p => p.FundoId)
             .IsUnique()
             .HasDatabaseName("ix_parametros_cota_fundo");
+
+        // Query filter: match parent Fundo's soft delete filter
+        builder.HasQueryFilter(p => p.Fundo.DeletedAt == null);
     }
 }

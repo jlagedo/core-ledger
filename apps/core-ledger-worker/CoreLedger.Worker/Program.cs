@@ -6,6 +6,7 @@ using CoreLedger.Worker.Services;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 using Serilog.Events;
+using Serilog.Sinks.SystemConsole.Themes;
 
 // Build configuration to read Serilog settings before creating logger
 var configuration = new ConfigurationBuilder()
@@ -16,17 +17,32 @@ var configuration = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
+
+//TODO: implement isDevelopment flag to enable more detailed logging
+// Log.Logger = new LoggerConfiguration()
+//     .MinimumLevel.Information()
+//     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+//     .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+//     .Enrich.FromLogContext()
+//     .Enrich.WithMachineName()
+//     .Enrich.WithThreadId()
+//     .Enrich.WithProperty("Application", "CoreLedgerApi")
+//     .WriteTo.Console(
+//         outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}",
+//         theme: AnsiConsoleTheme.Code,
+//         applyThemeToRedirectedOutput: true)
+//     .ReadFrom.Configuration(configuration)
+//     .CreateLogger();
+
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
+    .ReadFrom.Configuration(configuration) // Load base config first
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
     .Enrich.FromLogContext()
-    .Enrich.WithMachineName()
-    .Enrich.WithThreadId()
-    .Enrich.WithProperty("Application", "CoreLedgerWorker")
-    .WriteTo.Console(outputTemplate:
-        "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
-    .ReadFrom.Configuration(configuration)
+    .WriteTo.Console(
+        outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
+        theme: AnsiConsoleTheme.Code,
+        applyThemeToRedirectedOutput: true)
     .CreateLogger();
 
 try

@@ -140,5 +140,8 @@ public class FundoTaxaConfiguration : IEntityTypeConfiguration<FundoTaxa>
             .IsUnique()
             .HasFilter("ativa = true")
             .HasDatabaseName("ix_taxa_unica_ativa");
+
+        // Query filter: match parent Fundo's soft delete filter
+        builder.HasQueryFilter(t => t.Fundo.DeletedAt == null);
     }
 }
