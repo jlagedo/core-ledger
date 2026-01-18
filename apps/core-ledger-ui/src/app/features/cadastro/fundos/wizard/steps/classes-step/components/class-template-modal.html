@@ -1,0 +1,83 @@
+<div class="template-modal">
+  <!-- Header -->
+  <div class="modal-header">
+    <div class="template-modal__header">
+      <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+      <h5 class="modal-title">Selecione um Template</h5>
+    </div>
+    <button
+      type="button"
+      class="btn-close btn-close-white"
+      aria-label="Fechar"
+      (click)="cancel()"
+    ></button>
+  </div>
+
+  <!-- Body -->
+  <div class="modal-body">
+    <p class="template-modal__subtitle">
+      @if (isFidc()) {
+        Templates para FIDCs com estruturas de subordinacao pre-configuradas.
+      } @else {
+        Templates para fundos multiclasse com configuracoes comuns.
+      }
+    </p>
+
+    <!-- Templates Grid -->
+    <div class="template-modal__grid">
+      @for (template of templates(); track template.id) {
+        <button
+          type="button"
+          class="template-card"
+          (click)="selectTemplate(template)"
+        >
+          <div class="template-card__header">
+            <span class="template-card__badge">{{ getTemplateBadge(template) }}</span>
+            <span class="template-card__count font-monospace">{{ getClassCount(template) }} classes</span>
+          </div>
+          <div class="template-card__body">
+            <h6 class="template-card__title">{{ template.nome }}</h6>
+            <p class="template-card__description">{{ template.descricao }}</p>
+          </div>
+          <div class="template-card__classes">
+            @for (classe of template.classes; track $index) {
+              <span
+                class="template-card__class-badge"
+                [class.template-card__class-badge--senior]="classe.tipoClasseFidc === 'SENIOR'"
+                [class.template-card__class-badge--mezanino]="classe.tipoClasseFidc === 'MEZANINO'"
+                [class.template-card__class-badge--subordinada]="classe.tipoClasseFidc === 'SUBORDINADA' || classe.tipoClasseFidc === 'SUBORDINADA_JUNIOR'"
+              >
+                {{ classe.codigoClasse }}
+              </span>
+            }
+          </div>
+        </button>
+      }
+    </div>
+
+    <!-- Divider -->
+    <div class="template-modal__divider">
+      <span>ou</span>
+    </div>
+
+    <!-- Create from scratch option -->
+    <button
+      type="button"
+      class="template-card template-card--scratch"
+      (click)="createFromScratch()"
+    >
+      <div class="template-card__body">
+        <i class="bi bi-plus-circle template-card__scratch-icon" aria-hidden="true"></i>
+        <h6 class="template-card__title">Criar do Zero</h6>
+        <p class="template-card__description">Configure as classes manualmente</p>
+      </div>
+    </button>
+  </div>
+
+  <!-- Footer -->
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" (click)="cancel()">
+      Cancelar
+    </button>
+  </div>
+</div>

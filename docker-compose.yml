@@ -34,7 +34,7 @@ services:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -45,10 +45,10 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
-    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    command: [ "redis-server", "--save", "", "--appendonly", "no" ]
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -62,7 +62,7 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgres://postgres:postgres@core-ledger-db:5432/glitchtip_db
-      VALKEY_URL: ""   # empty = no Redis
+      VALKEY_URL: "" # empty = no Redis
       SECRET_KEY: 09bc0bd1c98d956279b430beb54303f69586e0d31323d88c638ce053f77c1d79
       PORT: 8000
       EMAIL_URL: consolemail://
@@ -73,94 +73,93 @@ services:
     restart: unless-stopped
     volumes:
       - uploads:/code/uploads
+  # api:
+  #   build:
+  #     context: .
+  #     dockerfile: CoreLedger.API/Dockerfile
+  #     args:
+  #       BUILD_CONFIGURATION: Debug
+  #   container_name: core-ledger-api
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     rabbitmq:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   ports:
+  #     - "5071:8080"  # HTTP only for Docker - internal communication
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - ASPNETCORE_URLS=http://+:8080
+  #     # Database
+  #     - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=core_ledger_db;Username=postgres;Password=postgres
+  #     # Auth - Mocked for development
+  #     - Auth__UseMock=true
+  #     - Auth0__Domain=https://dev-7yj4txd3qg4xsckj.us.auth0.com/
+  #     - Auth0__Audience=https://core-ledger-api
+  #     # RabbitMQ
+  #     - RabbitMQ__Hostname=rabbitmq
+  #     - RabbitMQ__Port=5672
+  #     - RabbitMQ__Username=guest
+  #     - RabbitMQ__Password=guest
+  #     # Redis
+  #     - Redis__ConnectionString=redis:6379
+  #     # Logging
+  #     - Serilog__MinimumLevel__Default=Debug
+  #   volumes:
+  #     - ./logs:/var/tmp/coreledger
+  #   restart: unless-stopped
+  #   # Healthcheck disabled in development mode - curl not available in mounted volume mode
+  #   # healthcheck:
+  #   #   test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+  #   #   interval: 30s
+  #   #   timeout: 10s
+  #   #   retries: 3
+  #   #   start_period: 40s
 
-  api:
-    build:
-      context: .
-      dockerfile: CoreLedger.API/Dockerfile
-      args:
-        BUILD_CONFIGURATION: Debug
-    container_name: core-ledger-api
-    depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    ports:
-      - "5071:8080"  # HTTP only for Docker - internal communication
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
-      # Database
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=core_ledger_db;Username=postgres;Password=postgres
-      # Auth - Mocked for development
-      - Auth__UseMock=true
-      - Auth0__Domain=https://dev-7yj4txd3qg4xsckj.us.auth0.com/
-      - Auth0__Audience=https://core-ledger-api
-      # RabbitMQ
-      - RabbitMQ__Hostname=rabbitmq
-      - RabbitMQ__Port=5672
-      - RabbitMQ__Username=guest
-      - RabbitMQ__Password=guest
-      # Redis
-      - Redis__ConnectionString=redis:6379
-      # Logging
-      - Serilog__MinimumLevel__Default=Debug
-    volumes:
-      - ./logs:/var/tmp/coreledger
-    restart: unless-stopped
-    # Healthcheck disabled in development mode - curl not available in mounted volume mode
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 40s
-
-  worker:
-    build:
-      context: .
-      dockerfile: CoreLedger.Worker/Dockerfile
-      args:
-        BUILD_CONFIGURATION: Debug
-    container_name: core-ledger-worker
-    depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      api:
-        condition: service_started  # Changed from service_healthy - healthcheck disabled in dev
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
-      # Database
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=core_ledger_db;Username=postgres;Password=postgres
-      # RabbitMQ
-      - RabbitMQ__Hostname=rabbitmq
-      - RabbitMQ__Port=5672
-      - RabbitMQ__Username=guest
-      - RabbitMQ__Password=guest
-      # Redis
-      - Redis__ConnectionString=redis:6379
-      # Worker HTTP Client - API connection
-      - WorkerHttpClient__ApiBaseUrl=http://api:8080
-      # Logging
-      - Serilog__MinimumLevel__Default=Debug
-    volumes:
-      - ./logs:/var/tmp/coreledger
-    restart: unless-stopped
-    # Healthcheck disabled in development mode - curl not available in mounted volume mode
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 40s
+  # worker:
+  #   build:
+  #     context: .
+  #     dockerfile: CoreLedger.Worker/Dockerfile
+  #     args:
+  #       BUILD_CONFIGURATION: Debug
+  #   container_name: core-ledger-worker
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     rabbitmq:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #     api:
+  #       condition: service_started  # Changed from service_healthy - healthcheck disabled in dev
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - ASPNETCORE_URLS=http://+:8080
+  #     # Database
+  #     - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=core_ledger_db;Username=postgres;Password=postgres
+  #     # RabbitMQ
+  #     - RabbitMQ__Hostname=rabbitmq
+  #     - RabbitMQ__Port=5672
+  #     - RabbitMQ__Username=guest
+  #     - RabbitMQ__Password=guest
+  #     # Redis
+  #     - Redis__ConnectionString=redis:6379
+  #     # Worker HTTP Client - API connection
+  #     - WorkerHttpClient__ApiBaseUrl=http://api:8080
+  #     # Logging
+  #     - Serilog__MinimumLevel__Default=Debug
+  #   volumes:
+  #     - ./logs:/var/tmp/coreledger
+  #   restart: unless-stopped
+  #   # Healthcheck disabled in development mode - curl not available in mounted volume mode
+  #   # healthcheck:
+  #   #   test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+  #   #   interval: 30s
+  #   #   timeout: 10s
+  #   #   retries: 3
+  #   #   start_period: 40s
 
 volumes:
   postgres_data:

@@ -232,3 +232,193 @@ export const LIMITES_TAXA_CLASSE = {
   taxaGestao: 5.0,
   taxaPerformance: 50.0,
 };
+
+// ============================================================
+// CLASS TEMPLATES
+// Pre-configured class structures for common FIDC configurations
+// ============================================================
+
+/**
+ * Template interface for pre-configured class structures
+ */
+export interface ClasseTemplate {
+  id: string;
+  nome: string;
+  descricao: string;
+  aplicavelFidc: boolean;
+  classes: Partial<FundoClasse>[];
+}
+
+/**
+ * Valores default para classe Subordinada FIDC
+ */
+export const CLASSE_SUBORDINADA_DEFAULT: Partial<FundoClasse> = {
+  codigoClasse: 'SUB',
+  nomeClasse: 'Classe Subordinada',
+  classePaiId: null,
+  nivel: 1,
+  publicoAlvo: PublicoAlvo.PROFISSIONAL,
+  tipoClasseFidc: TipoClasseFidc.SUBORDINADA,
+  ordemSubordinacao: 2,
+  responsabilidadeLimitada: false,
+  segregacaoPatrimonial: true,
+  permiteResgateAntecipado: false,
+  ativo: true,
+};
+
+/**
+ * Valores default para classe Mezanino FIDC
+ */
+export const CLASSE_MEZANINO_DEFAULT: Partial<FundoClasse> = {
+  codigoClasse: 'MEZ',
+  nomeClasse: 'Classe Mezanino',
+  classePaiId: null,
+  nivel: 1,
+  publicoAlvo: PublicoAlvo.QUALIFICADO,
+  tipoClasseFidc: TipoClasseFidc.MEZANINO,
+  ordemSubordinacao: 2,
+  responsabilidadeLimitada: true,
+  segregacaoPatrimonial: true,
+  permiteResgateAntecipado: false,
+  ativo: true,
+};
+
+/**
+ * Pre-defined class templates for quick configuration
+ */
+export const CLASSE_TEMPLATES: ClasseTemplate[] = [
+  {
+    id: 'fidc-padrao',
+    nome: 'FIDC Padrao',
+    descricao: 'Senior (80%) + Subordinada (20%)',
+    aplicavelFidc: true,
+    classes: [
+      {
+        ...CLASSE_SENIOR_DEFAULT,
+        codigoClasse: 'SR',
+        nomeClasse: 'Classe Senior',
+      },
+      {
+        ...CLASSE_SUBORDINADA_DEFAULT,
+        codigoClasse: 'SUB',
+        nomeClasse: 'Classe Subordinada',
+      },
+    ],
+  },
+  {
+    id: 'fidc-mezanino',
+    nome: 'FIDC com Mezanino',
+    descricao: 'Senior (70%) + Mezanino (15%) + Subordinada (15%)',
+    aplicavelFidc: true,
+    classes: [
+      {
+        ...CLASSE_SENIOR_DEFAULT,
+        codigoClasse: 'SR',
+        nomeClasse: 'Classe Senior',
+      },
+      {
+        ...CLASSE_MEZANINO_DEFAULT,
+        codigoClasse: 'MEZ',
+        nomeClasse: 'Classe Mezanino',
+        ordemSubordinacao: 2,
+      },
+      {
+        ...CLASSE_SUBORDINADA_DEFAULT,
+        codigoClasse: 'SUB',
+        nomeClasse: 'Classe Subordinada',
+        ordemSubordinacao: 3,
+      },
+    ],
+  },
+  {
+    id: 'fidc-junior',
+    nome: 'FIDC Senior + Junior',
+    descricao: 'Senior (85%) + Subordinada Junior (15%)',
+    aplicavelFidc: true,
+    classes: [
+      {
+        ...CLASSE_SENIOR_DEFAULT,
+        codigoClasse: 'SR',
+        nomeClasse: 'Classe Senior',
+      },
+      {
+        codigoClasse: 'JR',
+        nomeClasse: 'Classe Subordinada Junior',
+        classePaiId: null,
+        nivel: 1,
+        publicoAlvo: PublicoAlvo.PROFISSIONAL,
+        tipoClasseFidc: TipoClasseFidc.SUBORDINADA_JUNIOR,
+        ordemSubordinacao: 2,
+        responsabilidadeLimitada: false,
+        segregacaoPatrimonial: true,
+        permiteResgateAntecipado: false,
+        ativo: true,
+      },
+    ],
+  },
+  {
+    id: 'fundo-multiclasse',
+    nome: 'Fundo Multiclasse',
+    descricao: 'Classe A (Qualificado) + Classe B (Geral)',
+    aplicavelFidc: false,
+    classes: [
+      {
+        codigoClasse: 'A',
+        nomeClasse: 'Classe A',
+        classePaiId: null,
+        nivel: 1,
+        publicoAlvo: PublicoAlvo.QUALIFICADO,
+        tipoClasseFidc: null,
+        ordemSubordinacao: null,
+        responsabilidadeLimitada: true,
+        segregacaoPatrimonial: true,
+        permiteResgateAntecipado: true,
+        ativo: true,
+      },
+      {
+        codigoClasse: 'B',
+        nomeClasse: 'Classe B',
+        classePaiId: null,
+        nivel: 1,
+        publicoAlvo: PublicoAlvo.GERAL,
+        tipoClasseFidc: null,
+        ordemSubordinacao: null,
+        responsabilidadeLimitada: true,
+        segregacaoPatrimonial: true,
+        permiteResgateAntecipado: true,
+        ativo: true,
+      },
+    ],
+  },
+];
+
+/**
+ * Get applicable templates based on fund type
+ */
+export function getApplicableTemplates(isFidc: boolean): ClasseTemplate[] {
+  return CLASSE_TEMPLATES.filter((t) => (isFidc ? t.aplicavelFidc : !t.aplicavelFidc));
+}
+
+/**
+ * Hierarquia do publico alvo para validacao
+ * PROFISSIONAL pode ser sob QUALIFICADO ou PROFISSIONAL
+ * QUALIFICADO pode ser sob QUALIFICADO ou GERAL
+ * GERAL so pode ser sob GERAL
+ */
+export const PUBLICO_ALVO_HIERARCHY: Record<PublicoAlvo, PublicoAlvo[]> = {
+  [PublicoAlvo.PROFISSIONAL]: [PublicoAlvo.PROFISSIONAL, PublicoAlvo.QUALIFICADO, PublicoAlvo.GERAL],
+  [PublicoAlvo.QUALIFICADO]: [PublicoAlvo.QUALIFICADO, PublicoAlvo.GERAL],
+  [PublicoAlvo.GERAL]: [PublicoAlvo.GERAL],
+};
+
+/**
+ * Check if a subclass publico alvo is compatible with parent
+ */
+export function isPublicoAlvoCompatible(
+  subclassPublico: PublicoAlvo | null,
+  parentPublico: PublicoAlvo | null
+): boolean {
+  if (!subclassPublico || !parentPublico) return true;
+  const allowedParents = PUBLICO_ALVO_HIERARCHY[subclassPublico];
+  return allowedParents.includes(parentPublico);
+}

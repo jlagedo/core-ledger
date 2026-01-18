@@ -1,0 +1,107 @@
+<div class="overview-panel">
+  <!-- Header -->
+  <div class="overview-panel__header">
+    <div class="overview-panel__title">
+      <i class="bi bi-layers" aria-hidden="true"></i>
+      <span>Classes</span>
+      <span class="overview-panel__count font-monospace">{{ classesCount() }}/{{ maxClasses() }}</span>
+    </div>
+    <button
+      type="button"
+      class="btn btn-sm btn-outline-secondary overview-panel__add-btn"
+      (click)="onAddClass()"
+      [disabled]="!canAddClasse()"
+      aria-label="Adicionar nova classe"
+    >
+      <i class="bi bi-plus-lg" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <!-- Validation Warnings -->
+  @if (hasOrdemGapError() || hasCodigoDuplicadoError()) {
+    <div class="overview-panel__warnings">
+      @if (hasOrdemGapError()) {
+        <div class="overview-panel__warning">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          <span>Ordem sequencial</span>
+        </div>
+      }
+      @if (hasCodigoDuplicadoError()) {
+        <div class="overview-panel__warning">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          <span>Codigos duplicados</span>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Classes List -->
+  <div class="overview-panel__list" role="listbox" aria-label="Lista de classes">
+    @for (group of classesFormGroups(); track $index; let i = $index) {
+      <div
+        class="class-item"
+        [class.class-item--selected]="isSelected(i)"
+        [class.class-item--senior]="isSeniorClasse(group)"
+        [class.class-item--error]="hasValidationErrors(group)"
+        role="option"
+        [attr.aria-selected]="isSelected(i)"
+        tabindex="0"
+        (click)="onSelectClass(i)"
+        (keydown.enter)="onSelectClass(i)"
+        (keydown.space)="onSelectClass(i); $event.preventDefault()"
+      >
+        <div class="class-item__number font-monospace">
+          @if (isFidc() && getOrdemSubordinacao(group); as ordem) {
+            {{ ordem }}
+          } @else {
+            {{ (i + 1).toString().padStart(2, '0') }}
+          }
+        </div>
+
+        <div class="class-item__content">
+          <div class="class-item__name">{{ getClassName(group) }}</div>
+          @if (isFidc() && getTipoClasseLabel(group); as tipoLabel) {
+            <span class="class-item__badge" [class]="getBadgeClass(group)">
+              {{ tipoLabel }}
+            </span>
+          }
+        </div>
+
+        <div class="class-item__actions">
+          @if (hasValidationErrors(group)) {
+            <span class="class-item__error-indicator" title="Campos invalidos">
+              <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+            </span>
+          }
+          @if (canRemoveClasse(i)) {
+            <button
+              type="button"
+              class="btn btn-sm btn-link class-item__remove"
+              (click)="onRemoveClass(i, $event)"
+              aria-label="Remover classe"
+            >
+              <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </button>
+          } @else {
+            <span class="class-item__locked" title="Esta classe nao pode ser removida">
+              <i class="bi bi-lock-fill" aria-hidden="true"></i>
+            </span>
+          }
+        </div>
+      </div>
+    } @empty {
+      <div class="overview-panel__empty">
+        <i class="bi bi-layers" aria-hidden="true"></i>
+        <p>Nenhuma classe</p>
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-secondary"
+          (click)="onAddClass()"
+        >
+          <i class="bi bi-plus-lg" aria-hidden="true"></i>
+          Adicionar
+        </button>
+      </div>
+    }
+  </div>
+</div>

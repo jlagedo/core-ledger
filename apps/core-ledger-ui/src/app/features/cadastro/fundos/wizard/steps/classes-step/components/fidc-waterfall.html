@@ -1,0 +1,115 @@
+<div class="fidc-waterfall">
+  <!-- Header -->
+  <div class="fidc-waterfall__header">
+    <div class="fidc-waterfall__title">
+      <i class="bi bi-diagram-3" aria-hidden="true"></i>
+      <span>Cascata de Subordinacao</span>
+    </div>
+    <button
+      type="button"
+      class="btn btn-sm btn-link fidc-waterfall__help"
+      title="Como funciona a cascata de subordinacao"
+      aria-label="Ajuda sobre cascata de subordinacao"
+    >
+      <i class="bi bi-question-circle" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <!-- Flow Visualization -->
+  <div class="fidc-waterfall__flow">
+    <!-- Payment Flow Label -->
+    <div class="fidc-waterfall__flow-label">
+      <span>PAGAMENTOS</span>
+      <div class="fidc-waterfall__flow-arrow">
+        <span class="fidc-waterfall__flow-arrow-line"></span>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+      </div>
+    </div>
+
+    <!-- Tiers -->
+    <div class="fidc-waterfall__tiers">
+      <!-- Senior Tier -->
+      @if (seniorCount() > 0) {
+        <div class="fidc-waterfall__tier fidc-waterfall__tier--senior">
+          <div class="fidc-waterfall__tier-header">
+            <span class="fidc-waterfall__tier-label">SENIOR</span>
+            <span class="fidc-waterfall__tier-priority">1a prioridade</span>
+          </div>
+          <div class="fidc-waterfall__tier-classes">
+            @for (code of getTierCodes(classesGrouped().senior); track code) {
+              <span class="fidc-waterfall__tier-code font-monospace">{{ code }}</span>
+            }
+            @if (seniorCount() > 3) {
+              <span class="fidc-waterfall__tier-more">+{{ seniorCount() - 3 }}</span>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Arrow between tiers -->
+      @if (seniorCount() > 0 && (hasMezanino() || hasSubordinada())) {
+        <div class="fidc-waterfall__tier-arrow">
+          <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        </div>
+      }
+
+      <!-- Mezanino Tier -->
+      @if (hasMezanino()) {
+        <div class="fidc-waterfall__tier fidc-waterfall__tier--mezanino">
+          <div class="fidc-waterfall__tier-header">
+            <span class="fidc-waterfall__tier-label">MEZANINO</span>
+            <span class="fidc-waterfall__tier-priority">2a prioridade</span>
+          </div>
+          <div class="fidc-waterfall__tier-classes">
+            @for (code of getTierCodes(classesGrouped().mezanino); track code) {
+              <span class="fidc-waterfall__tier-code font-monospace">{{ code }}</span>
+            }
+            @if (mezaninoCount() > 3) {
+              <span class="fidc-waterfall__tier-more">+{{ mezaninoCount() - 3 }}</span>
+            }
+          </div>
+        </div>
+
+        <!-- Arrow to subordinada -->
+        @if (hasSubordinada()) {
+          <div class="fidc-waterfall__tier-arrow">
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+          </div>
+        }
+      }
+
+      <!-- Subordinada Tier -->
+      @if (hasSubordinada()) {
+        <div class="fidc-waterfall__tier fidc-waterfall__tier--subordinada">
+          <div class="fidc-waterfall__tier-header">
+            <span class="fidc-waterfall__tier-label">SUBORDINADA</span>
+            <span class="fidc-waterfall__tier-priority">Absorve perdas</span>
+          </div>
+          <div class="fidc-waterfall__tier-classes">
+            @for (code of getTierCodes(classesGrouped().subordinada); track code) {
+              <span class="fidc-waterfall__tier-code font-monospace">{{ code }}</span>
+            }
+            @if (subordinadaCount() > 3) {
+              <span class="fidc-waterfall__tier-more">+{{ subordinadaCount() - 3 }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Subordination Index Info -->
+  <div class="fidc-waterfall__info">
+    <div class="fidc-waterfall__info-item">
+      <i class="bi bi-calculator" aria-hidden="true"></i>
+      <span class="fidc-waterfall__info-label">Indice de Subordinacao</span>
+      <code class="fidc-waterfall__info-formula font-monospace">
+        IS = (PL<sub>Sub</sub> + PL<sub>Mez</sub>) / PL<sub>Total</sub>
+      </code>
+    </div>
+    <div class="fidc-waterfall__info-note">
+      <i class="bi bi-info-circle" aria-hidden="true"></i>
+      <span>Calculado apos cotizacao das classes</span>
+    </div>
+  </div>
+</div>

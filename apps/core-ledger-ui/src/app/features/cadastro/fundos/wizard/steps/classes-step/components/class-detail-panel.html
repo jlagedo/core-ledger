@@ -1,0 +1,446 @@
+<div class="detail-panel" [formGroup]="classeFormGroup()">
+  <!-- Header -->
+  <div class="detail-panel__header" [class]="getTipoBadgeClass()">
+    <div class="detail-panel__title">
+      <span class="detail-panel__number font-monospace">{{ (classeIndex() + 1).toString().padStart(2, '0') }}</span>
+      <span class="detail-panel__name">{{ classCode }}</span>
+    </div>
+    @if (isSubclass()) {
+      <span class="detail-panel__subclass-badge">SUBCLASSE</span>
+    }
+  </div>
+
+  <!-- Essential Section (Always Open) -->
+  <div class="detail-panel__section detail-panel__section--essential">
+    <div class="section-title">
+      <i class="bi bi-card-heading" aria-hidden="true"></i>
+      <span>Identificacao</span>
+    </div>
+
+    <div class="step-form__grid step-form__grid--2-cols">
+      <!-- Codigo Classe -->
+      <div class="step-field">
+        <label [for]="'codigoClasse-' + classeIndex()" class="step-field__label">
+          <span class="step-field__label-text">Codigo</span>
+          <span class="step-field__required" aria-label="obrigatorio">*</span>
+        </label>
+        <input
+          type="text"
+          class="form-control step-field__input font-monospace"
+          [class.is-invalid]="isFieldInvalid('codigoClasse')"
+          [class.is-valid]="isFieldValid('codigoClasse')"
+          [id]="'codigoClasse-' + classeIndex()"
+          formControlName="codigoClasse"
+          placeholder="SR"
+          maxlength="20"
+          style="text-transform: uppercase"
+        />
+        @if (isFieldInvalid('codigoClasse')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            @if (hasFieldError('codigoClasse', 'required')) {
+              Codigo e obrigatorio
+            } @else if (hasFieldError('codigoClasse', 'maxlength')) {
+              Maximo 20 caracteres
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Nome Classe -->
+      <div class="step-field">
+        <label [for]="'nomeClasse-' + classeIndex()" class="step-field__label">
+          <span class="step-field__label-text">Nome da Classe</span>
+          <span class="step-field__required" aria-label="obrigatorio">*</span>
+        </label>
+        <input
+          type="text"
+          class="form-control step-field__input"
+          [class.is-invalid]="isFieldInvalid('nomeClasse')"
+          [class.is-valid]="isFieldValid('nomeClasse')"
+          [id]="'nomeClasse-' + classeIndex()"
+          formControlName="nomeClasse"
+          placeholder="Classe Senior"
+          maxlength="100"
+        />
+        @if (isFieldInvalid('nomeClasse')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            @if (hasFieldError('nomeClasse', 'required')) {
+              Nome e obrigatorio
+            } @else if (hasFieldError('nomeClasse', 'maxlength')) {
+              Maximo 100 caracteres
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- FIDC-specific: Tipo e Ordem -->
+    @if (isFidc()) {
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Tipo Classe FIDC -->
+        <div class="step-field">
+          <label [for]="'tipoClasseFidc-' + classeIndex()" class="step-field__label">
+            <span class="step-field__label-text">Tipo de Classe</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <select
+            class="form-select step-field__input"
+            [class.is-invalid]="isFieldInvalid('tipoClasseFidc')"
+            [class.is-valid]="isFieldValid('tipoClasseFidc')"
+            [id]="'tipoClasseFidc-' + classeIndex()"
+            formControlName="tipoClasseFidc"
+          >
+            <option [ngValue]="null">Selecione o tipo</option>
+            @for (option of tipoClasseFidcOptions; track option.value) {
+              <option [ngValue]="option.value">{{ option.label }}</option>
+            }
+          </select>
+          @if (isFieldInvalid('tipoClasseFidc')) {
+            <div class="step-field__error">
+              <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+              Tipo de classe e obrigatorio para FIDC
+            </div>
+          }
+        </div>
+
+        <!-- Ordem Subordinacao -->
+        <div class="step-field">
+          <label [for]="'ordemSubordinacao-' + classeIndex()" class="step-field__label">
+            <span class="step-field__label-text">Ordem de Subordinacao</span>
+            <span class="step-field__required" aria-label="obrigatorio">*</span>
+          </label>
+          <input
+            type="number"
+            class="form-control step-field__input font-monospace"
+            [class.is-invalid]="isFieldInvalid('ordemSubordinacao')"
+            [class.is-valid]="isFieldValid('ordemSubordinacao')"
+            [id]="'ordemSubordinacao-' + classeIndex()"
+            formControlName="ordemSubordinacao"
+            placeholder="1"
+            min="1"
+            max="10"
+          />
+          @if (isFieldInvalid('ordemSubordinacao')) {
+            <div class="step-field__error">
+              <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+              Ordem e obrigatoria (1 = maior prioridade)
+            </div>
+          }
+          <div class="step-field__hint">
+            <i class="bi bi-lightbulb" aria-hidden="true"></i>
+            1 = Senior (maior prioridade)
+          </div>
+        </div>
+      </div>
+    }
+
+    <div class="step-form__grid step-form__grid--2-cols">
+      <!-- Publico Alvo -->
+      <div class="step-field">
+        <label [for]="'publicoAlvo-' + classeIndex()" class="step-field__label">
+          <span class="step-field__label-text">Publico Alvo</span>
+          <span class="step-field__required" aria-label="obrigatorio">*</span>
+        </label>
+        <select
+          class="form-select step-field__input"
+          [class.is-invalid]="isFieldInvalid('publicoAlvo')"
+          [class.is-valid]="isFieldValid('publicoAlvo')"
+          [id]="'publicoAlvo-' + classeIndex()"
+          formControlName="publicoAlvo"
+        >
+          <option [ngValue]="null">Selecione o publico</option>
+          @for (option of publicoAlvoOptions; track option.value) {
+            <option [ngValue]="option.value">{{ option.label }}</option>
+          }
+        </select>
+        @if (isFieldInvalid('publicoAlvo')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Publico alvo e obrigatorio
+          </div>
+        }
+      </div>
+
+      <!-- Data Inicio -->
+      <div class="step-field">
+        <label [for]="'dataInicio-' + classeIndex()" class="step-field__label">
+          <span class="step-field__label-text">Data de Inicio</span>
+          <span class="step-field__required" aria-label="obrigatorio">*</span>
+        </label>
+        <input
+          type="date"
+          class="form-control step-field__input"
+          [class.is-invalid]="isFieldInvalid('dataInicio')"
+          [class.is-valid]="isFieldValid('dataInicio')"
+          [id]="'dataInicio-' + classeIndex()"
+          formControlName="dataInicio"
+        />
+        @if (isFieldInvalid('dataInicio')) {
+          <div class="step-field__error">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            Data de inicio e obrigatoria
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Values Section (Collapsible) -->
+  <details class="detail-panel__section detail-panel__section--collapsible">
+    <summary class="section-toggle">
+      <i class="bi bi-currency-dollar" aria-hidden="true"></i>
+      <span>Valores</span>
+      <span class="section-toggle__hint">(opcional)</span>
+      <i class="bi bi-chevron-down section-toggle__chevron" aria-hidden="true"></i>
+    </summary>
+    <div class="section-content">
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Valor Minimo Aplicacao -->
+        <div class="step-field">
+          <label [for]="'valorMinimoAplicacao-' + classeIndex()" class="step-field__label">
+            <span class="step-field__label-text">Valor Minimo Aplicacao</span>
+          </label>
+          <div class="input-group">
+            <span class="input-group-text step-input-prefix">R$</span>
+            <input
+              type="number"
+              class="form-control step-field__input font-monospace"
+              [id]="'valorMinimoAplicacao-' + classeIndex()"
+              formControlName="valorMinimoAplicacao"
+              placeholder="25000.00"
+              step="0.01"
+              min="0"
+            />
+          </div>
+        </div>
+
+        <!-- Valor Minimo Permanencia -->
+        <div class="step-field">
+          <label [for]="'valorMinimoPermanencia-' + classeIndex()" class="step-field__label">
+            <span class="step-field__label-text">Valor Minimo Permanencia</span>
+          </label>
+          <div class="input-group">
+            <span class="input-group-text step-input-prefix">R$</span>
+            <input
+              type="number"
+              class="form-control step-field__input font-monospace"
+              [id]="'valorMinimoPermanencia-' + classeIndex()"
+              formControlName="valorMinimoPermanencia"
+              placeholder="25000.00"
+              step="0.01"
+              min="0"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Rentabilidade Alvo -->
+        <div class="step-field">
+          <label [for]="'rentabilidadeAlvo-' + classeIndex()" class="step-field__label">
+            <span class="step-field__label-text">Rentabilidade Alvo</span>
+          </label>
+          <div class="input-group">
+            <input
+              type="number"
+              class="form-control step-field__input font-monospace"
+              [id]="'rentabilidadeAlvo-' + classeIndex()"
+              formControlName="rentabilidadeAlvo"
+              placeholder="12.00"
+              step="0.01"
+              min="0"
+              max="100"
+            />
+            <span class="input-group-text step-input-suffix">% a.a.</span>
+          </div>
+        </div>
+
+        <!-- Placeholder for alignment -->
+        <div class="step-field"></div>
+      </div>
+    </div>
+  </details>
+
+  <!-- Fees Section (Collapsible) -->
+  <details class="detail-panel__section detail-panel__section--collapsible">
+    <summary class="section-toggle">
+      <i class="bi bi-percent" aria-hidden="true"></i>
+      <span>Taxas Especificas</span>
+      <span class="section-toggle__hint">(sobrepoe taxas do fundo)</span>
+      <i class="bi bi-chevron-down section-toggle__chevron" aria-hidden="true"></i>
+    </summary>
+    <div class="section-content">
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Taxa Administracao -->
+        <div class="step-field">
+          <label [for]="'taxaAdministracao-' + classeIndex()" class="step-field__label">
+            <span class="step-field__label-text">Taxa Administracao</span>
+          </label>
+          <div class="input-group">
+            <input
+              type="number"
+              class="form-control step-field__input font-monospace"
+              [id]="'taxaAdministracao-' + classeIndex()"
+              formControlName="taxaAdministracao"
+              placeholder="1.50"
+              step="0.01"
+              min="0"
+              max="10"
+            />
+            <span class="input-group-text step-input-suffix">% a.a.</span>
+          </div>
+        </div>
+
+        <!-- Taxa Gestao -->
+        <div class="step-field">
+          <label [for]="'taxaGestao-' + classeIndex()" class="step-field__label">
+            <span class="step-field__label-text">Taxa Gestao</span>
+          </label>
+          <div class="input-group">
+            <input
+              type="number"
+              class="form-control step-field__input font-monospace"
+              [id]="'taxaGestao-' + classeIndex()"
+              formControlName="taxaGestao"
+              placeholder="0.50"
+              step="0.01"
+              min="0"
+              max="5"
+            />
+            <span class="input-group-text step-input-suffix">% a.a.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Taxa Performance -->
+        <div class="step-field">
+          <label [for]="'taxaPerformance-' + classeIndex()" class="step-field__label">
+            <span class="step-field__label-text">Taxa Performance</span>
+          </label>
+          <div class="input-group">
+            <input
+              type="number"
+              class="form-control step-field__input font-monospace"
+              [id]="'taxaPerformance-' + classeIndex()"
+              formControlName="taxaPerformance"
+              placeholder="20.00"
+              step="0.01"
+              min="0"
+              max="50"
+            />
+            <span class="input-group-text step-input-suffix">%</span>
+          </div>
+        </div>
+
+        <!-- Placeholder for alignment -->
+        <div class="step-field"></div>
+      </div>
+    </div>
+  </details>
+
+  <!-- Advanced Section (Collapsible) -->
+  <details class="detail-panel__section detail-panel__section--collapsible">
+    <summary class="section-toggle">
+      <i class="bi bi-gear" aria-hidden="true"></i>
+      <span>Avancado</span>
+      <i class="bi bi-chevron-down section-toggle__chevron" aria-hidden="true"></i>
+    </summary>
+    <div class="section-content">
+      <!-- CNPJ da Classe -->
+      <div class="step-form__grid step-form__grid--1-col">
+        <div class="step-field">
+          <label [for]="'cnpjClasse-' + classeIndex()" class="step-field__label">
+            <span class="step-field__label-text">CNPJ da Classe</span>
+            <span class="step-field__optional">(opcional)</span>
+          </label>
+          <input
+            type="text"
+            class="form-control step-field__input font-monospace"
+            [class.is-invalid]="isFieldInvalid('cnpjClasse')"
+            [id]="'cnpjClasse-' + classeIndex()"
+            formControlName="cnpjClasse"
+            placeholder="00000000000000"
+            maxlength="14"
+          />
+          @if (isFieldInvalid('cnpjClasse')) {
+            <div class="step-field__error">
+              <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+              CNPJ deve ter 14 digitos
+            </div>
+          }
+          <div class="step-field__hint">
+            <i class="bi bi-info-circle" aria-hidden="true"></i>
+            Usado apenas se a classe tiver CNPJ proprio
+          </div>
+        </div>
+      </div>
+
+      <!-- Checkboxes -->
+      <div class="step-form__grid step-form__grid--2-cols">
+        <!-- Responsabilidade Limitada -->
+        <div class="step-field">
+          <div class="step-checkbox">
+            <input
+              type="checkbox"
+              class="form-check-input step-checkbox__input"
+              [id]="'responsabilidadeLimitada-' + classeIndex()"
+              formControlName="responsabilidadeLimitada"
+            />
+            <label class="step-checkbox__label" [for]="'responsabilidadeLimitada-' + classeIndex()">
+              <span class="step-checkbox__label-text">Responsabilidade Limitada</span>
+            </label>
+          </div>
+          <div class="step-field__hint">
+            <i class="bi bi-shield-check" aria-hidden="true"></i>
+            Limita perdas ao capital investido
+          </div>
+        </div>
+
+        <!-- Segregacao Patrimonial -->
+        <div class="step-field">
+          <div class="step-checkbox">
+            <input
+              type="checkbox"
+              class="form-check-input step-checkbox__input"
+              [id]="'segregacaoPatrimonial-' + classeIndex()"
+              formControlName="segregacaoPatrimonial"
+            />
+            <label class="step-checkbox__label" [for]="'segregacaoPatrimonial-' + classeIndex()">
+              <span class="step-checkbox__label-text">Segregacao Patrimonial</span>
+            </label>
+          </div>
+          <div class="step-field__hint">
+            <i class="bi bi-box-seam" aria-hidden="true"></i>
+            Patrimonio separado do administrador
+          </div>
+        </div>
+      </div>
+
+      <!-- FIDC-specific: Resgate Antecipado -->
+      @if (isFidc()) {
+        <div class="step-form__grid step-form__grid--1-col">
+          <div class="step-field">
+            <div class="step-checkbox">
+              <input
+                type="checkbox"
+                class="form-check-input step-checkbox__input"
+                [id]="'permiteResgateAntecipado-' + classeIndex()"
+                formControlName="permiteResgateAntecipado"
+              />
+              <label class="step-checkbox__label" [for]="'permiteResgateAntecipado-' + classeIndex()">
+                <span class="step-checkbox__label-text">Permite Resgate Antecipado</span>
+              </label>
+            </div>
+            <div class="step-field__hint">
+              <i class="bi bi-calendar-x" aria-hidden="true"></i>
+              Permite resgate antes do vencimento (FIDCs)
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </details>
+</div>

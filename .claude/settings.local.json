@@ -92,7 +92,20 @@
       "mcp__playwright-test__browser_press_key",
       "mcp__playwright-test__browser_wait_for",
       "mcp__playwright-test__planner_save_plan",
-      "Bash(nx:*)"
+      "Bash(nx:*)",
+      "Bash(npx nx graph:*)",
+      "Bash(npx nx validate:*)",
+      "Bash(npx nx report)",
+      "Bash(npx nx run-many:*)",
+      "Bash(tmux new-session:*)",
+      "Bash(tmux send-keys:*)",
+      "Bash(tmux split-window:*)",
+      "Bash(tmux select-layout:*)",
+      "Bash(tmux list-panes:*)",
+      "Bash(tmux capture-pane:*)",
+      "Bash(tmux kill-session:*)",
+      "Bash(docker logs:*)",
+      "Bash(timeout 2 docker compose:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

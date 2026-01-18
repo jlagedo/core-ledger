@@ -1,0 +1,1973 @@
+{
+  "graph": {
+    "nodes": {
+      "core-ledger-dotnet": {
+        "name": "core-ledger-dotnet",
+        "type": "lib",
+        "data": {
+          "root": "libs/core-ledger-dotnet",
+          "name": "core-ledger-dotnet",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "projectType": "library",
+          "sourceRoot": "libs/core-ledger-dotnet",
+          "tags": [
+            "type:lib",
+            "scope:backend"
+          ],
+          "targets": {
+            "build": {
+              "options": {
+                "cwd": "libs/core-ledger-dotnet",
+                "command": "dotnet build CoreLedger.Infrastructure/CoreLedger.Infrastructure.csproj --configuration Release"
+              },
+              "cache": true,
+              "inputs": [
+                "{projectRoot}/**/*.cs",
+                "{projectRoot}/**/*.csproj"
+              ],
+              "outputs": [
+                "{projectRoot}/CoreLedger.Domain/bin",
+                "{projectRoot}/CoreLedger.Application/bin",
+                "{projectRoot}/CoreLedger.Infrastructure/bin"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ]
+            },
+            "test": {
+              "options": {
+                "cwd": "libs/core-ledger-dotnet",
+                "command": "dotnet test CoreLedger.UnitTests/CoreLedger.UnitTests.csproj"
+              },
+              "cache": true,
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^production"
+              ]
+            },
+            "test:unit": {
+              "options": {
+                "cwd": "libs/core-ledger-dotnet",
+                "command": "dotnet test CoreLedger.UnitTests/CoreLedger.UnitTests.csproj"
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:integration": {
+              "options": {
+                "cwd": "libs/core-ledger-dotnet",
+                "command": "dotnet test CoreLedger.IntegrationTests/CoreLedger.IntegrationTests.csproj"
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "implicitDependencies": []
+        }
+      },
+      "core-ledger-worker": {
+        "name": "core-ledger-worker",
+        "type": "app",
+        "data": {
+          "root": "apps/core-ledger-worker",
+          "name": "core-ledger-worker",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "projectType": "application",
+          "sourceRoot": "apps/core-ledger-worker",
+          "tags": [
+            "type:app",
+            "scope:backend"
+          ],
+          "implicitDependencies": [
+            "core-ledger-dotnet"
+          ],
+          "targets": {
+            "build": {
+              "options": {
+                "cwd": "apps/core-ledger-worker",
+                "command": "dotnet build CoreLedger.Worker/CoreLedger.Worker.csproj --configuration Release"
+              },
+              "cache": true,
+              "inputs": [
+                "{projectRoot}/**/*.cs",
+                "{projectRoot}/**/*.csproj",
+                "{workspaceRoot}/libs/core-ledger-dotnet/**/*.cs"
+              ],
+              "outputs": [
+                "{projectRoot}/CoreLedger.Worker/bin"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ]
+            },
+            "serve": {
+              "options": {
+                "cwd": "apps/core-ledger-worker",
+                "command": "dotnet watch run --project CoreLedger.Worker/CoreLedger.Worker.csproj"
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            }
+          }
+        }
+      },
+      "core-ledger-api": {
+        "name": "core-ledger-api",
+        "type": "app",
+        "data": {
+          "root": "apps/core-ledger-api",
+          "name": "core-ledger-api",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "projectType": "application",
+          "sourceRoot": "apps/core-ledger-api",
+          "tags": [
+            "type:app",
+            "scope:backend"
+          ],
+          "implicitDependencies": [
+            "core-ledger-dotnet"
+          ],
+          "targets": {
+            "build": {
+              "options": {
+                "cwd": "apps/core-ledger-api",
+                "command": "dotnet build CoreLedger.API/CoreLedger.API.csproj --configuration Release"
+              },
+              "cache": true,
+              "inputs": [
+                "{projectRoot}/**/*.cs",
+                "{projectRoot}/**/*.csproj",
+                "{workspaceRoot}/libs/core-ledger-dotnet/**/*.cs"
+              ],
+              "outputs": [
+                "{projectRoot}/CoreLedger.API/bin"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ]
+            },
+            "serve": {
+              "options": {
+                "cwd": "apps/core-ledger-api",
+                "command": "dotnet watch run --project CoreLedger.API/CoreLedger.API.csproj"
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "migrate": {
+              "options": {
+                "cwd": "apps/core-ledger-api/CoreLedger.API",
+                "command": "dotnet ef database update --project ../../../libs/core-ledger-dotnet/CoreLedger.Infrastructure --startup-project CoreLedger.API"
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "export-openapi": {
+              "options": {
+                "cwd": "apps/core-ledger-api",
+                "command": "curl -o openapi.json http://localhost:5071/swagger/v1/swagger.json --insecure"
+              },
+              "outputs": [
+                "{projectRoot}/openapi.json"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            }
+          }
+        }
+      },
+      "core-ledger-e2e": {
+        "name": "core-ledger-e2e",
+        "type": "e2e",
+        "data": {
+          "root": "apps/core-ledger-e2e",
+          "metadata": {
+            "targetGroups": {
+              "E2E (CI)": [
+                "e2e-ci--tests/api/account-types/account-types.spec.ts",
+                "e2e-ci--tests/api/accounts/accounts.spec.ts",
+                "e2e-ci--tests/api/audit-logs/audit-logs.spec.ts",
+                "e2e-ci--tests/api/calendario/calendario.spec.ts",
+                "e2e-ci--tests/api/classes/classes.spec.ts",
+                "e2e-ci--tests/api/core-jobs/core-jobs.spec.ts",
+                "e2e-ci--tests/api/funds/funds.spec.ts",
+                "e2e-ci--tests/api/historicos-indexadores/historicos-indexadores.spec.ts",
+                "e2e-ci--tests/api/indexadores/indexadores.spec.ts",
+                "e2e-ci--tests/api/instituicoes/instituicoes.spec.ts",
+                "e2e-ci--tests/api/jobs-ingestion/jobs-ingestion.spec.ts",
+                "e2e-ci--tests/api/prazos/prazos.spec.ts",
+                "e2e-ci--tests/api/securities/securities.spec.ts",
+                "e2e-ci--tests/api/taxas/taxas.spec.ts",
+                "e2e-ci--tests/api/transaction/transaction.spec.ts",
+                "e2e-ci--tests/api/transactions/transactions.spec.ts",
+                "e2e-ci--tests/api/users/users.spec.ts",
+                "e2e-ci--tests/api/vinculos/vinculos.spec.ts",
+                "e2e-ci--tests/api/worker-notifications/worker-notifications.spec.ts",
+                "e2e-ci--tests/ui/calendar/register-national-holiday.spec.ts",
+                "e2e-ci--tests/ui/wizard/wizard-dataversion-issue.spec.ts",
+                "e2e-ci--tests/ui/wizard/wizard-navigation.spec.ts",
+                "e2e-ci--tests/ui/wizard/wizard-simple-diagnostic.spec.ts",
+                "e2e-ci--tests/ui/wizard/wizard-storage-diagnostic.spec.ts",
+                "e2e-ci",
+                "e2e-ci--merge-reports"
+              ]
+            },
+            "description": "",
+            "js": {
+              "packageName": "core-ledger-test",
+              "packageVersion": "1.0.0",
+              "packageMain": "index.js",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "targets": {
+            "e2e": {
+              "executor": "@nx/playwright:playwright",
+              "options": {
+                "config": "apps/core-ledger-e2e/playwright.config.ts"
+              },
+              "outputs": [
+                "{workspaceRoot}/playwright-report",
+                "{workspaceRoot}/test-results"
+              ],
+              "configurations": {},
+              "parallelism": true,
+              "cache": true
+            },
+            "e2e-ci--tests/api/account-types/account-types.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-account-types-account-types-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-account-types-account-types-spec-ts"
+                },
+                "command": "playwright test tests/api/account-types/account-types.spec.ts --output=test-results/tests-api-account-types-account-types-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/account-types/account-types.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-account-types-account-types-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-account-types-account-types-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/api/accounts/accounts.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-accounts-accounts-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-accounts-accounts-spec-ts"
+                },
+                "command": "playwright test tests/api/accounts/accounts.spec.ts --output=test-results/tests-api-accounts-accounts-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/accounts/accounts.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-accounts-accounts-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-accounts-accounts-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/api/audit-logs/audit-logs.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-audit-logs-audit-logs-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-audit-logs-audit-logs-spec-ts"
+                },
+                "command": "playwright test tests/api/audit-logs/audit-logs.spec.ts --output=test-results/tests-api-audit-logs-audit-logs-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/audit-logs/audit-logs.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-audit-logs-audit-logs-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-audit-logs-audit-logs-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/api/calendario/calendario.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-calendario-calendario-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-calendario-calendario-spec-ts"
+                },
+                "command": "playwright test tests/api/calendario/calendario.spec.ts --output=test-results/tests-api-calendario-calendario-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/calendario/calendario.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-calendario-calendario-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-calendario-calendario-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/api/classes/classes.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-classes-classes-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-classes-classes-spec-ts"
+                },
+                "command": "playwright test tests/api/classes/classes.spec.ts --output=test-results/tests-api-classes-classes-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/classes/classes.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-classes-classes-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-classes-classes-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/api/core-jobs/core-jobs.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-core-jobs-core-jobs-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-core-jobs-core-jobs-spec-ts"
+                },
+                "command": "playwright test tests/api/core-jobs/core-jobs.spec.ts --output=test-results/tests-api-core-jobs-core-jobs-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/core-jobs/core-jobs.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-core-jobs-core-jobs-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-core-jobs-core-jobs-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/api/funds/funds.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-funds-funds-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-funds-funds-spec-ts"
+                },
+                "command": "playwright test tests/api/funds/funds.spec.ts --output=test-results/tests-api-funds-funds-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/funds/funds.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-funds-funds-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-funds-funds-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/api/historicos-indexadores/historicos-indexadores.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-historicos-indexadores-historicos-indexadores-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-historicos-indexadores-historicos-indexadores-spec-ts"
+                },
+                "command": "playwright test tests/api/historicos-indexadores/historicos-indexadores.spec.ts --output=test-results/tests-api-historicos-indexadores-historicos-indexadores-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/historicos-indexadores/historicos-indexadores.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-historicos-indexadores-historicos-indexadores-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-historicos-indexadores-historicos-indexadores-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/api/indexadores/indexadores.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-indexadores-indexadores-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-indexadores-indexadores-spec-ts"
+                },
+                "command": "playwright test tests/api/indexadores/indexadores.spec.ts --output=test-results/tests-api-indexadores-indexadores-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/indexadores/indexadores.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-indexadores-indexadores-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-indexadores-indexadores-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/api/instituicoes/instituicoes.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-instituicoes-instituicoes-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-instituicoes-instituicoes-spec-ts"
+                },
+                "command": "playwright test tests/api/instituicoes/instituicoes.spec.ts --output=test-results/tests-api-instituicoes-instituicoes-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/instituicoes/instituicoes.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-instituicoes-instituicoes-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-instituicoes-instituicoes-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/api/jobs-ingestion/jobs-ingestion.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-jobs-ingestion-jobs-ingestion-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-jobs-ingestion-jobs-ingestion-spec-ts"
+                },
+                "command": "playwright test tests/api/jobs-ingestion/jobs-ingestion.spec.ts --output=test-results/tests-api-jobs-ingestion-jobs-ingestion-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/jobs-ingestion/jobs-ingestion.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-jobs-ingestion-jobs-ingestion-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-jobs-ingestion-jobs-ingestion-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/api/prazos/prazos.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-prazos-prazos-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-prazos-prazos-spec-ts"
+                },
+                "command": "playwright test tests/api/prazos/prazos.spec.ts --output=test-results/tests-api-prazos-prazos-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/prazos/prazos.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-prazos-prazos-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-prazos-prazos-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/api/securities/securities.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-securities-securities-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-securities-securities-spec-ts"
+                },
+                "command": "playwright test tests/api/securities/securities.spec.ts --output=test-results/tests-api-securities-securities-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/securities/securities.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-securities-securities-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-securities-securities-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/api/taxas/taxas.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-taxas-taxas-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-taxas-taxas-spec-ts"
+                },
+                "command": "playwright test tests/api/taxas/taxas.spec.ts --output=test-results/tests-api-taxas-taxas-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/taxas/taxas.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-taxas-taxas-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-taxas-taxas-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/api/transaction/transaction.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-transaction-transaction-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-transaction-transaction-spec-ts"
+                },
+                "command": "playwright test tests/api/transaction/transaction.spec.ts --output=test-results/tests-api-transaction-transaction-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/transaction/transaction.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-transaction-transaction-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-transaction-transaction-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/api/transactions/transactions.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-transactions-transactions-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-transactions-transactions-spec-ts"
+                },
+                "command": "playwright test tests/api/transactions/transactions.spec.ts --output=test-results/tests-api-transactions-transactions-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/transactions/transactions.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-transactions-transactions-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-transactions-transactions-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/api/users/users.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-users-users-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-users-users-spec-ts"
+                },
+                "command": "playwright test tests/api/users/users.spec.ts --output=test-results/tests-api-users-users-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/users/users.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-users-users-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-users-users-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/api/vinculos/vinculos.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-vinculos-vinculos-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-vinculos-vinculos-spec-ts"
+                },
+                "command": "playwright test tests/api/vinculos/vinculos.spec.ts --output=test-results/tests-api-vinculos-vinculos-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/vinculos/vinculos.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-vinculos-vinculos-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-vinculos-vinculos-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/api/worker-notifications/worker-notifications.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-api-worker-notifications-worker-notifications-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-api-worker-notifications-worker-notifications-spec-ts"
+                },
+                "command": "playwright test tests/api/worker-notifications/worker-notifications.spec.ts --output=test-results/tests-api-worker-notifications-worker-notifications-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/api/worker-notifications/worker-notifications.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-api-worker-notifications-worker-notifications-spec-ts",
+                "{projectRoot}/playwright-report/tests-api-worker-notifications-worker-notifications-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/ui/calendar/register-national-holiday.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-ui-calendar-register-national-holiday-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-ui-calendar-register-national-holiday-spec-ts"
+                },
+                "command": "playwright test tests/ui/calendar/register-national-holiday.spec.ts --output=test-results/tests-ui-calendar-register-national-holiday-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/ui/calendar/register-national-holiday.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-ui-calendar-register-national-holiday-spec-ts",
+                "{projectRoot}/playwright-report/tests-ui-calendar-register-national-holiday-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/ui/wizard/wizard-dataversion-issue.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-ui-wizard-wizard-dataversion-issue-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-ui-wizard-wizard-dataversion-issue-spec-ts"
+                },
+                "command": "playwright test tests/ui/wizard/wizard-dataversion-issue.spec.ts --output=test-results/tests-ui-wizard-wizard-dataversion-issue-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/ui/wizard/wizard-dataversion-issue.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-ui-wizard-wizard-dataversion-issue-spec-ts",
+                "{projectRoot}/playwright-report/tests-ui-wizard-wizard-dataversion-issue-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/ui/wizard/wizard-navigation.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-ui-wizard-wizard-navigation-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-ui-wizard-wizard-navigation-spec-ts"
+                },
+                "command": "playwright test tests/ui/wizard/wizard-navigation.spec.ts --output=test-results/tests-ui-wizard-wizard-navigation-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/ui/wizard/wizard-navigation.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-ui-wizard-wizard-navigation-spec-ts",
+                "{projectRoot}/playwright-report/tests-ui-wizard-wizard-navigation-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/ui/wizard/wizard-simple-diagnostic.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-ui-wizard-wizard-simple-diagnostic-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-ui-wizard-wizard-simple-diagnostic-spec-ts"
+                },
+                "command": "playwright test tests/ui/wizard/wizard-simple-diagnostic.spec.ts --output=test-results/tests-ui-wizard-wizard-simple-diagnostic-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/ui/wizard/wizard-simple-diagnostic.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-ui-wizard-wizard-simple-diagnostic-spec-ts",
+                "{projectRoot}/playwright-report/tests-ui-wizard-wizard-simple-diagnostic-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--tests/ui/wizard/wizard-storage-diagnostic.spec.ts": {
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/tests-ui-wizard-wizard-storage-diagnostic-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/tests-ui-wizard-wizard-storage-diagnostic-spec-ts"
+                },
+                "command": "playwright test tests/ui/wizard/wizard-storage-diagnostic.spec.ts --output=test-results/tests-ui-wizard-wizard-storage-diagnostic-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in tests/ui/wizard/wizard-storage-diagnostic.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/tests-ui-wizard-wizard-storage-diagnostic-spec-ts",
+                "{projectRoot}/playwright-report/tests-ui-wizard-wizard-storage-diagnostic-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci": {
+              "executor": "nx:noop",
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results",
+                "{projectRoot}/playwright-report"
+              ],
+              "dependsOn": [
+                {
+                  "target": "e2e-ci--tests/api/account-types/account-types.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/api/accounts/accounts.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/api/audit-logs/audit-logs.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/api/calendario/calendario.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/api/classes/classes.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/api/core-jobs/core-jobs.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/api/funds/funds.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/api/historicos-indexadores/historicos-indexadores.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/api/indexadores/indexadores.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/api/instituicoes/instituicoes.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/api/jobs-ingestion/jobs-ingestion.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/api/prazos/prazos.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/api/securities/securities.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/api/taxas/taxas.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/api/transaction/transaction.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/api/transactions/transactions.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/api/users/users.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/api/vinculos/vinculos.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/api/worker-notifications/worker-notifications.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/ui/calendar/register-national-holiday.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/ui/wizard/wizard-dataversion-issue.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/ui/wizard/wizard-navigation.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/ui/wizard/wizard-simple-diagnostic.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                },
+                {
+                  "target": "e2e-ci--tests/ui/wizard/wizard-storage-diagnostic.spec.ts",
+                  "projects": "self",
+                  "params": "forward",
+                  "options": "forward"
+                }
+              ],
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in CI",
+                "nonAtomizedTarget": "e2e",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "configurations": {},
+              "options": {}
+            },
+            "e2e-ci--merge-reports": {
+              "executor": "@nx/playwright:merge-reports",
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/playwright-report"
+              ],
+              "options": {
+                "config": "playwright.config.ts",
+                "expectedSuites": 24
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Merges Playwright blob reports from atomized tasks to produce unified reports for the configured reporters."
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "cache": true,
+              "options": {
+                "cwd": "apps/core-ledger-e2e",
+                "command": "eslint ."
+              },
+              "inputs": [
+                "default",
+                "{workspaceRoot}/eslint.config.*"
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "npx eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "e2e:ui": {
+              "executor": "@nx/playwright:playwright",
+              "options": {
+                "config": "apps/core-ledger-e2e/playwright.config.ts",
+                "ui": true
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "core-ledger-e2e",
+          "tags": [
+            "npm:public",
+            "type:e2e",
+            "scope:testing"
+          ],
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "projectType": "application",
+          "sourceRoot": "apps/core-ledger-e2e",
+          "implicitDependencies": [
+            "core-ledger-ui",
+            "core-ledger-api"
+          ]
+        }
+      },
+      "core-ledger-ui": {
+        "name": "core-ledger-ui",
+        "type": "app",
+        "data": {
+          "root": "apps/core-ledger-ui",
+          "targets": {
+            "lint": {
+              "cache": true,
+              "options": {
+                "cwd": "apps/core-ledger-ui",
+                "command": "eslint ."
+              },
+              "inputs": [
+                "default",
+                "{workspaceRoot}/eslint.config.*"
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "npx eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "ng": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "ng"
+              },
+              "metadata": {
+                "scriptContent": "ng",
+                "runCommand": "npm run ng"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "start": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "start"
+              },
+              "metadata": {
+                "scriptContent": "ng serve",
+                "runCommand": "npm run start"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "start:auth": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "start:auth"
+              },
+              "metadata": {
+                "scriptContent": "ng serve --configuration=local-auth",
+                "runCommand": "npm run start:auth"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "watch": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "watch"
+              },
+              "metadata": {
+                "scriptContent": "ng build --watch --configuration local-noauth",
+                "runCommand": "npm run watch"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "watch:auth": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "watch:auth"
+              },
+              "metadata": {
+                "scriptContent": "ng build --watch --configuration local-auth",
+                "runCommand": "npm run watch:auth"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "generate-tokens": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "generate-tokens"
+              },
+              "metadata": {
+                "scriptContent": "tsx tools/generate-dev-token.ts",
+                "runCommand": "npm run generate-tokens"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "knip": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "knip"
+              },
+              "metadata": {
+                "scriptContent": "knip",
+                "runCommand": "npm run knip"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "knip:prod": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "knip:prod"
+              },
+              "metadata": {
+                "scriptContent": "knip --production",
+                "runCommand": "npm run knip:prod"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "check:compliance": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "check:compliance"
+              },
+              "metadata": {
+                "scriptContent": "bash scripts/check-compliance.sh",
+                "runCommand": "npm run check:compliance"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@angular/build:application",
+              "options": {
+                "browser": "apps/core-ledger-ui/src/main.ts",
+                "tsConfig": "apps/core-ledger-ui/tsconfig.app.json",
+                "inlineStyleLanguage": "scss",
+                "assets": [
+                  {
+                    "glob": "**/*",
+                    "input": "apps/core-ledger-ui/public"
+                  },
+                  {
+                    "glob": "IBMPlexSans-{Light,Regular,Medium,SemiBold,Bold}.woff2",
+                    "input": "node_modules/@ibm/plex/IBM-Plex-Sans/fonts/complete/woff2",
+                    "output": "assets/fonts/ibm-plex-sans"
+                  },
+                  {
+                    "glob": "IBMPlexMono-{Light,Regular,Medium,SemiBold,Bold}.woff2",
+                    "input": "node_modules/@ibm/plex/IBM-Plex-Mono/fonts/complete/woff2",
+                    "output": "assets/fonts/ibm-plex-mono"
+                  }
+                ],
+                "styles": [
+                  "apps/core-ledger-ui/src/styles.scss"
+                ],
+                "polyfills": [
+                  "@angular/localize/init"
+                ],
+                "outputPath": "dist/apps/core-ledger-ui"
+              },
+              "configurations": {
+                "production": {
+                  "budgets": [
+                    {
+                      "type": "initial",
+                      "maximumWarning": "500kB",
+                      "maximumError": "1MB"
+                    },
+                    {
+                      "type": "anyComponentStyle",
+                      "maximumWarning": "4kB",
+                      "maximumError": "8kB"
+                    }
+                  ],
+                  "outputHashing": "all",
+                  "fileReplacements": [
+                    {
+                      "replace": "apps/core-ledger-ui/src/environments/environment.ts",
+                      "with": "apps/core-ledger-ui/src/environments/environment.production.ts"
+                    },
+                    {
+                      "replace": "apps/core-ledger-ui/src/app/auth/mock-tokens.ts",
+                      "with": "apps/core-ledger-ui/src/app/auth/mock-tokens.production.ts"
+                    },
+                    {
+                      "replace": "apps/core-ledger-ui/src/app/auth/mock-users.ts",
+                      "with": "apps/core-ledger-ui/src/app/auth/mock-users.production.ts"
+                    },
+                    {
+                      "replace": "apps/core-ledger-ui/src/app/api/mock-data/index.ts",
+                      "with": "apps/core-ledger-ui/src/app/api/mock-data.production.ts"
+                    },
+                    {
+                      "replace": "apps/core-ledger-ui/src/app/services/mock-notification-hub.service.ts",
+                      "with": "apps/core-ledger-ui/src/app/services/mock-notification-hub.service.production.ts"
+                    }
+                  ]
+                },
+                "development": {
+                  "optimization": false,
+                  "extractLicenses": false,
+                  "sourceMap": true,
+                  "fileReplacements": [
+                    {
+                      "replace": "apps/core-ledger-ui/src/environments/environment.ts",
+                      "with": "apps/core-ledger-ui/src/environments/environment.development.ts"
+                    }
+                  ]
+                },
+                "local-auth": {
+                  "optimization": false,
+                  "extractLicenses": false,
+                  "sourceMap": true,
+                  "fileReplacements": [
+                    {
+                      "replace": "apps/core-ledger-ui/src/environments/environment.ts",
+                      "with": "apps/core-ledger-ui/src/environments/environment.local-auth.ts"
+                    }
+                  ]
+                },
+                "local-noauth": {
+                  "optimization": false,
+                  "extractLicenses": false,
+                  "sourceMap": true,
+                  "fileReplacements": [
+                    {
+                      "replace": "apps/core-ledger-ui/src/environments/environment.ts",
+                      "with": "apps/core-ledger-ui/src/environments/environment.local-noauth.ts"
+                    }
+                  ]
+                }
+              },
+              "defaultConfiguration": "local-noauth",
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "cache": true
+            },
+            "serve": {
+              "executor": "@angular/build:dev-server",
+              "options": {
+                "proxyConfig": "apps/core-ledger-ui/src/proxy.conf.json"
+              },
+              "configurations": {
+                "production": {
+                  "buildTarget": "core-ledger-ui:build:production"
+                },
+                "development": {
+                  "buildTarget": "core-ledger-ui:build:development"
+                },
+                "local-auth": {
+                  "buildTarget": "core-ledger-ui:build:local-auth"
+                },
+                "local-noauth": {
+                  "buildTarget": "core-ledger-ui:build:local-noauth"
+                }
+              },
+              "defaultConfiguration": "local-noauth",
+              "parallelism": true
+            },
+            "test": {
+              "executor": "@angular/build:unit-test",
+              "options": {
+                "tsConfig": "apps/core-ledger-ui/tsconfig.spec.json",
+                "setupFiles": [
+                  "apps/core-ledger-ui/src/test-setup.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "inputs": [
+                "default",
+                "^production"
+              ],
+              "cache": true
+            }
+          },
+          "name": "core-ledger-ui",
+          "tags": [
+            "npm:private",
+            "type:app",
+            "scope:frontend"
+          ],
+          "metadata": {
+            "targetGroups": {
+              "NPM Scripts": [
+                "ng",
+                "start",
+                "start:auth",
+                "watch",
+                "watch:auth",
+                "generate-tokens",
+                "knip",
+                "knip:prod",
+                "check:compliance"
+              ]
+            },
+            "js": {
+              "packageName": "core-ledger-ui",
+              "packageVersion": "0.0.0",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "projectType": "application",
+          "sourceRoot": "apps/core-ledger-ui/src",
+          "prefix": "app",
+          "implicitDependencies": []
+        }
+      },
+      "api-client": {
+        "name": "api-client",
+        "type": "lib",
+        "data": {
+          "root": "libs/api-client",
+          "targets": {
+            "lint": {
+              "cache": true,
+              "options": {
+                "cwd": "libs/api-client",
+                "command": "eslint ."
+              },
+              "inputs": [
+                "default",
+                "{workspaceRoot}/eslint.config.*"
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "npx eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "generate": {
+              "executor": "nx:run-commands",
+              "options": {
+                "commands": [
+                  "npx nswag run nswag.json"
+                ],
+                "cwd": "apps/core-ledger-api",
+                "parallel": false
+              },
+              "dependsOn": [
+                {
+                  "target": "export-openapi",
+                  "projects": [
+                    "core-ledger-api"
+                  ]
+                }
+              ],
+              "inputs": [
+                "{workspaceRoot}/apps/core-ledger-api/openapi.json"
+              ],
+              "outputs": [
+                "{projectRoot}/generated"
+              ],
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "api-client",
+          "tags": [
+            "npm:public",
+            "type:lib",
+            "scope:frontend"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "description": "Generated TypeScript clients for Core Ledger API (NSwag)",
+            "js": {
+              "packageName": "@core-ledger/api-client",
+              "packageVersion": "0.0.2",
+              "packageMain": "./src/index.ts",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "projectType": "library",
+          "sourceRoot": "libs/api-client/src",
+          "implicitDependencies": []
+        }
+      }
+    },
+    "dependencies": {
+      "core-ledger-dotnet": [],
+      "core-ledger-worker": [
+        {
+          "source": "core-ledger-worker",
+          "target": "core-ledger-dotnet",
+          "type": "implicit"
+        }
+      ],
+      "core-ledger-api": [
+        {
+          "source": "core-ledger-api",
+          "target": "core-ledger-dotnet",
+          "type": "implicit"
+        }
+      ],
+      "core-ledger-e2e": [
+        {
+          "source": "core-ledger-e2e",
+          "target": "core-ledger-ui",
+          "type": "implicit"
+        },
+        {
+          "source": "core-ledger-e2e",
+          "target": "core-ledger-api",
+          "type": "implicit"
+        }
+      ],
+      "core-ledger-ui": [
+        {
+          "source": "core-ledger-ui",
+          "target": "api-client",
+          "type": "static"
+        }
+      ],
+      "api-client": []
+    }
+  }
+}

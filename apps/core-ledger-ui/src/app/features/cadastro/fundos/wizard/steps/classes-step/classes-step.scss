@@ -1,6 +1,6 @@
 // ============================================================
 // CLASSES STEP — CVM 175 Multi-class Fund Structure
-// Terminal-style form with dynamic list of class cards
+// Two-panel layout with overview list and detail form
 // Uses shared wizard styles from _components.scss
 // ============================================================
 
@@ -27,6 +27,7 @@
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .classes-toggle__icon {
@@ -43,6 +44,7 @@
 
 .classes-toggle__text {
   flex: 1;
+  min-width: 200px;
 }
 
 .classes-toggle__title {
@@ -58,6 +60,17 @@
   margin: 0.25rem 0 0;
   font-size: 0.75rem;
   color: var(--bs-secondary-color);
+}
+
+.classes-toggle__template-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-left: auto;
+
+  i {
+    font-size: 0.875rem;
+  }
 }
 
 .classes-toggle__options {
@@ -202,267 +215,73 @@
 }
 
 // ============================================================
-// CLASSES HEADER
+// TWO-PANEL LAYOUT
 // ============================================================
 
-.classes-header {
-  @include card-list-header(indigo);
+.classes-panels {
+  display: grid;
+  grid-template-columns: minmax(200px, 280px) 1fr;
+  gap: 1rem;
+  min-height: 400px;
+
+  @media (max-width: 991.98px) {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
 }
 
-// ============================================================
-// CLASSES LIST
-// ============================================================
+.classes-panels__overview {
+  min-width: 0;
 
-.classes-list {
+  @media (max-width: 991.98px) {
+    max-height: 300px;
+  }
+}
+
+.classes-panels__detail {
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 }
 
-.classes-empty {
+.classes-panels__empty-detail {
   @include empty-state-placeholder(indigo);
-}
-
-// ============================================================
-// CLASSE CARD
-// ============================================================
-
-.classe-card {
-  background: var(--bs-secondary-bg);
-  border: 1px solid var(--table-border-color);
-  border-radius: 2px;
-  overflow: hidden;
-  transition: all 0.2s ease;
-
-  &:hover {
-    border-color: var(--indigo-30);
-  }
-
-  &--senior {
-    border-color: var(--teal-30);
-
-    .classe-card__header {
-      background: var(--teal-5);
-    }
-
-    .classe-card__number {
-      background: var(--teal-15);
-      color: var(--accent-teal);
-    }
-
-    .classe-card__tipo-badge {
-      background: var(--teal-15);
-      color: var(--accent-teal);
-    }
-  }
-
-  &--subordinada {
-    border-color: var(--amber-30);
-
-    .classe-card__header {
-      background: var(--amber-4);
-    }
-
-    .classe-card__number {
-      background: var(--amber-15);
-      color: var(--accent-amber);
-    }
-
-    .classe-card__tipo-badge {
-      background: var(--amber-15);
-      color: var(--accent-amber);
-    }
-  }
-}
-
-.classe-card__header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0.75rem;
-  background: var(--indigo-2);
-  border-bottom: 1px solid var(--table-border-color);
-}
-
-.classe-card__number {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  font-size: 0.625rem;
-  font-weight: 700;
-  background: var(--indigo-10);
-  border-radius: 2px;
-  color: var(--accent-indigo);
-}
-
-.classe-card__title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
   flex: 1;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--bs-body-color);
+  min-height: 300px;
 }
 
-.classe-card__tipo-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.125rem 0.375rem;
-  font-size: 0.5625rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  background: var(--indigo-10);
-  border-radius: 2px;
-  color: var(--accent-indigo);
-}
-
-.classe-card__remove {
-  padding: 0.25rem;
-  color: var(--accent-coral);
-  opacity: 0.7;
-  transition: all 0.2s ease;
-
-  &:hover {
-    opacity: 1;
-    background: var(--coral-10);
-  }
-}
-
-.classe-card__locked {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.25rem;
-  font-size: 0.75rem;
+.classes-panels__empty-icon {
+  font-size: 2rem;
   color: var(--bs-secondary-color);
   opacity: 0.5;
 }
 
-.classe-card__body {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
+.classes-panels__empty-text {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--bs-secondary-color);
+  text-align: center;
 }
 
 // ============================================================
-// TAXAS SECTION (RF-07)
+// VALIDATION ERROR
 // ============================================================
 
-.classe-card__taxas-section {
-  margin-top: 0.5rem;
-  border: 1px dashed var(--table-border-color);
-  border-radius: 2px;
-
-  &[open] {
-    .classe-card__taxas-toggle {
-      border-bottom: 1px dashed var(--table-border-color);
-    }
-  }
-}
-
-.classe-card__taxas-toggle {
+.classes-validation-error {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 0.875rem;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--bs-secondary-color);
-  cursor: pointer;
-  list-style: none;
-  transition: all 0.2s ease;
-
-  &::-webkit-details-marker {
-    display: none;
-  }
-
-  &:hover {
-    color: var(--bs-body-color);
-    background: var(--indigo-2);
-  }
-
-  i {
-    font-size: 0.75rem;
-  }
-}
-
-.classe-card__taxas-hint {
-  font-weight: 400;
-  text-transform: none;
-  letter-spacing: normal;
-  color: var(--terminal-text-muted);
-}
-
-.classe-card__taxas-content {
-  @include wizard-section(indigo);
-  margin-top: 0;
-  border: none;
-}
-
-// ============================================================
-// SUBORDINATION INFO (RF-08)
-// ============================================================
-
-.subordination-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: var(--indigo-2);
-  border: 1px solid var(--indigo-15);
+  background: var(--coral-5);
+  border: 1px solid var(--coral-20);
   border-radius: 2px;
-}
-
-.subordination-info__header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--accent-indigo);
+  color: var(--accent-coral);
+  @include pulse-warning;
 
   i {
     font-size: 0.875rem;
-  }
-}
-
-.subordination-info__formula {
-  padding: 0.75rem;
-  background: var(--bs-secondary-bg);
-  border: 1px solid var(--table-border-color);
-  border-radius: 2px;
-
-  code {
-    font-size: 0.8125rem;
-    color: var(--bs-body-color);
-
-    sub {
-      font-size: 0.625rem;
-      color: var(--bs-secondary-color);
-    }
-  }
-}
-
-.subordination-info__note {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.6875rem;
-  color: var(--bs-secondary-color);
-
-  i {
-    color: var(--accent-indigo);
   }
 }
 
@@ -516,101 +335,8 @@
     color: var(--daylight-teal);
   }
 
-  .classes-header {
-    background: var(--indigo-2);
-  }
-
-  .classes-header__warning {
+  .classes-validation-error {
     color: var(--daylight-coral);
-  }
-
-  .classes-empty {
-    background: var(--indigo-2);
-  }
-
-  .classe-card {
-    &:hover {
-      border-color: var(--indigo-30);
-    }
-
-    &--senior {
-      border-color: var(--teal-30);
-
-      .classe-card__header {
-        background: var(--teal-5);
-      }
-
-      .classe-card__number {
-        background: var(--teal-15);
-        color: var(--daylight-teal);
-      }
-
-      .classe-card__tipo-badge {
-        background: var(--teal-15);
-        color: var(--daylight-teal);
-      }
-    }
-
-    &--subordinada {
-      border-color: var(--amber-30);
-
-      .classe-card__header {
-        background: var(--amber-4);
-      }
-
-      .classe-card__number {
-        background: var(--amber-15);
-        color: var(--daylight-amber);
-      }
-
-      .classe-card__tipo-badge {
-        background: var(--amber-15);
-        color: var(--daylight-amber);
-      }
-    }
-  }
-
-  .classe-card__header {
-    background: var(--indigo-2);
-  }
-
-  .classe-card__number {
-    background: var(--indigo-10);
-    color: var(--daylight-indigo);
-  }
-
-  .classe-card__tipo-badge {
-    background: var(--indigo-10);
-    color: var(--daylight-indigo);
-  }
-
-  .classe-card__remove {
-    color: var(--daylight-coral);
-
-    &:hover {
-      background: var(--coral-10);
-    }
-  }
-
-  .classe-card__taxas-toggle:hover {
-    background: var(--indigo-2);
-  }
-
-  .classe-card__taxas-content {
-    background: var(--indigo-2);
-  }
-
-  .subordination-info {
-    background: var(--indigo-2);
-    border-color: var(--indigo-15);
-  }
-
-  .subordination-info__header {
-    color: var(--daylight-indigo);
-  }
-
-  .subordination-info__note i {
-    color: var(--daylight-indigo);
   }
 }
 
@@ -620,8 +346,7 @@
 
 @include reduced-motion {
   .classes-step,
-  .classe-card__taxas-content,
-  .classes-header__warning {
+  .classes-validation-error {
     animation: none;
   }
 }

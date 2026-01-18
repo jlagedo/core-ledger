@@ -19,6 +19,7 @@ import {
 } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { map, startWith } from 'rxjs/operators';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { WizardStepConfig, InvalidFieldInfo } from '../../models/wizard.model';
 import { WizardStore } from '../../wizard-store';
 import {
@@ -32,6 +33,7 @@ import {
   ClassesFormData,
   CLASSE_DEFAULT,
   CLASSE_SENIOR_DEFAULT,
+  ClasseTemplate,
   FundoClasse,
   getDefaultOrdemSubordinacao,
   getDefaultResponsabilidadeLimitada,
@@ -42,6 +44,12 @@ import {
   TipoClasseFidc,
   TIPO_CLASSE_FIDC_OPTIONS,
 } from '../../models/classes.model';
+
+// Sub-components
+import { ClassOverviewPanel } from './components/class-overview-panel';
+import { ClassDetailPanel } from './components/class-detail-panel';
+import { FidcWaterfall } from './components/fidc-waterfall';
+import { ClassTemplateModal } from './components/class-template-modal';
 
 /**
  * Validador customizado: verifica gaps na ordem de subordinacao (RF-05)
@@ -81,12 +89,30 @@ function codigoUnicoValidator(formArray: AbstractControl): ValidationErrors | nu
 }
 
 /**
+ * Validador customizado: FIDC deve ter pelo menos uma classe SENIOR
+ */
+function seniorObrigatorioValidator(isFidc: () => boolean): (formArray: AbstractControl) => ValidationErrors | null {
+  return (formArray: AbstractControl): ValidationErrors | null => {
+    if (!isFidc()) return null;
+
+    const array = formArray as FormArray;
+    const hasSenior = array.controls.some((ctrl) => ctrl.get('tipoClasseFidc')?.value === TipoClasseFidc.SENIOR);
+
+    if (!hasSenior && array.length > 0) {
+      return { seniorObrigatorio: true };
+    }
+
+    return null;
+  };
+}
+
+/**
  * Componente para Etapa 7 do wizard: Classes CVM 175
- * Gerencia estrutura multiclasse com lista dinamica de classes
+ * Redesigned with two-panel layout for better UX
  */
 @Component({
   selector: 'app-classes-step',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, ClassOverviewPanel, ClassDetailPanel, FidcWaterfall],
   templateUrl: './classes-step.html',
   styleUrl: './classes-step.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -97,17 +123,34 @@ export class ClassesStep {
   private readonly formBuilder = inject(FormBuilder);
   private readonly wizardStore = inject(WizardStore);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly modalService = inject(NgbModal);
 
   // Enum options for template
   readonly tipoClasseFidcOptions = TIPO_CLASSE_FIDC_OPTIONS;
   readonly publicoAlvoOptions = PUBLICO_ALVO_OPTIONS;
   readonly maxClasses = MAX_CLASSES;
 
+  // Computed: Check if fund is FIDC type (RF-02)
+  // IMPORTANT: Must be defined before the form, as the validator references this.isFidc()
+  readonly isFidc = computed(() => {
+    const identificacaoData = this.wizardStore.stepData()['identificacao'] as IdentificacaoFormData | undefined;
+    const tipoFundo = identificacaoData?.tipoFundo;
+    return tipoFundo === TipoFundo.FIDC || tipoFundo === TipoFundo.FIDC_NP;
+  });
+
   // Main form
   form = this.formBuilder.group({
     multiclasse: [false],
-    classes: this.formBuilder.array<FormGroup>([], [ordemSubordinacaoValidator, codigoUnicoValidator]),
+    classes: this.formBuilder.array<FormGroup>([], [
+      ordemSubordinacaoValidator,
+      codigoUnicoValidator,
+      seniorObrigatorioValidator(() => this.isFidc()),
+    ]),
   });
+
+  // UI State
+  readonly selectedClassIndex = signal<number | null>(null);
+  readonly isMulticlasse = signal(false);
 
   // Convert form valueChanges to signal for reactive computed dependencies
   // Fixes bug: computed() doesn't track Reactive Forms values directly
@@ -130,13 +173,23 @@ export class ClassesStep {
   readonly classesArray = computed(() => this.form.get('classes') as FormArray);
   readonly classesCount = computed(() => this.classesFormValue().length);
   readonly canAddClasse = computed(() => this.classesCount() < MAX_CLASSES);
-  readonly isMulticlasse = signal(false);
 
-  // Computed: Check if fund is FIDC type (RF-02)
-  readonly isFidc = computed(() => {
-    const identificacaoData = this.wizardStore.stepData()['identificacao'] as IdentificacaoFormData | undefined;
-    const tipoFundo = identificacaoData?.tipoFundo;
-    return tipoFundo === TipoFundo.FIDC || tipoFundo === TipoFundo.FIDC_NP;
+  // Computed: Get FormGroup array for sub-components
+  // IMPORTANT: Must read classesFormValue() to establish reactive dependency
+  // on form changes. Without this, the computed won't update when FormArray
+  // is modified (e.g., when applying a template).
+  readonly classesFormGroups = computed(() => {
+    // Read classesFormValue to trigger reactivity when form changes
+    this.classesFormValue();
+    return this.classesArray().controls as FormGroup[];
+  });
+
+  // Computed: Get selected class FormGroup
+  readonly selectedClassFormGroup = computed(() => {
+    const index = this.selectedClassIndex();
+    if (index === null) return null;
+    const groups = this.classesFormGroups();
+    return groups[index] ?? null;
   });
 
   // Computed: Classes are mandatory for FIDC (RF-02)
@@ -165,6 +218,13 @@ export class ClassesStep {
     return classesControl?.hasError('codigoDuplicado') ?? false;
   });
 
+  // Computed: Check for senior required error
+  readonly hasSeniorObrigatorioError = computed(() => {
+    this.formStatus();
+    const classesControl = this.form.get('classes');
+    return classesControl?.hasError('seniorObrigatorio') ?? false;
+  });
+
   // Computed: Get list of subordination types present
   readonly tiposSubordinacaoPresentes = computed(() => {
     const tipos: TipoClasseFidc[] = [];
@@ -178,6 +238,11 @@ export class ClassesStep {
     return tipos;
   });
 
+  // Computed: Show FIDC waterfall when FIDC and has multiple classes
+  readonly showFidcWaterfall = computed(() => {
+    return this.isFidc() && this.classesCount() > 0;
+  });
+
   constructor() {
     // Create restoration effect
     const { isRestoring } = createRestorationEffect<ClassesFormData>({
@@ -187,6 +252,7 @@ export class ClassesStep {
       resetForm: () => {
         const classesArray = this.form.get('classes') as FormArray;
         classesArray.clear();
+        this.selectedClassIndex.set(null);
       },
       restoreData: (data) => {
         const classesArray = this.form.get('classes') as FormArray;
@@ -203,6 +269,8 @@ export class ClassesStep {
           data.classes.forEach((classe) => {
             classesArray.push(this.createClasseFormGroup(classe, isFidc));
           });
+          // Select first class by default
+          this.selectedClassIndex.set(0);
         }
       },
       createDefaultData: () => {
@@ -213,6 +281,7 @@ export class ClassesStep {
           this.form.get('multiclasse')?.setValue(true, { emitEvent: false });
           this.isMulticlasse.set(true);
           classesArray.push(this.createClasseFormGroup(this.getDefaultSeniorClasse(), true));
+          this.selectedClassIndex.set(0);
         }
       },
       markAllAsTouched: () => this.markAllAsTouched(),
@@ -257,6 +326,7 @@ export class ClassesStep {
       } else {
         classesArray.push(this.createClasseFormGroup(this.getDefaultClasse(), false));
       }
+      this.selectedClassIndex.set(0);
     }
   }
 
@@ -376,10 +446,21 @@ export class ClassesStep {
     group.get('responsabilidadeLimitada')?.updateValueAndValidity({ emitEvent: false });
   }
 
+  // ============================================================
+  // PUBLIC METHODS FOR TEMPLATE/SUB-COMPONENTS
+  // ============================================================
+
   /**
-   * Add a new classe to the list (RF-03)
+   * Handle class selection from overview panel
    */
-  addClasse(): void {
+  onClassSelected(index: number): void {
+    this.selectedClassIndex.set(index);
+  }
+
+  /**
+   * Handle add class from overview panel
+   */
+  onAddClass(event: { parentIndex?: number }): void {
     if (!this.canAddClasse()) return;
 
     const classesArray = this.form.get('classes') as FormArray;
@@ -391,18 +472,33 @@ export class ClassesStep {
     };
 
     classesArray.push(this.createClasseFormGroup(newClasse, isFidc));
+
+    // Select the new class
+    this.selectedClassIndex.set(classesArray.length - 1);
   }
 
   /**
-   * Remove a classe from the list (RF-03)
-   * For FIDC, cannot remove the SENIOR class if it's the only one
+   * Handle remove class from overview panel
    */
-  removeClasse(index: number): void {
+  onRemoveClass(index: number): void {
     const classesArray = this.form.get('classes') as FormArray;
 
     if (!this.canRemoveClasse(index)) return;
 
     classesArray.removeAt(index);
+
+    // Update selection
+    const newLength = classesArray.length;
+    if (newLength === 0) {
+      this.selectedClassIndex.set(null);
+    } else if (this.selectedClassIndex() !== null) {
+      const currentSelection = this.selectedClassIndex()!;
+      if (currentSelection >= newLength) {
+        this.selectedClassIndex.set(newLength - 1);
+      } else if (currentSelection > index) {
+        this.selectedClassIndex.set(currentSelection - 1);
+      }
+    }
   }
 
   /**
@@ -434,30 +530,56 @@ export class ClassesStep {
   }
 
   /**
-   * Check if classe is SENIOR type (for locked icon display)
+   * Open template selection modal
    */
-  isSeniorClasse(index: number): boolean {
+  openTemplateModal(): void {
+    const modalRef = this.modalService.open(ClassTemplateModal, {
+      centered: true,
+      size: 'lg',
+      backdrop: 'static',
+    });
+
+    // Set the signal value - isFidc is a writable signal on the modal
+    modalRef.componentInstance.isFidc.set(this.isFidc());
+
+    modalRef.result.then(
+      (template: ClasseTemplate) => {
+        this.applyTemplate(template);
+      },
+      (reason) => {
+        if (reason === 'scratch') {
+          // User chose to create from scratch - just add a default class
+          this.onAddClass({});
+        }
+        // Otherwise cancelled - do nothing
+      }
+    );
+  }
+
+  /**
+   * Apply a template configuration
+   */
+  private applyTemplate(template: ClasseTemplate): void {
     const classesArray = this.form.get('classes') as FormArray;
-    const classe = classesArray.at(index);
-    return classe.get('tipoClasseFidc')?.value === TipoClasseFidc.SENIOR;
-  }
+    const isFidc = this.isFidc();
 
-  /**
-   * Get tipo classe label
-   */
-  getTipoClasseLabel(tipoClasse: TipoClasseFidc | null): string {
-    if (!tipoClasse) return '';
-    const option = TIPO_CLASSE_FIDC_OPTIONS.find((opt) => opt.value === tipoClasse);
-    return option?.label ?? tipoClasse;
-  }
+    // Clear existing classes
+    classesArray.clear();
+    this.selectedClassIndex.set(null);
 
-  /**
-   * Get publico alvo label
-   */
-  getPublicoAlvoLabel(publicoAlvo: PublicoAlvo | null): string {
-    if (!publicoAlvo) return '';
-    const option = PUBLICO_ALVO_OPTIONS.find((opt) => opt.value === publicoAlvo);
-    return option?.label ?? publicoAlvo;
+    // Add classes from template
+    template.classes.forEach((classeTemplate) => {
+      const classe: Partial<FundoClasse> = {
+        ...classeTemplate,
+        dataInicio: this.getTodayISODate(),
+      };
+      classesArray.push(this.createClasseFormGroup(classe, isFidc));
+    });
+
+    // Select first class
+    if (classesArray.length > 0) {
+      this.selectedClassIndex.set(0);
+    }
   }
 
   private prepareDataForStore(formValue: any): ClassesFormData {
@@ -519,6 +641,9 @@ export class ClassesStep {
         if (this.hasCodigoDuplicadoError()) {
           errors.push('Codigos de classe devem ser unicos');
         }
+        if (this.hasSeniorObrigatorioError()) {
+          errors.push('FIDC deve ter pelo menos uma classe Senior');
+        }
         if (errors.length === 0) {
           errors.push('Preencha todos os campos obrigatorios');
         }
@@ -546,29 +671,5 @@ export class ClassesStep {
   private collectInvalidFields(): InvalidFieldInfo[] {
     const classesArray = this.form.get('classes') as FormArray;
     return collectFormArrayInvalidFields(classesArray, 'classes');
-  }
-
-  // Helper methods for template
-  isFieldInvalid(index: number, fieldName: string): boolean {
-    const classesArray = this.form.get('classes') as FormArray;
-    const control = classesArray.at(index)?.get(fieldName);
-    return control ? control.touched && control.invalid : false;
-  }
-
-  isFieldValid(index: number, fieldName: string): boolean {
-    const classesArray = this.form.get('classes') as FormArray;
-    const control = classesArray.at(index)?.get(fieldName);
-    return control ? control.touched && control.valid : false;
-  }
-
-  getFieldError(index: number, fieldName: string, errorKey: string): boolean {
-    const classesArray = this.form.get('classes') as FormArray;
-    const control = classesArray.at(index)?.get(fieldName);
-    return control?.hasError(errorKey) ?? false;
-  }
-
-  getClasseGroup(index: number): FormGroup {
-    const classesArray = this.form.get('classes') as FormArray;
-    return classesArray.at(index) as FormGroup;
   }
 }

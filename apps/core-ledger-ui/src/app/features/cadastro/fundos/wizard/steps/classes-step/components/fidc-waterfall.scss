@@ -1,0 +1,363 @@
+// ============================================================
+// FIDC WATERFALL
+// Visual representation of the payment priority cascade
+// ============================================================
+
+@use "../../../../../../../../styles/mixins" as *;
+@use "../../../../../../../../styles/variables" as *;
+
+.fidc-waterfall {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  background: var(--indigo-2);
+  border: 1px solid var(--indigo-15);
+  border-radius: 2px;
+}
+
+// ============================================================
+// HEADER
+// ============================================================
+
+.fidc-waterfall__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fidc-waterfall__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent-indigo);
+
+  i {
+    font-size: 0.875rem;
+  }
+}
+
+.fidc-waterfall__help {
+  padding: 0.125rem;
+  color: var(--bs-secondary-color);
+  opacity: 0.7;
+
+  &:hover {
+    opacity: 1;
+    color: var(--accent-indigo);
+  }
+}
+
+// ============================================================
+// FLOW VISUALIZATION
+// ============================================================
+
+.fidc-waterfall__flow {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: var(--bs-secondary-bg);
+  border: 1px solid var(--table-border-color);
+  border-radius: 2px;
+}
+
+.fidc-waterfall__flow-label {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem;
+  min-width: 80px;
+
+  span {
+    font-size: 0.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--bs-secondary-color);
+  }
+}
+
+.fidc-waterfall__flow-arrow {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  color: var(--bs-secondary-color);
+}
+
+.fidc-waterfall__flow-arrow-line {
+  width: 20px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--bs-secondary-color) 50%,
+    var(--bs-secondary-color) 100%
+  );
+  animation: flow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes flow-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+// ============================================================
+// TIERS
+// ============================================================
+
+.fidc-waterfall__tiers {
+  display: flex;
+  align-items: stretch;
+  gap: 0.25rem;
+  flex: 1;
+  overflow-x: auto;
+}
+
+.fidc-waterfall__tier {
+  display: flex;
+  flex-direction: column;
+  min-width: 80px;
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+
+  &--senior {
+    background: var(--teal-5);
+    border: 1px solid var(--teal-20);
+
+    .fidc-waterfall__tier-label {
+      color: var(--accent-teal);
+    }
+
+    .fidc-waterfall__tier-code {
+      background: var(--teal-15);
+      color: var(--accent-teal);
+    }
+  }
+
+  &--mezanino {
+    background: var(--indigo-3);
+    border: 1px solid var(--indigo-15);
+
+    .fidc-waterfall__tier-label {
+      color: var(--accent-indigo);
+    }
+
+    .fidc-waterfall__tier-code {
+      background: var(--indigo-10);
+      color: var(--accent-indigo);
+    }
+  }
+
+  &--subordinada {
+    background: var(--amber-4);
+    border: 1px solid var(--amber-20);
+
+    .fidc-waterfall__tier-label {
+      color: var(--accent-amber);
+    }
+
+    .fidc-waterfall__tier-code {
+      background: var(--amber-15);
+      color: var(--accent-amber);
+    }
+  }
+}
+
+.fidc-waterfall__tier-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  margin-bottom: 0.375rem;
+}
+
+.fidc-waterfall__tier-label {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.fidc-waterfall__tier-priority {
+  font-size: 0.5rem;
+  color: var(--bs-secondary-color);
+}
+
+.fidc-waterfall__tier-classes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.fidc-waterfall__tier-code {
+  display: inline-flex;
+  padding: 0.125rem 0.25rem;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  border-radius: 2px;
+}
+
+.fidc-waterfall__tier-more {
+  display: inline-flex;
+  padding: 0.125rem 0.25rem;
+  font-size: 0.5rem;
+  color: var(--bs-secondary-color);
+}
+
+.fidc-waterfall__tier-arrow {
+  display: flex;
+  align-items: center;
+  padding: 0 0.25rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.625rem;
+  animation: arrow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes arrow-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(2px);
+  }
+}
+
+// ============================================================
+// INFO SECTION
+// ============================================================
+
+.fidc-waterfall__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.fidc-waterfall__info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.625rem;
+
+  i {
+    color: var(--accent-indigo);
+    font-size: 0.75rem;
+  }
+}
+
+.fidc-waterfall__info-label {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bs-body-color);
+}
+
+.fidc-waterfall__info-formula {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.6875rem;
+  background: var(--bs-secondary-bg);
+  border: 1px solid var(--table-border-color);
+  border-radius: 2px;
+  color: var(--bs-body-color);
+
+  sub {
+    font-size: 0.5rem;
+    color: var(--bs-secondary-color);
+  }
+}
+
+.fidc-waterfall__info-note {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.625rem;
+  color: var(--bs-secondary-color);
+
+  i {
+    color: var(--accent-indigo);
+    font-size: 0.6875rem;
+  }
+}
+
+// ============================================================
+// LIGHT MODE
+// ============================================================
+
+[data-bs-theme='light'] {
+  .fidc-waterfall {
+    background: var(--indigo-2);
+    border-color: var(--indigo-15);
+  }
+
+  .fidc-waterfall__title {
+    color: var(--daylight-indigo);
+  }
+
+  .fidc-waterfall__tier {
+    &--senior {
+      background: var(--teal-5);
+
+      .fidc-waterfall__tier-label {
+        color: var(--daylight-teal);
+      }
+
+      .fidc-waterfall__tier-code {
+        background: var(--teal-15);
+        color: var(--daylight-teal);
+      }
+    }
+
+    &--mezanino {
+      .fidc-waterfall__tier-label {
+        color: var(--daylight-indigo);
+      }
+
+      .fidc-waterfall__tier-code {
+        background: var(--indigo-10);
+        color: var(--daylight-indigo);
+      }
+    }
+
+    &--subordinada {
+      .fidc-waterfall__tier-label {
+        color: var(--daylight-amber);
+      }
+
+      .fidc-waterfall__tier-code {
+        background: var(--amber-15);
+        color: var(--daylight-amber);
+      }
+    }
+  }
+
+  .fidc-waterfall__info-item i,
+  .fidc-waterfall__info-note i {
+    color: var(--daylight-indigo);
+  }
+}
+
+// ============================================================
+// REDUCED MOTION
+// ============================================================
+
+@include reduced-motion {
+  .fidc-waterfall__flow-arrow-line,
+  .fidc-waterfall__tier-arrow {
+    animation: none;
+  }
+}
